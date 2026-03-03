@@ -26,6 +26,14 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow SnapSort to access your photos to help you clean up your gallery.",
+          "savePhotosPermission": "Allow SnapSort to save/delete photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
