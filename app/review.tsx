@@ -155,6 +155,10 @@ export default function ReviewScreen() {
 
       {/* Grid */}
       <FlatList
+        style={{
+          paddingHorizontal: Spacing.md,
+          paddingVertical: Spacing.md,
+        }}
         data={assets}
         numColumns={NUM_COLUMNS}
         keyExtractor={(item) => item.id}
