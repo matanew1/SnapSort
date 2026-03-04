@@ -1,6 +1,19 @@
+import { ScreenBackground } from "@/components";
+import { BorderRadius, getColors, Spacing } from "@/constants/theme";
+import { useAppStore } from "@/store";
+import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
+import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, Trash2, X } from "lucide-react-native";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Check,
+  CheckSquare,
+  Info,
+  Square,
+  Trash2,
+} from "lucide-react-native";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,110 +27,88 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { EmptyState, ScreenBackground } from "@/components";
-import { BorderRadius, getColors, Spacing } from "@/constants/theme";
-import { useAppStore, useServiceStore } from "@/store";
-
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const GRID_GAP = 3;
 const NUM_COLUMNS = 3;
+const GRID_GAP = 3;
 const THUMB_SIZE = (SCREEN_WIDTH - GRID_GAP * (NUM_COLUMNS + 1)) / NUM_COLUMNS;
+
+interface PhotoAsset {
+  id: string;
+  uri: string;
+}
 
 export default function ReviewScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const params = useLocalSearchParams<{
-    assetIds: string;
-    assetUris: string;
-  }>();
-
   const isDark = useAppStore((s) => s.isDarkMode);
   const Colors = getColors(isDark);
+  const params = useLocalSearchParams<{ assetIds?: string; assetUris?: string }>();
 
-  // Store hooks
-  const { isDeleting, deletePhotos } = useServiceStore();
-  const { incrementPhotosDeleted } = useAppStore();
+  const assetIds = useMemo(
+    () => (params.assetIds ? params.assetIds.split(",").filter(Boolean) : []),
+    [params.assetIds]
+  );
+  const assetUris = useMemo(
+    () => (params.assetUris ? params.assetUris.split(",").filter(Boolean) : []),
+    [params.assetUris]
+  );
 
-  const assets = useMemo(() => {
-    const ids = params.assetIds?.split(",").filter(Boolean) ?? [];
-    const uris = params.assetUris?.split(",").filter(Boolean) ?? [];
-    return ids.map((id, index) => ({ id, uri: uris[index] ?? "" }));
-  }, [params.assetIds, params.assetUris]);
+  const selectedAssets: PhotoAsset[] = useMemo(
+    () => assetIds.map((id, i) => ({ id, uri: assetUris[i] ?? "" })),
+    [assetIds, assetUris]
+  );
 
   const [deselected, setDeselected] = useState<Set<string>>(new Set());
-
-  const selectedAssets = useMemo(
-    () => assets.filter((a) => !deselected.has(a.id)),
-    [assets, deselected],
-  );
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const toggleDeselect = useCallback((id: string) => {
     setDeselected((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }, []);
 
+  const selectAll = useCallback(() => setDeselected(new Set()), []);
+  const deselectAll = useCallback(
+    () => setDeselected(new Set(assetIds)),
+    [assetIds]
+  );
+
+  const toDeleteCount = selectedAssets.length - deselected.size;
+  const allSelected = deselected.size === 0;
+
   const handleDelete = useCallback(async () => {
-    if (selectedAssets.length === 0) return;
+    const toDelete = selectedAssets.filter((a) => !deselected.has(a.id));
+    if (toDelete.length === 0) return;
 
     Alert.alert(
-      "Delete Photos",
-      `Are you sure you want to permanently delete ${selectedAssets.length} photo${selectedAssets.length > 1 ? "s" : ""}? This action cannot be undone.`,
+      "Permanently Delete Photos",
+      `This will permanently delete ${toDelete.length} photo${toDelete.length !== 1 ? "s" : ""} from your library. This action cannot be undone.`,
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
+            setIsDeleting(true);
             try {
-              const ids = selectedAssets.map((a) => a.id);
-              const deletedCount = selectedAssets.length;
-
-              // Use store to delete photos
-              const success = await deletePhotos(ids);
-
-              if (success) {
-                // Track deleted count in app store
-                incrementPhotosDeleted(deletedCount);
-
-                // Navigate back to home and pass deletion count
-                if (router.canGoBack()) {
-                  router.back();
-                } else {
-                  router.replace("/");
-                }
-                // Force refresh with deletion count info
-                setTimeout(() => {
-                  router.setParams({ deletedCount });
-                }, 100);
-              } else {
-                Alert.alert(
-                  "Error",
-                  "Failed to delete some photos. Please try again.",
-                );
-              }
+              await MediaLibrary.deleteAssetsAsync(toDelete.map((a) => a.id));
+              router.replace({
+                pathname: "/",
+                params: { deletedCount: toDelete.length.toString() },
+              });
             } catch (error) {
-              console.error("Delete failed:", error);
-              Alert.alert(
-                "Error",
-                "Failed to delete some photos. Please try again.",
-              );
+              Alert.alert("Error", "Failed to delete some photos. Please try again.");
+            } finally {
+              setIsDeleting(false);
             }
           },
         },
-      ],
+      ]
     );
-  }, [selectedAssets, deletePhotos, incrementPhotosDeleted, router]);
-
-  const handleGoBack = useCallback(() => {
-    router.back();
-  }, [router]);
+  }, [selectedAssets, deselected, router]);
 
   return (
     <ScreenBackground>
@@ -126,106 +117,117 @@ export default function ReviewScreen() {
         <TouchableOpacity
           style={[
             styles.backButton,
-            {
-              borderColor: Colors.border,
-              backgroundColor: Colors.surface,
-            },
+            { backgroundColor: Colors.surfaceLight, borderColor: Colors.border },
           ]}
-          onPress={handleGoBack}
+          onPress={() => router.back()}
         >
-          <ArrowLeft size={22} color={Colors.text} />
+          <ArrowLeft size={20} color={Colors.text} />
         </TouchableOpacity>
+
         <View style={styles.headerCenter}>
-          <Text
-            style={[
-              styles.headerTitle,
-              {
-                color: Colors.text,
-              },
-            ]}
-          >
-            Review
+          <Text style={[styles.headerTitle, { color: Colors.text }]}>
+            Review Photos
           </Text>
-          <Text
-            style={[
-              styles.headerSubtitle,
-              {
-                color: Colors.textSecondary,
-              },
-            ]}
-          >
-            {selectedAssets.length} of {assets.length} selected
+          <Text style={[styles.headerSubtitle, { color: Colors.textSecondary }]}>
+            {toDeleteCount} of {selectedAssets.length} selected
           </Text>
         </View>
-        <View style={styles.headerRight} />
+
+        {/* Select All / Deselect All */}
+        <TouchableOpacity
+          style={[
+            styles.selectAllButton,
+            {
+              backgroundColor: allSelected ? Colors.accentLight : Colors.surfaceLight,
+              borderColor: allSelected ? Colors.accent : Colors.border,
+            },
+          ]}
+          onPress={allSelected ? deselectAll : selectAll}
+        >
+          {allSelected ? (
+            <CheckSquare size={18} color={Colors.accent} />
+          ) : (
+            <Square size={18} color={Colors.textSecondary} />
+          )}
+        </TouchableOpacity>
       </View>
 
-      {/* Info banner */}
+      {/* Info Banner */}
       <View
         style={[
           styles.infoBanner,
-          {
-            backgroundColor: Colors.deleteLight,
-          },
+          { backgroundColor: Colors.deleteLight, borderColor: Colors.delete + "30" },
         ]}
       >
-        <Trash2 size={16} color={Colors.delete} />
-        <Text
-          style={[
-            styles.infoText,
-            {
-              color: Colors.delete,
-            },
-          ]}
-        >
+        <AlertTriangle size={14} color={Colors.delete} />
+        <Text style={[styles.infoText, { color: Colors.delete }]}>
           Tap a photo to deselect it from deletion
         </Text>
       </View>
-      {assets.length === 0 ? (
+
+      {/* Photo Grid */}
+      {selectedAssets.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <EmptyState type="no-results" filterName="Selected for deletion" />
+          <Check size={48} color={Colors.keep} />
+          <Text style={[styles.emptyText, { color: Colors.textSecondary }]}>
+            No photos to review
+          </Text>
         </View>
       ) : (
         <FlatList
-          style={{
-            paddingHorizontal: Spacing.md,
-            paddingVertical: Spacing.md,
-          }}
-          data={assets}
+          data={selectedAssets}
           numColumns={NUM_COLUMNS}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.grid}
           columnWrapperStyle={styles.gridRow}
-          renderItem={({ item }) => {
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item, index }) => {
             const isSelected = !deselected.has(item.id);
             return (
               <TouchableOpacity
-                activeOpacity={0.8}
+                activeOpacity={0.85}
                 onPress={() => toggleDeselect(item.id)}
-                style={[styles.thumb, !isSelected && styles.thumbDeselected]}
+                style={[
+                  styles.thumb,
+                  !isSelected && styles.thumbDeselected,
+                ]}
               >
                 <Image
                   source={{ uri: item.uri }}
                   style={styles.thumbImage}
                   contentFit="cover"
+                  transition={150}
                 />
+
+                {/* Selected overlay with trash badge */}
                 {isSelected && (
-                  <View style={styles.thumbOverlay}>
+                  <View style={styles.selectedOverlay}>
+                    <LinearGradient
+                      colors={["transparent", "rgba(0,0,0,0.5)"]}
+                      style={StyleSheet.absoluteFill}
+                    />
                     <View
                       style={[
                         styles.trashBadge,
-                        {
-                          backgroundColor: Colors.delete,
-                        },
+                        { backgroundColor: Colors.delete },
                       ]}
                     >
-                      <Trash2 size={14} color={Colors.white} />
+                      <Trash2 size={12} color={Colors.white} />
                     </View>
                   </View>
                 )}
+
+                {/* Deselected overlay */}
                 {!isSelected && (
                   <View style={styles.deselectedOverlay}>
-                    <X size={24} color={Colors.textMuted} />
+                    <View
+                      style={[
+                        styles.checkBadge,
+                        { backgroundColor: Colors.keep },
+                      ]}
+                    >
+                      <Check size={12} color={Colors.white} />
+                    </View>
                   </View>
                 )}
               </TouchableOpacity>
@@ -234,46 +236,59 @@ export default function ReviewScreen() {
         />
       )}
 
-      {/* Bottom action */}
+      {/* Bottom Action Bar */}
       <View
         style={[
           styles.bottomBar,
           {
-            paddingBottom: insets.bottom + Spacing.md,
+            paddingBottom: insets.bottom + Spacing.sm,
             backgroundColor: Colors.surface,
             borderTopColor: Colors.border,
           },
         ]}
       >
+        {/* Stats row */}
+        <View style={styles.statsRow}>
+          <View style={[styles.statPill, { backgroundColor: Colors.keepLight }]}>
+            <Check size={12} color={Colors.keep} />
+            <Text style={[styles.statText, { color: Colors.keep }]}>
+              {deselected.size} keeping
+            </Text>
+          </View>
+          <View style={[styles.statPill, { backgroundColor: Colors.deleteLight }]}>
+            <Trash2 size={12} color={Colors.delete} />
+            <Text style={[styles.statText, { color: Colors.delete }]}>
+              {toDeleteCount} deleting
+            </Text>
+          </View>
+        </View>
+
         <TouchableOpacity
           style={[
-            styles.deleteButton,
-            selectedAssets.length === 0 && styles.deleteButtonDisabled,
-            {
-              backgroundColor: Colors.delete,
-            },
+            styles.deleteButtonWrapper,
+            { opacity: toDeleteCount === 0 || isDeleting ? 0.5 : 1 },
           ]}
           onPress={handleDelete}
-          disabled={selectedAssets.length === 0 || isDeleting}
+          disabled={toDeleteCount === 0 || isDeleting}
         >
-          {isDeleting ? (
-            <ActivityIndicator size="small" color={Colors.white} />
-          ) : (
-            <>
-              <Trash2 size={20} color={Colors.white} />
-              <Text
-                style={[
-                  styles.deleteButtonText,
-                  {
-                    color: Colors.white,
-                  },
-                ]}
-              >
-                Permanently Delete {selectedAssets.length} Photo
-                {selectedAssets.length !== 1 ? "s" : ""}
-              </Text>
-            </>
-          )}
+          <LinearGradient
+            colors={[Colors.delete, Colors.deleteDark ?? Colors.delete]}
+            start={[0, 0]}
+            end={[1, 0]}
+            style={styles.deleteButton}
+          >
+            {isDeleting ? (
+              <ActivityIndicator size="small" color={Colors.white} />
+            ) : (
+              <>
+                <Trash2 size={20} color={Colors.white} />
+                <Text style={[styles.deleteButtonText, { color: Colors.white }]}>
+                  Permanently Delete {toDeleteCount} Photo
+                  {toDeleteCount !== 1 ? "s" : ""}
+                </Text>
+              </>
+            )}
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </ScreenBackground>
@@ -286,11 +301,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
+    gap: Spacing.sm,
   },
   backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: BorderRadius.full,
+    width: 42,
+    height: 42,
+    borderRadius: BorderRadius.md,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
@@ -300,15 +316,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
   },
   headerSubtitle: {
-    fontSize: 13,
+    fontSize: 12,
     marginTop: 2,
+    fontWeight: "500",
   },
-  headerRight: {
-    width: 44,
+  selectAllButton: {
+    width: 42,
+    height: 42,
+    borderRadius: BorderRadius.md,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
   },
   infoBanner: {
     flexDirection: "row",
@@ -320,14 +342,14 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: "rgba(239, 68, 68, 0.15)",
   },
   infoText: {
-    fontSize: 13,
-    fontWeight: "500",
+    fontSize: 12,
+    fontWeight: "600",
   },
   grid: {
     paddingHorizontal: GRID_GAP,
+    paddingTop: GRID_GAP,
   },
   gridRow: {
     gap: GRID_GAP,
@@ -341,21 +363,21 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   thumbDeselected: {
-    opacity: 0.4,
+    opacity: 0.35,
   },
   thumbImage: {
     width: "100%",
     height: "100%",
   },
-  thumbOverlay: {
+  selectedOverlay: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: "flex-end",
     alignItems: "flex-end",
-    padding: 6,
+    padding: 5,
   },
   trashBadge: {
-    width: 26,
-    height: 26,
+    width: 24,
+    height: 24,
     borderRadius: BorderRadius.full,
     justifyContent: "center",
     alignItems: "center",
@@ -364,12 +386,56 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.45)",
+  },
+  checkBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: BorderRadius.full,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  emptyText: {
+    fontSize: 16,
+    fontWeight: "500",
   },
   bottomBar: {
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.md,
     borderTopWidth: 1,
+    gap: Spacing.sm,
+  },
+  statsRow: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    justifyContent: "center",
+  },
+  statPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 5,
+    borderRadius: BorderRadius.full,
+  },
+  statText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  deleteButtonWrapper: {
+    borderRadius: BorderRadius.full,
+    overflow: "hidden",
+    shadowColor: "#FF4D6D",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
   deleteButton: {
     flexDirection: "row",
@@ -379,16 +445,8 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.full,
   },
-  deleteButtonDisabled: {
-    opacity: 0.5,
-  },
   deleteButtonText: {
     fontSize: 16,
     fontWeight: "700",
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

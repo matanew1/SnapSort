@@ -1,5 +1,7 @@
+import { BorderRadius, Colors, Spacing } from "@/constants/theme";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { ChevronDown, FolderOpen, Heart, Trash2 } from "lucide-react-native";
 import React from "react";
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -14,88 +16,53 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { BorderRadius, Colors, getColors } from "@/constants/theme";
-import { useAppStore } from "@/store";
-
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
-const ROTATION_ANGLE = 15;
+const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.35;
+const ROTATION_FACTOR = 12;
 
 interface SwipeCardProps {
   uri: string;
   onSwipe: (direction: "keep" | "delete") => void;
-  isTop: boolean;
-  hasActiveFilter?: boolean;
-  getCurrentFilterName?: () => string;
   onFilterPress?: () => void;
   onGoBack?: () => void;
+  hasActiveFilter?: boolean;
+  getCurrentFilterName?: () => string;
+  index?: number;
 }
 
-export function SwipeCard({ 
-  uri, 
-  onSwipe, 
-  isTop,
-  hasActiveFilter = false,
-  getCurrentFilterName,
+export function SwipeCard({
+  uri,
+  onSwipe,
   onFilterPress,
   onGoBack,
+  hasActiveFilter,
+  getCurrentFilterName,
+  index = 0,
 }: SwipeCardProps) {
-  const isDark = useAppStore((s) => s.isDarkMode);
-  const Colors = getColors(isDark);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
-  const cardScale = useSharedValue(isTop ? 1 : 0.95);
-  const isExiting = useSharedValue(false);
-  const exitDirection = useSharedValue<"keep" | "delete">("keep");
-
-  // Reset values when card becomes top
-  React.useEffect(() => {
-    if (isTop) {
-      translateX.value = 0;
-      translateY.value = 0;
-      isExiting.value = false;
-      cardScale.value = withSpring(1, {
-        damping: 20,
-        stiffness: 150,
-      });
-    } else {
-      cardScale.value = withSpring(0.95, {
-        damping: 20,
-        stiffness: 150,
-      });
-    }
-  }, [isTop, translateX, translateY, cardScale, isExiting]);
-
-  const handleSwipe = (direction: "keep" | "delete") => {
-    if (!isTop) return;
-    isExiting.value = true;
-    exitDirection.value = direction;
-    onSwipe(direction);
-  };
+  const scale = useSharedValue(1);
 
   const panGesture = Gesture.Pan()
-    .enabled(isTop)
+    .onBegin(() => {
+      scale.value = withSpring(1.02, { damping: 20, stiffness: 300 });
+    })
     .onUpdate((event) => {
       translateX.value = event.translationX;
-      translateY.value = event.translationY * 0.4;
+      translateY.value = event.translationY * 0.2;
     })
     .onEnd((event) => {
-      if (isExiting.value) return;
-      
-      if (Math.abs(event.translationX) > SWIPE_THRESHOLD) {
+      const shouldSwipe = Math.abs(event.translationX) > SWIPE_THRESHOLD;
+      if (shouldSwipe) {
         const direction = event.translationX > 0 ? "keep" : "delete";
-        const targetX =
-          event.translationX > 0 ? SCREEN_WIDTH * 1.5 : -SCREEN_WIDTH * 1.5;
-
-        translateX.value = withTiming(targetX, { duration: 250 });
-        translateY.value = withTiming(event.translationY * 0.8, {
-          duration: 250,
-        });
-        
-        runOnJS(handleSwipe)(direction);
+        const exitX = direction === "keep" ? SCREEN_WIDTH * 1.5 : -SCREEN_WIDTH * 1.5;
+        translateX.value = withTiming(exitX, { duration: 350 });
+        translateY.value = withTiming(event.translationY, { duration: 350 });
+        runOnJS(onSwipe)(direction);
       } else {
-        translateX.value = withSpring(0, { damping: 20, stiffness: 200 });
-        translateY.value = withSpring(0, { damping: 20, stiffness: 200 });
+        translateX.value = withSpring(0, { damping: 20, stiffness: 300 });
+        translateY.value = withSpring(0, { damping: 20, stiffness: 300 });
+        scale.value = withSpring(1, { damping: 20, stiffness: 300 });
       }
     });
 
@@ -103,18 +70,16 @@ export function SwipeCard({
     const rotate = interpolate(
       translateX.value,
       [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-      [-ROTATION_ANGLE, 0, ROTATION_ANGLE],
-      Extrapolation.CLAMP,
+      [-ROTATION_FACTOR, 0, ROTATION_FACTOR],
+      Extrapolation.CLAMP
     );
-
     return {
       transform: [
         { translateX: translateX.value },
         { translateY: translateY.value },
         { rotate: `${rotate}deg` },
-        { scale: cardScale.value },
+        { scale: scale.value },
       ],
-      zIndex: isTop ? 10 : 1,
     };
   });
 
@@ -123,15 +88,15 @@ export function SwipeCard({
       translateX.value,
       [0, SWIPE_THRESHOLD],
       [0, 1],
-      Extrapolation.CLAMP,
+      Extrapolation.CLAMP
     );
-    const scale = interpolate(
+    const stampScale = interpolate(
       translateX.value,
       [0, SWIPE_THRESHOLD],
-      [0.5, 1],
-      Extrapolation.CLAMP,
+      [0.7, 1],
+      Extrapolation.CLAMP
     );
-    return { opacity, transform: [{ scale }, { rotate: "-15deg" }] };
+    return { opacity, transform: [{ scale: stampScale }, { rotate: "-15deg" }] };
   });
 
   const deleteStampStyle = useAnimatedStyle(() => {
@@ -139,23 +104,23 @@ export function SwipeCard({
       translateX.value,
       [-SWIPE_THRESHOLD, 0],
       [1, 0],
-      Extrapolation.CLAMP,
+      Extrapolation.CLAMP
     );
-    const scale = interpolate(
+    const stampScale = interpolate(
       translateX.value,
       [-SWIPE_THRESHOLD, 0],
-      [1, 0.5],
-      Extrapolation.CLAMP,
+      [1, 0.7],
+      Extrapolation.CLAMP
     );
-    return { opacity, transform: [{ scale }, { rotate: "15deg" }] };
+    return { opacity, transform: [{ scale: stampScale }, { rotate: "15deg" }] };
   });
 
   const keepGlowStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       translateX.value,
       [0, SWIPE_THRESHOLD],
-      [0, 0.3],
-      Extrapolation.CLAMP,
+      [0, 0.4],
+      Extrapolation.CLAMP
     );
     return { opacity };
   });
@@ -164,8 +129,28 @@ export function SwipeCard({
     const opacity = interpolate(
       translateX.value,
       [-SWIPE_THRESHOLD, 0],
-      [0.3, 0],
-      Extrapolation.CLAMP,
+      [0.4, 0],
+      Extrapolation.CLAMP
+    );
+    return { opacity };
+  });
+
+  const keepBorderStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      translateX.value,
+      [0, SWIPE_THRESHOLD * 0.5],
+      [0, 1],
+      Extrapolation.CLAMP
+    );
+    return { opacity };
+  });
+
+  const deleteBorderStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      translateX.value,
+      [-SWIPE_THRESHOLD * 0.5, 0],
+      [1, 0],
+      Extrapolation.CLAMP
     );
     return { opacity };
   });
@@ -173,33 +158,7 @@ export function SwipeCard({
   return (
     <GestureDetector gesture={panGesture}>
       <Animated.View style={[styles.cardContainer, cardStyle]}>
-        {/* Floating Buttons - Top Row */}
-        {(onFilterPress || onGoBack) && (
-          <View style={styles.topButtonsRow}>         
-            {/* Filter Button */}
-            {onFilterPress && (
-              <BlurView intensity={100} tint="default" style={styles.filterButtonBlur}>
-                <TouchableOpacity
-                  style={styles.filterButton}
-                  onPress={onFilterPress}
-                >
-                  {hasActiveFilter ? (
-                    <ChevronDown size={16} color={Colors.black} />
-                  ) : (
-                    <FolderOpen size={16} color={Colors.black} />
-                  )}
-                  <Text style={[
-                    styles.filterButtonText, 
-                    { color: Colors.black }
-                  ]}>
-                    {getCurrentFilterName ? getCurrentFilterName() : "Filter"}
-                  </Text>
-                </TouchableOpacity>
-              </BlurView>
-            )}
-          </View>
-        )}
-
+        {/* Main Image */}
         <Image
           source={{ uri }}
           style={styles.image}
@@ -207,32 +166,58 @@ export function SwipeCard({
           transition={200}
         />
 
-        {/* Green keep glow */}
-        <Animated.View
-          style={[styles.glowOverlay, styles.keepGlow, keepGlowStyle]}
+        {/* Keep glow overlay */}
+        <Animated.View style={[styles.glowOverlay, styles.keepGlow, keepGlowStyle]} />
+
+        {/* Delete glow overlay */}
+        <Animated.View style={[styles.glowOverlay, styles.deleteGlow, deleteGlowStyle]} />
+
+        {/* Keep border glow */}
+        <Animated.View style={[styles.borderGlow, styles.keepBorder, keepBorderStyle]} />
+
+        {/* Delete border glow */}
+        <Animated.View style={[styles.borderGlow, styles.deleteBorder, deleteBorderStyle]} />
+
+        {/* Bottom gradient */}
+        <LinearGradient
+          colors={["transparent", "rgba(0,0,0,0.7)"]}
+          style={styles.bottomGradient}
+          pointerEvents="none"
         />
 
-        {/* Red delete glow */}
-        <Animated.View
-          style={[styles.glowOverlay, styles.deleteGlow, deleteGlowStyle]}
-        />
+        {/* Top buttons row */}
+        {onFilterPress && (
+          <View style={styles.topButtonsRow}>
+            <BlurView intensity={80} tint="dark" style={styles.filterButtonBlur}>
+              <TouchableOpacity style={styles.filterButton} onPress={onFilterPress}>
+                {hasActiveFilter ? (
+                  <ChevronDown size={14} color="#fff" />
+                ) : (
+                  <FolderOpen size={14} color="#fff" />
+                )}
+                <Text style={styles.filterButtonText}>
+                  {getCurrentFilterName ? getCurrentFilterName() : "Filter"}
+                </Text>
+              </TouchableOpacity>
+            </BlurView>
+          </View>
+        )}
 
         {/* KEEP stamp */}
         <Animated.View style={[styles.stamp, styles.keepStamp, keepStampStyle]}>
-          <Heart size={28} color={Colors.keep} fill={Colors.keep} />
-          <Text style={[styles.stampText, styles.keepText]}>KEEP</Text>
+          <BlurView intensity={60} tint="dark" style={styles.stampBlur}>
+            <Heart size={22} color={Colors.keep} fill={Colors.keep} />
+            <Text style={[styles.stampText, { color: Colors.keep }]}>KEEP</Text>
+          </BlurView>
         </Animated.View>
 
         {/* DELETE stamp */}
-        <Animated.View
-          style={[styles.stamp, styles.deleteStamp, deleteStampStyle]}
-        >
-          <Trash2 size={28} color={Colors.delete} />
-          <Text style={[styles.stampText, styles.deleteText]}>DELETE</Text>
+        <Animated.View style={[styles.stamp, styles.deleteStamp, deleteStampStyle]}>
+          <BlurView intensity={60} tint="dark" style={styles.stampBlur}>
+            <Trash2 size={22} color={Colors.delete} />
+            <Text style={[styles.stampText, { color: Colors.delete }]}>DELETE</Text>
+          </BlurView>
         </Animated.View>
-
-        {/* Bottom gradient for readability */}
-        <View style={styles.bottomGradient} />
       </Animated.View>
     </GestureDetector>
   );
@@ -242,99 +227,105 @@ const styles = StyleSheet.create({
   cardContainer: {
     position: "absolute",
     width: SCREEN_WIDTH - 32,
-    height: SCREEN_HEIGHT * 0.7,
+    height: SCREEN_HEIGHT * 0.68,
     borderRadius: BorderRadius.xxl,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    elevation: 12,
-  },
-  filterButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    backgroundColor: "transparent",
-  },
-  filterButtonBlur: {
-    borderRadius: BorderRadius.full,
-    overflow: "hidden",
-  },
-  topButtonsRow: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    left: 16,
-    zIndex: 100,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  filterButtonText: {
-    fontSize: 13,
-    fontWeight: "600",
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.6,
+    shadowRadius: 32,
+    elevation: 16,
   },
   image: {
     width: "100%",
     height: "100%",
-    borderRadius: BorderRadius.xxl,
   },
   glowOverlay: {
     ...StyleSheet.absoluteFillObject,
-    borderRadius: BorderRadius.xxl,
   },
   keepGlow: {
     backgroundColor: Colors.keep,
+    opacity: 0,
   },
   deleteGlow: {
     backgroundColor: Colors.delete,
+    opacity: 0,
   },
-  stamp: {
-    position: "absolute",
-    top: 60,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+  borderGlow: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: BorderRadius.xxl,
     borderWidth: 3,
-    borderRadius: BorderRadius.md,
   },
-  keepStamp: {
-    left: 20,
+  keepBorder: {
     borderColor: Colors.keep,
-    backgroundColor: Colors.keepLight,
+    shadowColor: Colors.keep,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 20,
   },
-  deleteStamp: {
-    right: 20,
+  deleteBorder: {
     borderColor: Colors.delete,
-    backgroundColor: Colors.deleteLight,
-  },
-  stampText: {
-    fontSize: 24,
-    fontWeight: "800",
-    letterSpacing: 2,
-  },
-  keepText: {
-    color: Colors.keep,
-  },
-  deleteText: {
-    color: Colors.delete,
+    shadowColor: Colors.delete,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 20,
   },
   bottomGradient: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: 120,
+    height: 160,
     borderBottomLeftRadius: BorderRadius.xxl,
     borderBottomRightRadius: BorderRadius.xxl,
-    backgroundColor: "transparent",
+  },
+  topButtonsRow: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    zIndex: 100,
+  },
+  filterButtonBlur: {
+    borderRadius: BorderRadius.full,
+    overflow: "hidden",
+  },
+  filterButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  filterButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  stamp: {
+    position: "absolute",
+    top: 56,
+    zIndex: 50,
+  },
+  keepStamp: {
+    left: 20,
+  },
+  deleteStamp: {
+    right: 20,
+  },
+  stampBlur: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: BorderRadius.md,
+    overflow: "hidden",
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.15)",
+  },
+  stampText: {
+    fontSize: 20,
+    fontWeight: "900",
+    letterSpacing: 2,
   },
 });
-

@@ -1,98 +1,211 @@
-import { FolderOpen, ImageOff, RefreshCw } from 'lucide-react-native';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BorderRadius, getColors, Spacing } from "@/constants/theme";
+import { useAppStore } from "@/store";
+import { LinearGradient } from "expo-linear-gradient";
+import {
+  CheckCircle,
+  FolderOpen,
+  Image as ImageIcon,
+  RefreshCw,
+  Sparkles,
+  Trash2,
+} from "lucide-react-native";
+import React, { useEffect, useRef } from "react";
+import {
+  Animated,
+  Easing,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { BorderRadius, getColors, Spacing } from '@/constants/theme';
-import { useAppStore } from '@/store';
+type EmptyStateType =
+  | "no-permission"
+  | "no-photos"
+  | "permission-undetermined"
+  | "no-photos-in-filter";
 
 interface EmptyStateProps {
-  type: 'permission' | 'no-photos' | 'no-results';
+  type: EmptyStateType;
+  onRequestPermission?: () => void;
+  onFilterPress?: () => void;
   hasActiveFilter?: boolean;
   filterName?: string;
-  onRetry?: () => void;
-  onFilterPress?: () => void;
 }
 
 export function EmptyState({
   type,
-  hasActiveFilter = false,
-  filterName,
-  onRetry,
+  onRequestPermission,
   onFilterPress,
+  hasActiveFilter,
+  filterName,
 }: EmptyStateProps) {
   const isDark = useAppStore((s) => s.isDarkMode);
   const Colors = getColors(isDark);
+  const floatAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatAnim, {
+          toValue: 1,
+          duration: 2000,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(floatAnim, {
+          toValue: 0,
+          duration: 2000,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const floatTranslate = floatAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -12],
+  });
 
   const renderContent = () => {
     switch (type) {
-      case 'permission':
+      case "no-permission":
         return (
           <>
-            <ImageOff size={64} color={Colors.textMuted} />
+            <Animated.View
+              style={[
+                styles.iconWrapper,
+                { transform: [{ translateY: floatTranslate }] },
+              ]}
+            >
+              <LinearGradient
+                colors={[Colors.primaryLight, Colors.accentLight]}
+                style={styles.iconCircle}
+              >
+                <ImageIcon size={44} color={Colors.accent} />
+              </LinearGradient>
+            </Animated.View>
             <Text style={[styles.title, { color: Colors.text }]}>
               Photo Access Required
             </Text>
             <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>
-              SnapSort needs access to your photo library to help you clean up
-              your gallery.
+              SnapSort needs access to your photo library to help you organize
+              and clean up your photos.
             </Text>
-            {onRetry && (
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: Colors.accent }]}
-                onPress={onRetry}
-                accessibilityLabel="Grant photo permission"
-                accessibilityRole="button"
-              >
-                <Text style={[styles.buttonText, { color: Colors.white }]}>
-                  Grant Permission
-                </Text>
+            {onRequestPermission && (
+              <TouchableOpacity onPress={onRequestPermission}>
+                <LinearGradient
+                  colors={[Colors.accent, Colors.accentSecondary ?? Colors.accent]}
+                  start={[0, 0]}
+                  end={[1, 0]}
+                  style={styles.primaryButton}
+                >
+                  <Text style={[styles.primaryButtonText, { color: Colors.white }]}>
+                    Grant Access
+                  </Text>
+                </LinearGradient>
               </TouchableOpacity>
             )}
           </>
         );
 
-      case 'no-photos':
+      case "permission-undetermined":
         return (
           <>
-            <ImageOff size={64} color={Colors.textMuted} />
+            <Animated.View
+              style={[
+                styles.iconWrapper,
+                { transform: [{ translateY: floatTranslate }] },
+              ]}
+            >
+              <LinearGradient
+                colors={[Colors.primaryLight, Colors.accentLight]}
+                style={styles.iconCircle}
+              >
+                <RefreshCw size={44} color={Colors.accent} />
+              </LinearGradient>
+            </Animated.View>
             <Text style={[styles.title, { color: Colors.text }]}>
-              No Photos Found
+              Checking Permissions
             </Text>
             <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>
-              Your gallery appears to be empty. Take some photos and come back!
+              Please wait while we check your photo library access.
             </Text>
           </>
         );
 
-      case 'no-results':
+      case "no-photos":
         return (
           <>
-            <FolderOpen size={64} color={Colors.textMuted} />
+            <Animated.View
+              style={[
+                styles.iconWrapper,
+                { transform: [{ translateY: floatTranslate }] },
+              ]}
+            >
+              <LinearGradient
+                colors={[Colors.keepLight, Colors.accentLight]}
+                style={styles.iconCircle}
+              >
+                <Sparkles size={44} color={Colors.keep} />
+              </LinearGradient>
+            </Animated.View>
+            <Text style={[styles.title, { color: Colors.text }]}>
+              All Caught Up!
+            </Text>
+            <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>
+              Your photo library is empty or all photos have been sorted. Great
+              job keeping things organized!
+            </Text>
+          </>
+        );
+
+      case "no-photos-in-filter":
+        return (
+          <>
+            <Animated.View
+              style={[
+                styles.iconWrapper,
+                { transform: [{ translateY: floatTranslate }] },
+              ]}
+            >
+              <LinearGradient
+                colors={[Colors.primaryLight, Colors.accentLight]}
+                style={styles.iconCircle}
+              >
+                <FolderOpen size={44} color={Colors.accent} />
+              </LinearGradient>
+            </Animated.View>
             <Text style={[styles.title, { color: Colors.text }]}>
               No Photos Found
             </Text>
             <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>
               No photos match your current filter
-              {filterName ? ` "${filterName}"` : ''}
-              .{'\n'}Try a different filter!
+              {filterName ? ` "${filterName}"` : ""}. Try a different filter!
             </Text>
             {onFilterPress && (
               <TouchableOpacity
                 style={[
-                  styles.filterButton,
-                  { borderColor: Colors.border },
+                  styles.outlineButton,
+                  { borderColor: Colors.borderLight },
                 ]}
                 onPress={onFilterPress}
-                accessibilityLabel="Change filter"
-                accessibilityRole="button"
               >
                 <FolderOpen
-                  size={18}
+                  size={16}
                   color={hasActiveFilter ? Colors.accent : Colors.textSecondary}
                 />
                 <Text
                   style={[
-                    styles.filterButtonText,
+                    styles.outlineButtonText,
                     {
                       color: hasActiveFilter
                         ? Colors.accent
@@ -100,9 +213,7 @@ export function EmptyState({
                     },
                   ]}
                 >
-                  {hasActiveFilter
-                    ? `Change "${filterName}" Filter`
-                    : 'Change Filter'}
+                  {hasActiveFilter ? `Change Filter` : "Change Filter"}
                 </Text>
               </TouchableOpacity>
             )}
@@ -115,9 +226,9 @@ export function EmptyState({
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>{renderContent()}</View>
-    </View>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+      {renderContent()}
+    </Animated.View>
   );
 }
 
@@ -125,22 +236,60 @@ interface LoadingStateProps {
   message?: string;
 }
 
-export function LoadingState({ message = 'Loading your photos...' }: LoadingStateProps) {
+export function LoadingState({
+  message = "Loading your photos...",
+}: LoadingStateProps) {
   const isDark = useAppStore((s) => s.isDarkMode);
   const Colors = getColors(isDark);
+  const spinAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(spinAnim, {
+        toValue: 1,
+        duration: 1200,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    ).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const spin = spinAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <RefreshCw
-          size={40}
-          color={Colors.accent}
-          style={styles.spinner}
-        />
-        <Text style={[styles.loadingText, { color: Colors.textSecondary }]}>
-          {message}
-        </Text>
-      </View>
+      <Animated.View
+        style={[
+          styles.iconCircle,
+          { backgroundColor: Colors.primaryLight, transform: [{ scale: pulseAnim }] },
+        ]}
+      >
+        <Animated.View style={{ transform: [{ rotate: spin }] }}>
+          <RefreshCw size={40} color={Colors.accent} />
+        </Animated.View>
+      </Animated.View>
+      <Text style={[styles.loadingText, { color: Colors.textSecondary }]}>
+        {message}
+      </Text>
     </View>
   );
 }
@@ -160,114 +309,234 @@ export function FinishedState({
 }: FinishedStateProps) {
   const isDark = useAppStore((s) => s.isDarkMode);
   const Colors = getColors(isDark);
+  const scaleAnim = useRef(new Animated.Value(0.5)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 80,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 80,
+        friction: 10,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  const keptCount = totalPhotos - deletedCount;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.emoji}>🎉</Text>
-        <Text style={[styles.title, { color: Colors.text }]}>All Done!</Text>
-        <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>
-          You sorted through {totalPhotos} photos.{'\n'}
-          {deletedCount} marked for deletion.
-        </Text>
+    <Animated.View
+      style={[
+        styles.container,
+        { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
+      ]}
+    >
+      {/* Trophy icon */}
+      <Animated.View
+        style={[styles.trophyWrapper, { transform: [{ scale: scaleAnim }] }]}
+      >
+        <LinearGradient
+          colors={[Colors.accent, Colors.accentSecondary ?? Colors.accent]}
+          style={styles.trophyCircle}
+        >
+          <CheckCircle size={52} color={Colors.white} />
+        </LinearGradient>
+      </Animated.View>
 
-        {deletedCount > 0 && onReview && (
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: Colors.accent }]}
-            onPress={onReview}
-            accessibilityLabel={`Review ${deletedCount} photos`}
-            accessibilityRole="button"
+      <Text style={[styles.title, { color: Colors.text }]}>All Sorted!</Text>
+      <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>
+        You reviewed {totalPhotos} photos
+      </Text>
+
+      {/* Stats row */}
+      <View style={styles.statsRow}>
+        <View
+          style={[
+            styles.statCard,
+            { backgroundColor: Colors.keepLight, borderColor: Colors.keep + "40" },
+          ]}
+        >
+          <Text style={[styles.statNumber, { color: Colors.keep }]}>
+            {keptCount}
+          </Text>
+          <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
+            Kept
+          </Text>
+        </View>
+        <View
+          style={[
+            styles.statCard,
+            {
+              backgroundColor: Colors.deleteLight,
+              borderColor: Colors.delete + "40",
+            },
+          ]}
+        >
+          <Text style={[styles.statNumber, { color: Colors.delete }]}>
+            {deletedCount}
+          </Text>
+          <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
+            To Delete
+          </Text>
+        </View>
+      </View>
+
+      {deletedCount > 0 && onReview && (
+        <TouchableOpacity onPress={onReview} style={styles.reviewButtonWrapper}>
+          <LinearGradient
+            colors={[Colors.delete, Colors.deleteDark ?? Colors.delete]}
+            start={[0, 0]}
+            end={[1, 0]}
+            style={styles.primaryButton}
           >
-            <Text style={[styles.buttonText, { color: Colors.white }]}>
+            <Trash2 size={18} color={Colors.white} />
+            <Text style={[styles.primaryButtonText, { color: Colors.white }]}>
               Review {deletedCount} Photos
             </Text>
-          </TouchableOpacity>
-        )}
+          </LinearGradient>
+        </TouchableOpacity>
+      )}
 
-        {onUndo && (
-          <TouchableOpacity
-            style={styles.undoButton}
-            onPress={onUndo}
-            accessibilityLabel="Undo last action"
-            accessibilityRole="button"
-          >
-            <Text style={[styles.undoText, { color: Colors.textSecondary }]}>
-              Undo Last
-            </Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </View>
+      {onUndo && (
+        <TouchableOpacity style={styles.undoButton} onPress={onUndo}>
+          <Text style={[styles.undoText, { color: Colors.textSecondary }]}>
+            Undo Last Action
+          </Text>
+        </TouchableOpacity>
+      )}
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: Spacing.xl,
   },
-  content: {
-    alignItems: 'center',
+  iconWrapper: {
+    marginBottom: Spacing.xl,
   },
-  emoji: {
-    fontSize: 64,
+  iconCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  trophyWrapper: {
+    marginBottom: Spacing.xl,
+  },
+  trophyCircle: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#6C63FF",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 12,
   },
   title: {
-    fontSize: 22,
-    fontWeight: '700',
-    marginTop: Spacing.lg,
-    textAlign: 'center',
+    fontSize: 28,
+    fontWeight: "700" as const,
+    letterSpacing: -0.5,
+    textAlign: "center",
+    marginBottom: Spacing.sm,
   },
   subtitle: {
     fontSize: 15,
-    marginTop: Spacing.sm,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 22,
+    marginBottom: Spacing.xl,
   },
-  button: {
-    marginTop: Spacing.xl,
+  statsRow: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    marginBottom: Spacing.xl,
+  },
+  statCard: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: Spacing.lg,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+  },
+  statNumber: {
+    fontSize: 36,
+    fontWeight: "800",
+    letterSpacing: -1,
+  },
+  statLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    marginTop: 4,
+  },
+  primaryButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
     paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.md + 2,
     borderRadius: BorderRadius.full,
+    shadowColor: "#FF4D6D",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
-  buttonText: {
+  primaryButtonText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
   },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  reviewButtonWrapper: {
+    width: "100%",
+    alignItems: "center",
+  },
+  outlineButton: {
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
-    marginTop: Spacing.xl,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
+    marginTop: Spacing.md,
   },
-  filterButtonText: {
+  outlineButtonText: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: 15,
     marginTop: Spacing.lg,
-  },
-  spinner: {
-    opacity: 0.8,
+    fontWeight: "500",
   },
   undoButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
     marginTop: Spacing.lg,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
   },
   undoText: {
-    fontSize: 15,
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: "500",
   },
 });
+
 
