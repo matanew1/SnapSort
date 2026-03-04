@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ScreenBackground } from "@/components";
+import { EmptyState, ScreenBackground } from "@/components";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore, useServiceStore } from "@/store";
 
@@ -181,54 +181,58 @@ export default function ReviewScreen() {
           Tap a photo to deselect it from deletion
         </Text>
       </View>
-
-      {/* Grid */}
-      <FlatList
-        style={{
-          paddingHorizontal: Spacing.md,
-          paddingVertical: Spacing.md,
-        }}
-        data={assets}
-        numColumns={NUM_COLUMNS}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.grid}
-        columnWrapperStyle={styles.gridRow}
-        renderItem={({ item }) => {
-          const isSelected = !deselected.has(item.id);
-          return (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => toggleDeselect(item.id)}
-              style={[styles.thumb, !isSelected && styles.thumbDeselected]}
-            >
-              <Image
-                source={{ uri: item.uri }}
-                style={styles.thumbImage}
-                contentFit="cover"
-              />
-              {isSelected && (
-                <View style={styles.thumbOverlay}>
-                  <View
-                    style={[
-                      styles.trashBadge,
-                      {
-                        backgroundColor: Colors.delete,
-                      },
-                    ]}
-                  >
-                    <Trash2 size={14} color={Colors.white} />
+      {assets.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <EmptyState type="no-results" filterName="Selected for deletion" />
+        </View>
+      ) : (
+        <FlatList
+          style={{
+            paddingHorizontal: Spacing.md,
+            paddingVertical: Spacing.md,
+          }}
+          data={assets}
+          numColumns={NUM_COLUMNS}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.grid}
+          columnWrapperStyle={styles.gridRow}
+          renderItem={({ item }) => {
+            const isSelected = !deselected.has(item.id);
+            return (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => toggleDeselect(item.id)}
+                style={[styles.thumb, !isSelected && styles.thumbDeselected]}
+              >
+                <Image
+                  source={{ uri: item.uri }}
+                  style={styles.thumbImage}
+                  contentFit="cover"
+                />
+                {isSelected && (
+                  <View style={styles.thumbOverlay}>
+                    <View
+                      style={[
+                        styles.trashBadge,
+                        {
+                          backgroundColor: Colors.delete,
+                        },
+                      ]}
+                    >
+                      <Trash2 size={14} color={Colors.white} />
+                    </View>
                   </View>
-                </View>
-              )}
-              {!isSelected && (
-                <View style={styles.deselectedOverlay}>
-                  <X size={24} color={Colors.textMuted} />
-                </View>
-              )}
-            </TouchableOpacity>
-          );
-        }}
-      />
+                )}
+                {!isSelected && (
+                  <View style={styles.deselectedOverlay}>
+                    <X size={24} color={Colors.textMuted} />
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          }}
+        />
+      )}
 
       {/* Bottom action */}
       <View
@@ -381,5 +385,10 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     fontSize: 16,
     fontWeight: "700",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

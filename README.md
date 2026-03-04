@@ -1,50 +1,74 @@
-# Welcome to your Expo app 👋
+# SnapSort 📸
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**SnapSort** is a premium, high-performance mobile application built with React Native and Expo. It provides a "Tinder-style" swipe interface to help users quickly sort through their photo library, keeping what they love and trashing what they don't.
 
-## Get started
+![SnapSort Header](https://raw.githubusercontent.com/matanew1/SnapSort/main/assets/images/icon.png)
 
-1. Install dependencies
+## ✨ Features
 
-   ```bash
-   npm install
-   ```
+- **Swipe-to-Sort**: Intuitive left/right swipe gestures for deleting or keeping photos.
+- **Media Library Integration**: Seamlessly fetches and manages local device photos.
+- **Advanced Filtering**: Filter by albums or date ranges (Today, This Week, This Month, etc.).
+- **Review & Permanent Delete**: Safety-first review screen before permanently removing assets.
+- **Premium UI/UX**: Sophisticated dark theme with smooth Reanimated 3 animations and haptic feedback.
+- **Modular Architecture**: Clean, scalable codebase using Zustand for state management and Atomic design principles.
 
-2. Start the app
+## 🚀 Getting Started
 
-   ```bash
-   npx expo start
-   ```
+### Prerequisites
 
-In the output, you'll find options to open the app in a
+- [Node.js](https://nodejs.org/) (v18 or newer)
+- [Expo Go](https://expo.dev/go) app on your device or an emulator/simulator.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Installation
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+1.  Clone the repository:
 
-## Get a fresh project
+    ```bash
+    git clone https://github.com/matanew1/SnapSort.git
+    cd SnapSort
+    ```
 
-When you're ready, run:
+2.  Install dependencies:
+
+    ```bash
+    npm install
+    ```
+
+3.  Start the development server:
+    ```bash
+    npm start
+    ```
+
+## 🛠 Tech Stack
+
+- **Framework**: [Expo](https://expo.dev/) (SDK 54) / React Native
+- **Navigation**: [Expo Router](https://docs.expo.dev/router/introduction/) (v3)
+- **State Management**: [Zustand](https://github.com/pmndrs/zustand)
+- **Animations**: [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/)
+- **Gestures**: [React Native Gesture Handler](https://docs.swmansion.com/react-native-gesture-handler/)
+- **Icons**: [Lucide React Native](https://lucide.dev/guide/react-native)
+- **Persistence**: [AsyncStorage](https://react-native-async-storage.github.io/async-storage/)
+
+## 📂 Project Structure
 
 ```bash
-npm run reset-project
+├── app/              # Expo Router pages & layouts
+├── assets/           # Static images, fonts, and icons
+├── components/       # UI components (Atomic structure)
+│   ├── common/       # Global/Generic components
+│   ├── features/     # Feature-specific components
+│   └── shared/       # Cross-feature reusable components
+├── constants/        # Theme definitions (Colors, Spacing, etc.)
+├── hooks/            # Custom React hooks
+├── store/            # Zustand store definitions
+└── scripts/          # Utility scripts
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 📜 License
 
-## Learn more
+This project is private and intended for internal use.
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+_Built with ❤️ by matanew1_
