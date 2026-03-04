@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/matanew1/SnapSort/compare/v1.5.0...v1.6.0) (2026-03-04)
+
+
+### Features
+
+* introduce responsive scaling utilities and apply them to AI suggestions and swipe tutorial components. ([438d542](https://github.com/matanew1/SnapSort/commit/438d5425ca25e6f0272ed5de5c1ef06d1bc26017))
+
 ## [1.5.0](https://github.com/matanew1/SnapSort/compare/v1.4.0...v1.5.0) (2026-03-04)
 
 
