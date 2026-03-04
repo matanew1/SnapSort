@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.3](https://github.com/matanew1/SnapSort/compare/v1.1.2...v1.1.3) (2026-03-04)
+
+
+### Bug Fixes
+
+* `Added filter functionality to HomeScreen and SwipeCard components` ([b2a1226](https://github.com/matanew1/SnapSort/commit/b2a12261c6f25153b20475c0f36564312f35f4d2))
+
 ### [1.1.2](https://github.com/matanew1/SnapSort/compare/v1.1.1...v1.1.2) (2026-03-04)
 
 
