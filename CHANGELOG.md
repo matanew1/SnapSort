@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/matanew1/SnapSort/compare/v1.3.0...v1.4.0) (2026-03-04)
+
+
+### Features
+
+* add free AI-powered photo analysis and suggestions ([e38fa87](https://github.com/matanew1/SnapSort/commit/e38fa8702714822577c5b54fdb35d9da7e191dd0))
+* Add multi-platform app icons for iOS, Android, and web, and update the `expo-file-system` import. ([f8fd43c](https://github.com/matanew1/SnapSort/commit/f8fd43cbf90a9d6cc6ef97f3dac457d4aeed6c6d))
+* next-level modern design overhaul v2.0 ([098413b](https://github.com/matanew1/SnapSort/commit/098413bafb3c64b3764ae2187b234365ef9ed1e7)), closes [#6C63](https://github.com/matanew1/SnapSort/issues/6C63) [#00D4](https://github.com/matanew1/SnapSort/issues/00D4) [#00E5A0](https://github.com/matanew1/SnapSort/issues/00E5A0) [#FF6B9](https://github.com/matanew1/SnapSort/issues/FF6B9)
+* Overhaul asset management by deleting redundant icon/splash files, removing the asset script, and updating `app.json` to use primary assets. ([67c2d3b](https://github.com/matanew1/SnapSort/commit/67c2d3b339612a135bd0a99a181f1091a4c62351))
+
 ## [1.3.0](https://github.com/matanew1/SnapSort/compare/v1.2.0...v1.3.0) (2026-03-04)
 
 
