@@ -184,13 +184,13 @@ export function SwipeCard({
                   onPress={onFilterPress}
                 >
                   {hasActiveFilter ? (
-                    <ChevronDown size={16} color={Colors.text} />
+                    <ChevronDown size={16} color={Colors.black} />
                   ) : (
-                    <FolderOpen size={16} color={Colors.text} />
+                    <FolderOpen size={16} color={Colors.black} />
                   )}
                   <Text style={[
                     styles.filterButtonText, 
-                    { color: Colors.text }
+                    { color: Colors.black }
                   ]}>
                     {getCurrentFilterName ? getCurrentFilterName() : "Filter"}
                   </Text>
