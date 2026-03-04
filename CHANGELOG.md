@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/matanew1/SnapSort/compare/v1.4.0...v1.5.0) (2026-03-04)
+
+
+### Features
+
+* Add an animated AppSplashScreen component and integrate it into the root layout, replacing the default splash screen and removing an old launcher icon. ([af48d9f](https://github.com/matanew1/SnapSort/commit/af48d9f3ddc03a9f17e1fe452f48c49039e93a2e))
+
 ## [1.4.0](https://github.com/matanew1/SnapSort/compare/v1.3.0...v1.4.0) (2026-03-04)
 
 
