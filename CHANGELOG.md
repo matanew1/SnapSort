@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/matanew1/SnapSort/compare/v1.1.5...v1.2.0) (2026-03-04)
+
+
+### Features
+
+* Introduce `ScreenBackground` component, refactor component exports, and remove deprecated photo pagination and gallery store. ([5a2419e](https://github.com/matanew1/SnapSort/commit/5a2419e36cc08cbb5b2fa1cc15d8deac29845f4f))
+
 ### [1.1.5](https://github.com/matanew1/SnapSort/compare/v1.1.4...v1.1.5) (2026-03-04)
 
 ### [1.1.4](https://github.com/matanew1/SnapSort/compare/v1.1.3...v1.1.4) (2026-03-04)
