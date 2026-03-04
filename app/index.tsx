@@ -1,19 +1,20 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import {
-  ArrowRight,
-  Heart,
-  ImageOff,
-  Trash2,
-  Undo2,
+    ArrowRight,
+    Heart,
+    ImageOff,
+    Settings,
+    Trash2,
+    Undo2,
 } from "lucide-react-native";
 import React, { useCallback, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -57,13 +58,19 @@ export default function HomeScreen() {
         const deletedCount = parseInt(params.deletedCount, 10);
         // Reset state and refetch with deletion count
         setCurrentPhotoIndex(0);
-        removePhotoFromDelete("");  // Clear all deletions by resetting
+        removePhotoFromDelete(""); // Clear all deletions by resetting
         setCardKey((prev) => prev + 1);
         refetch(deletedCount);
         // Clear the param
         router.setParams({ deletedCount: undefined });
       }
-    }, [params.deletedCount, refetch, router, setCurrentPhotoIndex, removePhotoFromDelete])
+    }, [
+      params.deletedCount,
+      refetch,
+      router,
+      setCurrentPhotoIndex,
+      removePhotoFromDelete,
+    ]),
   );
 
   const isFinished = currentPhotoIndex >= photos.length && photos.length > 0;
@@ -85,7 +92,13 @@ export default function HomeScreen() {
       setCurrentPhotoIndex(currentPhotoIndex + 1);
       setCardKey((prev) => prev + 1);
     },
-    [currentPhotoIndex, photos, addPhotoToDelete, addToHistory, setCurrentPhotoIndex],
+    [
+      currentPhotoIndex,
+      photos,
+      addPhotoToDelete,
+      addToHistory,
+      setCurrentPhotoIndex,
+    ],
   );
 
   const handleUndo = useCallback(() => {
@@ -103,7 +116,13 @@ export default function HomeScreen() {
         removePhotoFromDelete(photo.id);
       }
     }
-  }, [sortingHistory.length, undoLastAction, setCurrentPhotoIndex, removePhotoFromDelete, photos]);
+  }, [
+    sortingHistory.length,
+    undoLastAction,
+    setCurrentPhotoIndex,
+    removePhotoFromDelete,
+    photos,
+  ]);
 
   const handleReview = useCallback(() => {
     router.push({
@@ -120,16 +139,20 @@ export default function HomeScreen() {
     return Math.min(currentPhotoIndex / photos.length, 1);
   }, [currentPhotoIndex, photos.length]);
 
-  const ScreenBackground: React.FC<{ children: React.ReactNode; centered?: boolean }> = ({
-    children,
-    centered,
-  }) => {
+  const ScreenBackground: React.FC<{
+    children: React.ReactNode;
+    centered?: boolean;
+  }> = ({ children, centered }) => {
     return (
       <LinearGradient
         colors={[Colors.gradientStart, Colors.gradientEnd]}
         start={[0, 0]}
         end={[1, 1]}
-        style={centered ? [styles.centered, { paddingTop: insets.top }] : [styles.container, { paddingTop: insets.top }]}
+        style={
+          centered
+            ? [styles.centered, { paddingTop: insets.top }]
+            : [styles.container, { paddingTop: insets.top }]
+        }
       >
         {children}
       </LinearGradient>
@@ -221,11 +244,19 @@ export default function HomeScreen() {
           <Text style={styles.title}>SnapSort</Text>
           <Text style={styles.subtitle}>Swipe to sort your photos</Text>
         </View>
-        <View style={styles.counter}>
-          <Text style={styles.counterText}>
-            {currentPhotoIndex + 1}
-            <Text style={styles.counterTotal}> / {photos.length}</Text>
-          </Text>
+        <View style={styles.headerRight}>
+          <View style={styles.counter}>
+            <Text style={styles.counterText}>
+              {currentPhotoIndex + 1}
+              <Text style={styles.counterTotal}> / {photos.length}</Text>
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={() => router.push("/settings")}
+          >
+            <Settings size={20} color={Colors.textSecondary} />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -363,6 +394,21 @@ const styles = StyleSheet.create({
   counterTotal: {
     color: Colors.textMuted,
     fontWeight: "500",
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  settingsButton: {
+    width: 36,
+    height: 36,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   progressContainer: {
     paddingHorizontal: Spacing.lg,
