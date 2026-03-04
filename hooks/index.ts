@@ -1,9 +1,7 @@
 // Custom hooks
-export { useAppPreferences } from './useAppState';
-export { useHaptics } from './useHaptics';
-export { useMediaLibrary } from './useMediaLibrary';
-export { usePhotoPagination } from './usePhotoPagination';
+export { useAppPreferences } from "./useAppState";
+export { useHaptics } from "./useHaptics";
+export { useMediaLibrary } from "./useMediaLibrary";
 
 // Re-export types
-export type { Album, DateRangeFilter, PhotoAsset } from './useMediaLibrary';
-
+export type { Album, DateRangeFilter, PhotoAsset } from "./useMediaLibrary";

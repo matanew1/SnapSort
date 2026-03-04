@@ -1,5 +1,9 @@
 import Constants from "expo-constants";
-import { LinearGradient } from "expo-linear-gradient";
+
+import { ScreenBackground } from "@/components";
+import { BorderRadius, getColors, Spacing } from "@/constants/theme";
+import { useMediaLibrary } from "@/hooks";
+import { useAppStore } from "@/store";
 import { useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import React from "react";
@@ -11,14 +15,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import { BorderRadius, getColors, Spacing } from "@/constants/theme";
-import { useMediaLibrary } from "@/hooks/useMediaLibrary";
-import { useAppStore } from "@/store";
 
 export default function SettingsScreen() {
-  const insets = useSafeAreaInsets();
   const router = useRouter();
   const isDark = useAppStore((s) => s.isDarkMode);
   const toggleDark = useAppStore((s) => s.toggleDarkMode);
@@ -28,15 +26,7 @@ export default function SettingsScreen() {
     useMediaLibrary();
 
   return (
-    <LinearGradient
-      colors={[Colors.gradientStart, Colors.gradientEnd]}
-      start={[0, 0]}
-      end={[1, 1]}
-      style={[
-        styles.container,
-        { paddingTop: insets.top, backgroundColor: Colors.background },
-      ]}
-    >
+    <ScreenBackground>
       <View style={styles.header}>
         <TouchableOpacity
           style={[styles.backButton, { backgroundColor: Colors.surface }]}
@@ -135,14 +125,11 @@ export default function SettingsScreen() {
           Version {Constants.expoConfig?.version ?? "1.0.0"}
         </Text>
       </View>
-    </LinearGradient>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   header: {
     flexDirection: "row",
     alignItems: "center",

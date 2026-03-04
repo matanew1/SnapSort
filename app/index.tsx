@@ -1,43 +1,27 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import {
-  Heart,
-  Settings,
-  Trash2,
-  Undo2
-} from "lucide-react-native";
+import { Heart, Settings, Trash2, Undo2 } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
+  DATE_RANGE_OPTIONS,
   EmptyState,
   FilterModal,
   FinishedState,
   LoadingState,
-  SwipeTutorial
-} from "@/components/features";
-import { SwipeCard } from "@/components/shared/features";
+  ScreenBackground,
+  SwipeCard,
+  SwipeTutorial,
+} from "@/components";
 import { BorderRadius, Colors, getColors, Spacing } from "@/constants/theme";
-import { useAppPreferences } from "@/hooks/useAppState";
-import { useHaptics } from "@/hooks/useHaptics";
-import { DateRangeFilter, useMediaLibrary } from "@/hooks/useMediaLibrary";
+import {
+  useAppPreferences,
+  useHaptics,
+  useMediaLibrary
+} from "@/hooks";
 import { useAppStore } from "@/store";
-
-// Date range options - exported for FilterModal
-export const DATE_RANGE_OPTIONS: { value: DateRangeFilter; label: string }[] = [
-  { value: "all", label: "All Time" },
-  { value: "today", label: "Today" },
-  { value: "thisWeek", label: "This Week" },
-  { value: "thisMonth", label: "This Month" },
-  { value: "thisYear", label: "This Year" },
-  { value: "older", label: "Older" },
-];
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -45,16 +29,13 @@ export default function HomeScreen() {
   const Colors = getColors(isDark);
   const router = useRouter();
   const params = useLocalSearchParams<{ deletedCount?: string }>();
-  
+
   // Haptics
   const { triggerSwipeFeedback } = useHaptics();
 
   // Preferences & Tutorial
-  const { 
-    hasSeenTutorial, 
-    setHasSeenTutorial,
-  } = useAppPreferences();
-  
+  const { hasSeenTutorial, setHasSeenTutorial } = useAppPreferences();
+
   // Tutorial visibility state
   const [showTutorial, setShowTutorial] = useState(false);
 
@@ -121,7 +102,7 @@ export default function HomeScreen() {
       router,
       setCurrentPhotoIndex,
       removePhotoFromDelete,
-    ])
+    ]),
   );
 
   const isFinished = currentPhotoIndex >= photos.length && photos.length > 0;
@@ -152,7 +133,7 @@ export default function HomeScreen() {
       addToHistory,
       setCurrentPhotoIndex,
       triggerSwipeFeedback,
-    ]
+    ],
   );
 
   const handleUndo = useCallback(() => {
@@ -188,7 +169,8 @@ export default function HomeScreen() {
   }, [deletedPhotos, router]);
 
   // Check if any filter is active
-  const hasActiveFilter = selectedAlbumId !== null || selectedDateRange !== "all";
+  const hasActiveFilter =
+    selectedAlbumId !== null || selectedDateRange !== "all";
 
   // Get current filter display name - memoized
   const getCurrentFilterName = useCallback(() => {
@@ -198,7 +180,7 @@ export default function HomeScreen() {
     }
     if (selectedDateRange !== "all") {
       const option = DATE_RANGE_OPTIONS.find(
-        (o) => o.value === selectedDateRange
+        (o) => o.value === selectedDateRange,
       );
       return option?.label || "Date";
     }
@@ -222,35 +204,11 @@ export default function HomeScreen() {
     return Math.min(currentPhotoIndex / photos.length, 1);
   }, [currentPhotoIndex, photos.length]);
 
-  // Screen background wrapper
-  const ScreenBackground: React.FC<{
-    children: React.ReactNode;
-    centered?: boolean;
-  }> = ({ children, centered }) => {
-    return (
-      <LinearGradient
-        colors={[Colors.gradientStart, Colors.gradientEnd]}
-        start={[0, 0]}
-        end={[1, 1]}
-        style={
-          centered
-            ? [styles.centered, { paddingTop: insets.top }]
-            : [styles.container, { paddingTop: insets.top }]
-        }
-      >
-        {children}
-      </LinearGradient>
-    );
-  };
-
   // --- Permission denied ---
   if (permissionDenied) {
     return (
       <ScreenBackground centered>
-        <EmptyState
-          type="permission"
-          onRetry={() => refetch()}
-        />
+        <EmptyState type="permission" onRetry={() => refetch()} />
       </ScreenBackground>
     );
   }
@@ -259,10 +217,7 @@ export default function HomeScreen() {
   if (permissionUndetermined) {
     return (
       <ScreenBackground centered>
-        <EmptyState
-          type="permission"
-          onRetry={() => refetch()}
-        />
+        <EmptyState type="permission" onRetry={() => refetch()} />
       </ScreenBackground>
     );
   }
@@ -288,11 +243,9 @@ export default function HomeScreen() {
             onFilterPress={() => setShowFilterModal(true)}
           />
         ) : (
-          <EmptyState
-            type="no-photos"
-          />
+          <EmptyState type="no-photos" />
         )}
-        
+
         {/* Filter Modal */}
         <FilterModal
           visible={showFilterModal}
@@ -338,7 +291,9 @@ export default function HomeScreen() {
           <View style={[styles.counter, { borderColor: Colors.border }]}>
             <Text style={[styles.counterText, { color: Colors.text }]}>
               {currentPhotoIndex + 1}
-              <Text style={[styles.counterTotal, { color: Colors.textSecondary }]}>
+              <Text
+                style={[styles.counterTotal, { color: Colors.textSecondary }]}
+              >
                 {" "}
                 / {photos.length}
               </Text>
@@ -404,9 +359,7 @@ export default function HomeScreen() {
         >
           <Undo2
             size={24}
-            color={
-              sortingHistory.length === 0 ? Colors.textMuted : Colors.text
-            }
+            color={sortingHistory.length === 0 ? Colors.textMuted : Colors.text}
           />
         </TouchableOpacity>
 
@@ -476,17 +429,6 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  centered: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: Spacing.xl,
-  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -617,4 +559,3 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
 });
-

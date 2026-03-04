@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { ScreenBackground } from "@/components";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore, useServiceStore } from "@/store";
 
@@ -119,22 +120,40 @@ export default function ReviewScreen() {
   }, [router]);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: Colors.background }]}>
+    <ScreenBackground>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={[styles.backButton, {
-          borderColor: Colors.border,
-          backgroundColor: Colors.surface,
-        }]} onPress={handleGoBack}>
+        <TouchableOpacity
+          style={[
+            styles.backButton,
+            {
+              borderColor: Colors.border,
+              backgroundColor: Colors.surface,
+            },
+          ]}
+          onPress={handleGoBack}
+        >
           <ArrowLeft size={22} color={Colors.text} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={[styles.headerTitle, {
-            color: Colors.text,
-          }]}>Review</Text>
-          <Text style={[styles.headerSubtitle, {
-            color: Colors.textSecondary,
-          }]}>
+          <Text
+            style={[
+              styles.headerTitle,
+              {
+                color: Colors.text,
+              },
+            ]}
+          >
+            Review
+          </Text>
+          <Text
+            style={[
+              styles.headerSubtitle,
+              {
+                color: Colors.textSecondary,
+              },
+            ]}
+          >
             {selectedAssets.length} of {assets.length} selected
           </Text>
         </View>
@@ -142,13 +161,23 @@ export default function ReviewScreen() {
       </View>
 
       {/* Info banner */}
-      <View style={[styles.infoBanner, {
-        backgroundColor: Colors.deleteLight,
-      }]}>
+      <View
+        style={[
+          styles.infoBanner,
+          {
+            backgroundColor: Colors.deleteLight,
+          },
+        ]}
+      >
         <Trash2 size={16} color={Colors.delete} />
-        <Text style={[styles.infoText, {
-          color: Colors.delete,
-        }]}>
+        <Text
+          style={[
+            styles.infoText,
+            {
+              color: Colors.delete,
+            },
+          ]}
+        >
           Tap a photo to deselect it from deletion
         </Text>
       </View>
@@ -179,9 +208,14 @@ export default function ReviewScreen() {
               />
               {isSelected && (
                 <View style={styles.thumbOverlay}>
-                  <View style={[styles.trashBadge, {
-                    backgroundColor: Colors.delete,
-                  }]}>
+                  <View
+                    style={[
+                      styles.trashBadge,
+                      {
+                        backgroundColor: Colors.delete,
+                      },
+                    ]}
+                  >
                     <Trash2 size={14} color={Colors.white} />
                   </View>
                 </View>
@@ -201,7 +235,9 @@ export default function ReviewScreen() {
         style={[
           styles.bottomBar,
           {
-            paddingBottom: insets.bottom + Spacing.md, backgroundColor: Colors.surface, borderTopColor: Colors.border,
+            paddingBottom: insets.bottom + Spacing.md,
+            backgroundColor: Colors.surface,
+            borderTopColor: Colors.border,
           },
         ]}
       >
@@ -211,7 +247,7 @@ export default function ReviewScreen() {
             selectedAssets.length === 0 && styles.deleteButtonDisabled,
             {
               backgroundColor: Colors.delete,
-            }
+            },
           ]}
           onPress={handleDelete}
           disabled={selectedAssets.length === 0 || isDeleting}
@@ -221,9 +257,14 @@ export default function ReviewScreen() {
           ) : (
             <>
               <Trash2 size={20} color={Colors.white} />
-              <Text style={[styles.deleteButtonText, {
-                color: Colors.white,
-              }]}>
+              <Text
+                style={[
+                  styles.deleteButtonText,
+                  {
+                    color: Colors.white,
+                  },
+                ]}
+              >
                 Permanently Delete {selectedAssets.length} Photo
                 {selectedAssets.length !== 1 ? "s" : ""}
               </Text>
@@ -231,14 +272,11 @@ export default function ReviewScreen() {
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   header: {
     flexDirection: "row",
     alignItems: "center",
