@@ -13,7 +13,16 @@
         "buildType": "apk"
       }
     },
-    "production": {}
+"preview-ios": {
+      "ios": {
+        "simulator": true
+      }
+    },
+    "production": {
+      "ios": {
+        "distribution": "store"
+      }
+    }
   },
   "submit": {
     "production": {}

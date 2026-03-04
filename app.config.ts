@@ -19,7 +19,12 @@ const config: ExpoConfig = {
     },
   },
   ios: {
+    bundleIdentifier: "com.matanbardugo.snapsort",
     supportsTablet: true,
+    infoPlist: {
+      NSPhotoLibraryUsageDescription: "SnapSort needs access to your photos to help you organize and delete clutter.",
+      NSPhotoLibraryAddUsageDescription: "SnapSort needs permission to save organized photos to your library."
+    }
   },
   android: {
     package: "com.matanbardugo.snapsort",
