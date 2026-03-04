@@ -1,20 +1,20 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import {
-    ArrowRight,
-    Heart,
-    ImageOff,
-    Settings,
-    Trash2,
-    Undo2,
+  ArrowRight,
+  Heart,
+  ImageOff,
+  Settings,
+  Trash2,
+  Undo2,
 } from "lucide-react-native";
 import React, { useCallback, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -241,18 +241,18 @@ export default function HomeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>SnapSort</Text>
-          <Text style={styles.subtitle}>Swipe to sort your photos</Text>
+          <Text style={[styles.title, { color: Colors.text }]}>SnapSort</Text>
+          <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>Swipe to sort your photos</Text>
         </View>
         <View style={styles.headerRight}>
-          <View style={styles.counter}>
-            <Text style={styles.counterText}>
+          <View style={[styles.counter, { borderColor: Colors.border }]}>
+            <Text style={[styles.counterText, { color: Colors.text }]}>
               {currentPhotoIndex + 1}
-              <Text style={styles.counterTotal}> / {photos.length}</Text>
+              <Text style={[styles.counterTotal, { color: Colors.textSecondary }]}> / {photos.length}</Text>
             </Text>
           </View>
           <TouchableOpacity
-            style={styles.settingsButton}
+            style={[styles.settingsButton, { borderColor: Colors.border }]}
             onPress={() => router.push("/settings")}
           >
             <Settings size={20} color={Colors.textSecondary} />
@@ -293,13 +293,13 @@ export default function HomeScreen() {
         style={[styles.controls, { paddingBottom: insets.bottom + Spacing.md }]}
       >
         <TouchableOpacity
-          style={[styles.controlButton, styles.undoButton]}
+          style={[styles.controlButton, styles.undoButton, { borderColor: Colors.border }]}
           onPress={handleUndo}
           disabled={sortingHistory.length === 0}
         >
           <Undo2
             size={24}
-            color={sortingHistory.length > 0 ? Colors.text : Colors.textMuted}
+            color={sortingHistory.length === 0 ? Colors.textMuted : Colors.text}
           />
         </TouchableOpacity>
 
@@ -370,16 +370,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "800",
-    color: Colors.text,
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 14,
-    color: Colors.textSecondary,
     marginTop: 2,
   },
   counter: {
-    backgroundColor: Colors.surface,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
@@ -389,7 +386,6 @@ const styles = StyleSheet.create({
   counterText: {
     fontSize: 16,
     fontWeight: "700",
-    color: Colors.text,
   },
   counterTotal: {
     color: Colors.textMuted,
@@ -405,7 +401,6 @@ const styles = StyleSheet.create({
     height: 36,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Colors.surface,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -445,7 +440,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   undoButton: {
-    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
   },

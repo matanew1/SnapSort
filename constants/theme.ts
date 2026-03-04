@@ -50,14 +50,14 @@ export const Colors = {
 };
 
 export const LightColors = {
-  // Base colors - Clean and airy
-  background: "#F8FAFC",
-  surface: "#FFFFFF",
+  // Base colors - Clean white background with black text
+  background: "#FFFFFF",
+  surface: "#F8FAFC",
   surfaceLight: "#F1F5F9",
   card: "#FFFFFF",
 
-  // Text colors - Optimized contrast
-  text: "#0F172A",
+  // Text colors - Pure black for maximum contrast on white
+  text: "#000000",
   textSecondary: "#475569",
   textMuted: "#64748B",
 
@@ -82,14 +82,14 @@ export const LightColors = {
   accent: "#2563EB",
   accentLight: "rgba(37, 99, 235, 0.1)",
 
-  // Gradient presets
-  gradientStart: "#EFF6FF",
-  gradientEnd: "#DBEAFE",
+  // Gradient presets - White-based for light mode
+  gradientStart: "#FFFFFF",
+  gradientEnd: "#F1F5F9",
   gradientAltStart: "#EF4444",
   gradientAltEnd: "#FB923C",
 
   // UI colors
-  border: "rgba(15, 23, 42, 0.08)",
+  border: "rgba(0, 0, 0, 0.08)",
   overlay: "rgba(0, 0, 0, 0.1)",
 
   white: "#FFFFFF",
