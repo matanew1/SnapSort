@@ -13,10 +13,16 @@ const config: ExpoConfig = {
   scheme: "snapsort",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
+  extra: {
+    eas: {
+      projectId: "f56820b3-e4fa-41b9-a5fa-99cc6c36e8dd",
+    },
+  },
   ios: {
     supportsTablet: true,
   },
   android: {
+    package: "com.matanbardugo.snapsort",
     adaptiveIcon: {
       backgroundColor: "#000000",
       foregroundImage:

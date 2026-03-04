@@ -8,17 +8,22 @@
     "scheme": "snapsort",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "extra": {
+      "eas": {
+        "projectId": "f56820b3-e4fa-41b9-a5fa-99cc6c36e8dd"
+      }
+    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.matanbardugo.snapsort",
       "adaptiveIcon": {
         "backgroundColor": "#000000",
         "foregroundImage": "./assets/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
         "backgroundImage": "./assets/android/res/mipmap-xxxhdpi/ic_launcher_background.png",
         "monochromeImage": "./assets/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png"
       },
-      "package": "com.snapsort.app",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
