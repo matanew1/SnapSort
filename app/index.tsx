@@ -365,25 +365,6 @@ export default function HomeScreen() {
 
         {/* Header Right */}
         <View style={styles.headerRight}>
-          {/* Photo counter */}
-          {photos.length > 0 && !isFinished && (
-            <View
-              style={[
-                styles.counter,
-                {
-                  backgroundColor: Colors.surfaceLight,
-                  borderColor: Colors.border,
-                },
-              ]}
-            >
-              <Text style={[styles.counterText, { color: Colors.accent }]}>
-                {currentPhotoIndex + 1}
-              </Text>
-              <Text style={[styles.counterTotal, { color: Colors.textMuted }]}>
-                /{photos.length}
-              </Text>
-            </View>
-          )}
 
           {/* Filter button */}
           <TouchableOpacity

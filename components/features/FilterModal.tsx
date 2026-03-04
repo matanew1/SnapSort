@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: Spacing.xl * 6, // Massive padding to ensure it clears the absolute footer
+    paddingBottom: Spacing.xl * 4, // Massive padding to ensure it clears the absolute footer
   },
   section: {
     paddingHorizontal: Spacing.lg * 2,
