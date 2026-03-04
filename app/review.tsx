@@ -77,14 +77,14 @@ export default function ReviewScreen() {
             try {
               const ids = selectedAssets.map((a) => a.id);
               const deletedCount = selectedAssets.length;
-              
+
               // Use store to delete photos
               const success = await deletePhotos(ids);
-              
+
               if (success) {
                 // Track deleted count in app store
                 incrementPhotosDeleted(deletedCount);
-                
+
                 // Navigate back to home and pass deletion count
                 if (router.canGoBack()) {
                   router.back();
@@ -119,15 +119,22 @@ export default function ReviewScreen() {
   }, [router]);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: Colors.background }]}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+        <TouchableOpacity style={[styles.backButton, {
+          borderColor: Colors.border,
+          backgroundColor: Colors.surface,
+        }]} onPress={handleGoBack}>
           <ArrowLeft size={22} color={Colors.text} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>Review</Text>
-          <Text style={styles.headerSubtitle}>
+          <Text style={[styles.headerTitle, {
+            color: Colors.text,
+          }]}>Review</Text>
+          <Text style={[styles.headerSubtitle, {
+            color: Colors.textSecondary,
+          }]}>
             {selectedAssets.length} of {assets.length} selected
           </Text>
         </View>
@@ -135,9 +142,13 @@ export default function ReviewScreen() {
       </View>
 
       {/* Info banner */}
-      <View style={styles.infoBanner}>
+      <View style={[styles.infoBanner, {
+        backgroundColor: Colors.deleteLight,
+      }]}>
         <Trash2 size={16} color={Colors.delete} />
-        <Text style={styles.infoText}>
+        <Text style={[styles.infoText, {
+          color: Colors.delete,
+        }]}>
           Tap a photo to deselect it from deletion
         </Text>
       </View>
@@ -164,7 +175,9 @@ export default function ReviewScreen() {
               />
               {isSelected && (
                 <View style={styles.thumbOverlay}>
-                  <View style={styles.trashBadge}>
+                  <View style={[styles.trashBadge, {
+                    backgroundColor: Colors.delete,
+                  }]}>
                     <Trash2 size={14} color={Colors.white} />
                   </View>
                 </View>
@@ -183,13 +196,18 @@ export default function ReviewScreen() {
       <View
         style={[
           styles.bottomBar,
-          { paddingBottom: insets.bottom + Spacing.md },
+          {
+            paddingBottom: insets.bottom + Spacing.md, backgroundColor: Colors.surface, borderTopColor: Colors.border,
+          },
         ]}
       >
         <TouchableOpacity
           style={[
             styles.deleteButton,
             selectedAssets.length === 0 && styles.deleteButtonDisabled,
+            {
+              backgroundColor: Colors.delete,
+            }
           ]}
           onPress={handleDelete}
           disabled={selectedAssets.length === 0 || isDeleting}
@@ -199,7 +217,9 @@ export default function ReviewScreen() {
           ) : (
             <>
               <Trash2 size={20} color={Colors.white} />
-              <Text style={styles.deleteButtonText}>
+              <Text style={[styles.deleteButtonText, {
+                color: Colors.white,
+              }]}>
                 Permanently Delete {selectedAssets.length} Photo
                 {selectedAssets.length !== 1 ? "s" : ""}
               </Text>
@@ -214,7 +234,6 @@ export default function ReviewScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: "row",
@@ -226,11 +245,9 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.surface,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: Colors.border,
   },
   headerCenter: {
     flex: 1,
@@ -239,11 +256,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: Colors.text,
   },
   headerSubtitle: {
     fontSize: 13,
-    color: Colors.textSecondary,
     marginTop: 2,
   },
   headerRight: {
@@ -257,14 +272,12 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    backgroundColor: Colors.deleteLight,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
     borderColor: "rgba(239, 68, 68, 0.15)",
   },
   infoText: {
     fontSize: 13,
-    color: Colors.delete,
     fontWeight: "500",
   },
   grid: {
@@ -298,7 +311,6 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.delete,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -312,24 +324,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.md,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    backgroundColor: Colors.background,
   },
   deleteButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
-    backgroundColor: Colors.delete,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.full,
   },
   deleteButtonDisabled: {
-    backgroundColor: Colors.surfaceLight,
     opacity: 0.5,
   },
   deleteButtonText: {
-    color: Colors.white,
     fontSize: 16,
     fontWeight: "700",
   },
