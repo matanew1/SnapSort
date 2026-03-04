@@ -4,8 +4,7 @@
  * Uses image dimensions, file size, and basic heuristics for quality scoring
  */
 
-import * as FileSystem from "expo-file-system";
-import { Image as ExpoImage } from "expo-image";
+import * as FileSystem from "expo-file-system/legacy";
 
 export interface PhotoAsset {
   id: string;
@@ -44,7 +43,7 @@ export interface SimilarityGroup {
  */
 export async function analyzePhotoQuality(
   photo: PhotoAsset,
-  previousPhoto?: PhotoAsset
+  previousPhoto?: PhotoAsset,
 ): Promise<PhotoAnalysis> {
   try {
     const fileInfo = await FileSystem.getInfoAsync(photo.uri);
@@ -55,7 +54,8 @@ export async function analyzePhotoQuality(
     // Detect burst photos (same creation time or very close)
     const isBurst: boolean =
       (previousPhoto &&
-      Math.abs(photo.creationTime - previousPhoto.creationTime) < 500) || false;
+        Math.abs(photo.creationTime - previousPhoto.creationTime) < 500) ||
+      false;
 
     // Quality scoring heuristics
     let qualityScore = 50;
@@ -81,7 +81,9 @@ export async function analyzePhotoQuality(
 
     // Aspect ratio analysis (standard ratios are better)
     const standardRatios = [1, 1.33, 1.5, 1.77, 2]; // 1:1, 4:3, 3:2, 16:9, 2:1
-    const isStandardRatio = standardRatios.some((r) => Math.abs(aspectRatio - r) < 0.1);
+    const isStandardRatio = standardRatios.some(
+      (r) => Math.abs(aspectRatio - r) < 0.1,
+    );
     if (isStandardRatio) {
       qualityScore += 5;
     }
@@ -96,7 +98,8 @@ export async function analyzePhotoQuality(
     // Detect dark photos (filename contains "dark" or very small file)
     const isDark: boolean =
       photo.filename.toLowerCase().includes("dark") ||
-      (fileSizeKB < 80 && megapixels < 3) || false;
+      (fileSizeKB < 80 && megapixels < 3) ||
+      false;
     if (isDark) {
       qualityScore -= 20;
       reasons.push("Likely dark or underexposed");
@@ -133,7 +136,9 @@ export async function analyzePhotoQuality(
       aspectRatio,
       megapixels,
       isBurst,
-      burstGroupId: isBurst ? `burst_${previousPhoto?.creationTime}` : (undefined as any),
+      burstGroupId: isBurst
+        ? `burst_${previousPhoto?.creationTime}`
+        : (undefined as any),
       isSimilarToNext: false, // Will be computed separately
       suggestDelete,
       reason: reasons.length > 0 ? reasons.join(", ") : undefined,
@@ -161,7 +166,7 @@ export async function analyzePhotoQuality(
  */
 export function detectSimilarPhotos(
   photos: PhotoAsset[],
-  analyses: PhotoAnalysis[]
+  analyses: PhotoAnalysis[],
 ): SimilarityGroup[] {
   const groups: Map<string, PhotoAsset[]> = new Map();
   const groupBest: Map<string, string> = new Map();
@@ -190,7 +195,11 @@ export function detectSimilarPhotos(
 
       // Keep the one with highest quality score
       const currentBest = groupBest.get(burstId);
-      if (!currentBest || analysis.qualityScore > (analyses.find((a) => a.photoId === currentBest)?.qualityScore ?? 0)) {
+      if (
+        !currentBest ||
+        analysis.qualityScore >
+          (analyses.find((a) => a.photoId === currentBest)?.qualityScore ?? 0)
+      ) {
         groupBest.set(burstId, photo.id);
       }
     }
@@ -209,7 +218,11 @@ export function detectSimilarPhotos(
 
       // Keep the one with highest quality
       const currentBest = groupBest.get(dupId);
-      if (!currentBest || analysis.qualityScore > (analyses.find((a) => a.photoId === currentBest)?.qualityScore ?? 0)) {
+      if (
+        !currentBest ||
+        analysis.qualityScore >
+          (analyses.find((a) => a.photoId === currentBest)?.qualityScore ?? 0)
+      ) {
         groupBest.set(dupId, photo.id);
       }
     }
@@ -230,9 +243,17 @@ export function detectSimilarPhotos(
  * Generate smart cleanup suggestions
  */
 export function generateCleanupSuggestions(
-  analyses: PhotoAnalysis[]
-): { suggestion: string; photoIds: string[]; priority: "high" | "medium" | "low" }[] {
-  const suggestions: { suggestion: string; photoIds: string[]; priority: "high" | "medium" | "low" }[] = [];
+  analyses: PhotoAnalysis[],
+): {
+  suggestion: string;
+  photoIds: string[];
+  priority: "high" | "medium" | "low";
+}[] {
+  const suggestions: {
+    suggestion: string;
+    photoIds: string[];
+    priority: "high" | "medium" | "low";
+  }[] = [];
 
   // Suggestion 1: Delete blurry photos
   const blurryPhotos = analyses.filter((a) => a.isBlurry);
@@ -256,7 +277,7 @@ export function generateCleanupSuggestions(
 
   // Suggestion 3: Delete low-quality photos
   const lowQuality = analyses.filter(
-    (a) => a.qualityScore < 30 && !a.isBlurry && !a.isDark
+    (a) => a.qualityScore < 30 && !a.isBlurry && !a.isDark,
   );
   if (lowQuality.length > 0) {
     suggestions.push({
@@ -283,7 +304,7 @@ export function generateCleanupSuggestions(
  * Batch analyze multiple photos
  */
 export async function batchAnalyzePhotos(
-  photos: PhotoAsset[]
+  photos: PhotoAsset[],
 ): Promise<PhotoAnalysis[]> {
   const analyses: PhotoAnalysis[] = [];
 
