@@ -1,4 +1,4 @@
-import { getColors, Colors as StaticColors } from "@/constants/theme";
+import { getColors } from "@/constants/theme";
 import { useAppStore } from "@/store";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -11,7 +11,9 @@ export default function RootLayout() {
   const Colors = getColors(isDark);
 
   return (
-    <GestureHandlerRootView style={[styles.root, { backgroundColor: Colors.background }] }>
+    <GestureHandlerRootView
+      style={[styles.root, { backgroundColor: Colors.background }]}
+    >
       <Stack
         screenOptions={{
           headerShown: false,
@@ -37,6 +39,5 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: StaticColors.background,
   },
 });

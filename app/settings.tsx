@@ -1,3 +1,4 @@
+import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
@@ -128,6 +129,12 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      <View style={styles.versionContainer}>
+        <Text style={[styles.versionText, { color: Colors.textSecondary }]}>
+          Version {Constants.expoConfig?.version ?? "1.0.0"}
+        </Text>
+      </View>
     </LinearGradient>
   );
 }
@@ -185,5 +192,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
+  },
+  versionContainer: {
+    marginTop: Spacing.xl * 2,
+    alignItems: "center",
+    paddingBottom: Spacing.xl,
+  },
+  versionText: {
+    fontSize: 14,
+    fontWeight: "500",
   },
 });
