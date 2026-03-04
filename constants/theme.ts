@@ -1,107 +1,107 @@
 /**
- * SnapSort Native — Next-Level Modern Theme v2.0
- * Premium glassmorphism, neon accents, and cinematic gradients
+ * SnapSort Native — Modern Professional Theme v3.0
+ * Clean dark theme, subtle accents, professional appearance
  */
 
 export const Colors = {
-  // Base — deep space dark
-  background: "#050810",
-  surface: "#0D1117",
-  surfaceLight: "#161B27",
-  surfaceGlass: "rgba(22, 27, 39, 0.7)",
-  card: "#0D1117",
+  // Base — clean dark, professional
+  background: "#0F1419",
+  surface: "#1A1F2E",
+  surfaceLight: "#242C3D",
+  surfaceGlass: "rgba(26, 31, 46, 0.8)",
+  card: "#1A1F2E",
 
   // Text — crisp and accessible
-  text: "#F0F6FF",
-  textSecondary: "#8B9EC4",
-  textMuted: "#4A5568",
-  textInverse: "#050810",
+  text: "#E8EAED",
+  textSecondary: "#9CA3AF",
+  textMuted: "#6B7280",
+  textInverse: "#0F1419",
 
-  // Action colors — vivid neon
-  keep: "#00E5A0",
-  keepLight: "rgba(0, 229, 160, 0.12)",
-  keepGlow: "rgba(0, 229, 160, 0.45)",
-  keepDark: "#00B87A",
+  // Action colors — muted but clear
+  keep: "#10B981",
+  keepLight: "rgba(16, 185, 129, 0.12)",
+  keepGlow: "rgba(16, 185, 129, 0.25)",
+  keepDark: "#059669",
 
-  delete: "#FF4D6D",
-  deleteLight: "rgba(255, 77, 109, 0.12)",
-  deleteGlow: "rgba(255, 77, 109, 0.45)",
-  deleteDark: "#CC2244",
+  delete: "#EF4444",
+  deleteLight: "rgba(239, 68, 68, 0.12)",
+  deleteGlow: "rgba(239, 68, 68, 0.25)",
+  deleteDark: "#DC2626",
 
-  // Brand colors
-  primary: "#6C63FF",
-  primaryLight: "rgba(108, 99, 255, 0.15)",
-  primaryGlow: "rgba(108, 99, 255, 0.5)",
-  secondary: "#00D4FF",
-  secondaryLight: "rgba(0, 212, 255, 0.12)",
+  // Brand colors — subtle
+  primary: "#3B82F6",
+  primaryLight: "rgba(59, 130, 246, 0.12)",
+  primaryGlow: "rgba(59, 130, 246, 0.25)",
+  secondary: "#06B6D4",
+  secondaryLight: "rgba(6, 182, 212, 0.12)",
 
   // Semantic
-  danger: "#FF4D6D",
-  success: "#00E5A0",
-  warning: "#FFB800",
-  info: "#00D4FF",
-  disabled: "#1E2535",
+  danger: "#EF4444",
+  success: "#10B981",
+  warning: "#F59E0B",
+  info: "#06B6D4",
+  disabled: "#374151",
 
   // Accent
-  accent: "#6C63FF",
-  accentLight: "rgba(108, 99, 255, 0.15)",
-  accentSecondary: "#FF6B9D",
+  accent: "#3B82F6",
+  accentLight: "rgba(59, 130, 246, 0.12)",
+  accentSecondary: "#EC4899",
 
-  // Gradients
-  gradientStart: "#050810",
-  gradientEnd: "#0D1117",
-  gradientAltStart: "#FF4D6D",
-  gradientAltEnd: "#FF8E53",
+  // Gradients — subtle
+  gradientStart: "#0F1419",
+  gradientEnd: "#1A1F2E",
+  gradientAltStart: "#EF4444",
+  gradientAltEnd: "#F97316",
 
   // Glass & borders
-  border: "rgba(255, 255, 255, 0.06)",
+  border: "rgba(255, 255, 255, 0.08)",
   borderLight: "rgba(255, 255, 255, 0.12)",
-  borderGlow: "rgba(108, 99, 255, 0.3)",
-  overlay: "rgba(5, 8, 16, 0.85)",
-  glassLight: "rgba(255, 255, 255, 0.04)",
+  borderGlow: "rgba(59, 130, 246, 0.2)",
+  overlay: "rgba(15, 20, 25, 0.9)",
+  glassLight: "rgba(255, 255, 255, 0.05)",
   glassMedium: "rgba(255, 255, 255, 0.08)",
 
   // Base
   white: "#FFFFFF",
   black: "#000000",
 
-  // Neon palette
-  neonPurple: "#6C63FF",
-  neonCyan: "#00D4FF",
-  neonGreen: "#00E5A0",
-  neonPink: "#FF6B9D",
-  neonOrange: "#FF8E53",
+  // Palette
+  neonPurple: "#3B82F6",
+  neonCyan: "#06B6D4",
+  neonGreen: "#10B981",
+  neonPink: "#EC4899",
+  neonOrange: "#F97316",
 };
 
 export const LightColors = {
   // Base — clean white with depth
-  background: "#F8FAFF",
+  background: "#F8FAFC",
   surface: "#FFFFFF",
-  surfaceLight: "#EEF2FF",
-  surfaceGlass: "rgba(255, 255, 255, 0.85)",
+  surfaceLight: "#F1F5F9",
+  surfaceGlass: "rgba(255, 255, 255, 0.9)",
   card: "#FFFFFF",
 
   // Text
-  text: "#0A0E1A",
-  textSecondary: "#4B5563",
-  textMuted: "#9CA3AF",
-  textInverse: "#F0F6FF",
+  text: "#0F1419",
+  textSecondary: "#64748B",
+  textMuted: "#94A3B8",
+  textInverse: "#E8EAED",
 
   // Action colors
   keep: "#059669",
   keepLight: "rgba(5, 150, 105, 0.1)",
-  keepGlow: "rgba(5, 150, 105, 0.3)",
+  keepGlow: "rgba(5, 150, 105, 0.25)",
   keepDark: "#047857",
 
   delete: "#DC2626",
   deleteLight: "rgba(220, 38, 38, 0.1)",
-  deleteGlow: "rgba(220, 38, 38, 0.3)",
+  deleteGlow: "rgba(220, 38, 38, 0.25)",
   deleteDark: "#B91C1C",
 
   // Brand
-  primary: "#4F46E5",
-  primaryLight: "rgba(79, 70, 229, 0.1)",
-  primaryGlow: "rgba(79, 70, 229, 0.3)",
+  primary: "#2563EB",
+  primaryLight: "rgba(37, 99, 235, 0.1)",
+  primaryGlow: "rgba(37, 99, 235, 0.25)",
   secondary: "#0891B2",
   secondaryLight: "rgba(8, 145, 178, 0.1)",
 
@@ -110,23 +110,23 @@ export const LightColors = {
   success: "#059669",
   warning: "#D97706",
   info: "#0891B2",
-  disabled: "#E5E7EB",
+  disabled: "#E2E8F0",
 
   // Accent
-  accent: "#4F46E5",
-  accentLight: "rgba(79, 70, 229, 0.1)",
+  accent: "#2563EB",
+  accentLight: "rgba(37, 99, 235, 0.1)",
   accentSecondary: "#DB2777",
 
   // Gradients
-  gradientStart: "#F8FAFF",
-  gradientEnd: "#EEF2FF",
+  gradientStart: "#F8FAFC",
+  gradientEnd: "#F1F5F9",
   gradientAltStart: "#DC2626",
   gradientAltEnd: "#EA580C",
 
   // Glass & borders
   border: "rgba(0, 0, 0, 0.08)",
-  borderLight: "rgba(0, 0, 0, 0.15)",
-  borderGlow: "rgba(79, 70, 229, 0.3)",
+  borderLight: "rgba(0, 0, 0, 0.12)",
+  borderGlow: "rgba(37, 99, 235, 0.2)",
   overlay: "rgba(0, 0, 0, 0.5)",
   glassLight: "rgba(0, 0, 0, 0.02)",
   glassMedium: "rgba(0, 0, 0, 0.05)",
@@ -135,8 +135,8 @@ export const LightColors = {
   white: "#FFFFFF",
   black: "#000000",
 
-  // Neon palette (muted for light mode)
-  neonPurple: "#4F46E5",
+  // Palette
+  neonPurple: "#2563EB",
   neonCyan: "#0891B2",
   neonGreen: "#059669",
   neonPink: "#DB2777",

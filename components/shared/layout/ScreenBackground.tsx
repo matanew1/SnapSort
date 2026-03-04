@@ -20,28 +20,7 @@ export function ScreenBackground({
 
   return (
     <View style={[styles.root, { backgroundColor: Colors.background }]}>
-      {withGradient && isDark && (
-        <>
-          {/* Ambient top glow */}
-          <View
-            style={[
-              styles.ambientGlow,
-              styles.ambientGlowTop,
-              { backgroundColor: Colors.primaryGlow ?? "rgba(108,99,255,0.08)" },
-            ]}
-            pointerEvents="none"
-          />
-          {/* Ambient bottom glow */}
-          <View
-            style={[
-              styles.ambientGlow,
-              styles.ambientGlowBottom,
-              { backgroundColor: Colors.deleteGlow ?? "rgba(255,77,109,0.06)" },
-            ]}
-            pointerEvents="none"
-          />
-        </>
-      )}
+      {/* Clean, minimal background - no colorful gradients */}
       <SafeAreaView style={styles.safe} edges={edges}>
         {children}
       </SafeAreaView>
@@ -56,20 +35,5 @@ const styles = StyleSheet.create({
   },
   safe: {
     flex: 1,
-  },
-  ambientGlow: {
-    position: "absolute",
-    width: 400,
-    height: 400,
-    borderRadius: 200,
-    opacity: 0.15,
-  },
-  ambientGlowTop: {
-    top: -100,
-    left: -50,
-  },
-  ambientGlowBottom: {
-    bottom: -100,
-    right: -50,
   },
 });
