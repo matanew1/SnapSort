@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/matanew1/SnapSort/compare/v1.1.0...v1.1.1) (2026-03-04)
+
+
+### Bug Fixes
+
+* colors i dark and light mode ([55b9b04](https://github.com/matanew1/SnapSort/commit/55b9b04e226884cc5c064d206ca79dcf87dff4de))
+
 ## 1.1.0 (2026-03-04)
 
 
