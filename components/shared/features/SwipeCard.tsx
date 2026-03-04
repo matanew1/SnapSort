@@ -2,7 +2,7 @@ import { BorderRadius, Colors, Spacing } from "@/constants/theme";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { ChevronDown, FolderOpen, Heart, Trash2 } from "lucide-react-native";
+import { Heart, Trash2 } from "lucide-react-native";
 import React from "react";
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -23,20 +23,14 @@ const ROTATION_FACTOR = 12;
 interface SwipeCardProps {
   uri: string;
   onSwipe: (direction: "keep" | "delete") => void;
-  onFilterPress?: () => void;
   onGoBack?: () => void;
-  hasActiveFilter?: boolean;
-  getCurrentFilterName?: () => string;
   index?: number;
 }
 
 export function SwipeCard({
   uri,
   onSwipe,
-  onFilterPress,
   onGoBack,
-  hasActiveFilter,
-  getCurrentFilterName,
   index = 0,
 }: SwipeCardProps) {
   const translateX = useSharedValue(0);
@@ -185,23 +179,7 @@ export function SwipeCard({
           pointerEvents="none"
         />
 
-        {/* Top buttons row */}
-        {onFilterPress && (
-          <View style={styles.topButtonsRow}>
-            <BlurView intensity={80} tint="dark" style={styles.filterButtonBlur}>
-              <TouchableOpacity style={styles.filterButton} onPress={onFilterPress}>
-                {hasActiveFilter ? (
-                  <ChevronDown size={14} color="#fff" />
-                ) : (
-                  <FolderOpen size={14} color="#fff" />
-                )}
-                <Text style={styles.filterButtonText}>
-                  {getCurrentFilterName ? getCurrentFilterName() : "Filter"}
-                </Text>
-              </TouchableOpacity>
-            </BlurView>
-          </View>
-        )}
+
 
         {/* KEEP stamp */}
         <Animated.View style={[styles.stamp, styles.keepStamp, keepStampStyle]}>
@@ -279,28 +257,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: BorderRadius.xxl,
     borderBottomRightRadius: BorderRadius.xxl,
   },
-  topButtonsRow: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    zIndex: 100,
-  },
-  filterButtonBlur: {
-    borderRadius: BorderRadius.full,
-    overflow: "hidden",
-  },
-  filterButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
-  filterButtonText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#fff",
-  },
+
   stamp: {
     position: "absolute",
     top: 56,

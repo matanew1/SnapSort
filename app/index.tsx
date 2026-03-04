@@ -421,12 +421,9 @@ export default function HomeScreen() {
                   </View>
                 )}
                 <SwipeCard
-                key={currentPhotoIndex}
-                uri={photos[currentPhotoIndex].uri}
-                onSwipe={handleSwipe}
-                onFilterPress={() => setShowFilterModal(true)}
-                hasActiveFilter={hasActiveFilter}
-                getCurrentFilterName={getCurrentFilterName}
+                  key={currentPhotoIndex}
+                  uri={photos[currentPhotoIndex].uri}
+                  onSwipe={handleSwipe}
                   index={currentPhotoIndex}
                 />
               </View>
