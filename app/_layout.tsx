@@ -1,3 +1,4 @@
+import { ErrorBoundary } from "@/components/common";
 import { getColors } from "@/constants/theme";
 import { useAppStore } from "@/store";
 import { Stack } from "expo-router";
@@ -14,23 +15,25 @@ export default function RootLayout() {
     <GestureHandlerRootView
       style={[styles.root, { backgroundColor: Colors.background }]}
     >
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: Colors.background },
-          animation: "fade",
-        }}
-      >
-        <Stack.Screen name="index" />
-        <Stack.Screen
-          name="review"
-          options={{
-            animation: "slide_from_bottom",
-            gestureEnabled: false,
+      <ErrorBoundary>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: Colors.background },
+            animation: "fade",
           }}
-        />
-        <Stack.Screen name="settings" />
-      </Stack>
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen
+            name="review"
+            options={{
+              animation: "slide_from_bottom",
+              gestureEnabled: false,
+            }}
+          />
+          <Stack.Screen name="settings" />
+        </Stack>
+      </ErrorBoundary>
       <StatusBar style={isDark ? "light" : "dark"} />
     </GestureHandlerRootView>
   );

@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { BorderRadius, Colors, getColors, Spacing } from "@/constants/theme";
+import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore, useServiceStore } from "@/store";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");

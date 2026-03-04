@@ -31,6 +31,8 @@ interface AppState {
   clearPhotosToDelete: () => void;
   addToHistory: (entry: DeleteEntry) => void;
   undoLastAction: () => DeleteEntry | null;
+  undoAllActions: () => DeleteEntry[];
+  getLastNactions: (count: number) => DeleteEntry[];
   clearHistory: () => void;
   setIsReviewingPhotos: (reviewing: boolean) => void;
   setIsSortingComplete: (complete: boolean) => void;
@@ -112,6 +114,30 @@ export const useAppStore = create<AppState>()(
           }));
 
           return lastEntry;
+        },
+
+        undoAllActions: () => {
+          const state = get();
+          if (state.sortingHistory.length === 0) return [];
+
+          // Get all entries to restore
+          const allEntries = [...state.sortingHistory];
+          
+          // Clear history and reset to beginning
+          set({
+            sortingHistory: [],
+            currentPhotoIndex: 0,
+            // Remove all photos from delete list
+            selectedPhotosForDelete: [],
+            totalPhotosMarkedForDelete: 0,
+          });
+
+          return allEntries;
+        },
+
+        getLastNactions: (count: number) => {
+          const state = get();
+          return state.sortingHistory.slice(-count);
         },
 
         clearHistory: () =>

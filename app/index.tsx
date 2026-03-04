@@ -1,20 +1,13 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import {
-  ArrowRight,
-  FolderOpen,
   Heart,
-  ImageOff,
   Settings,
   Trash2,
-  Undo2,
-  X
+  Undo2
 } from "lucide-react-native";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Modal,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -22,13 +15,22 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import {
+  EmptyState,
+  FilterModal,
+  FinishedState,
+  LoadingState,
+  SwipeTutorial
+} from "@/components/features";
 import { SwipeCard } from "@/components/shared/features";
 import { BorderRadius, Colors, getColors, Spacing } from "@/constants/theme";
+import { useAppPreferences } from "@/hooks/useAppState";
+import { useHaptics } from "@/hooks/useHaptics";
 import { DateRangeFilter, useMediaLibrary } from "@/hooks/useMediaLibrary";
 import { useAppStore } from "@/store";
 
-// Date range options
-const DATE_RANGE_OPTIONS: { value: DateRangeFilter; label: string }[] = [
+// Date range options - exported for FilterModal
+export const DATE_RANGE_OPTIONS: { value: DateRangeFilter; label: string }[] = [
   { value: "all", label: "All Time" },
   { value: "today", label: "Today" },
   { value: "thisWeek", label: "This Week" },
@@ -43,10 +45,36 @@ export default function HomeScreen() {
   const Colors = getColors(isDark);
   const router = useRouter();
   const params = useLocalSearchParams<{ deletedCount?: string }>();
+  
+  // Haptics
+  const { triggerSwipeFeedback } = useHaptics();
+
+  // Preferences & Tutorial
+  const { 
+    hasSeenTutorial, 
+    setHasSeenTutorial,
+  } = useAppPreferences();
+  
+  // Tutorial visibility state
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // Show tutorial on first launch
+  useEffect(() => {
+    if (!hasSeenTutorial) {
+      setShowTutorial(true);
+    }
+  }, [hasSeenTutorial]);
+
+  const handleTutorialComplete = useCallback(() => {
+    setShowTutorial(false);
+    setHasSeenTutorial(true);
+  }, [setHasSeenTutorial]);
+
   const {
     photos,
     loading,
     permissionDenied,
+    permissionUndetermined,
     refetch,
     albums,
     selectedAlbumId,
@@ -93,7 +121,7 @@ export default function HomeScreen() {
       router,
       setCurrentPhotoIndex,
       removePhotoFromDelete,
-    ]),
+    ])
   );
 
   const isFinished = currentPhotoIndex >= photos.length && photos.length > 0;
@@ -102,6 +130,9 @@ export default function HomeScreen() {
     (direction: "keep" | "delete") => {
       const photo = photos[currentPhotoIndex];
       if (!photo) return;
+
+      // Trigger haptic feedback
+      triggerSwipeFeedback(direction);
 
       if (direction === "delete") {
         addPhotoToDelete(photo.id);
@@ -120,7 +151,8 @@ export default function HomeScreen() {
       addPhotoToDelete,
       addToHistory,
       setCurrentPhotoIndex,
-    ],
+      triggerSwipeFeedback,
+    ]
   );
 
   const handleUndo = useCallback(() => {
@@ -158,36 +190,39 @@ export default function HomeScreen() {
   // Check if any filter is active
   const hasActiveFilter = selectedAlbumId !== null || selectedDateRange !== "all";
 
-  // Get current filter display name
-  const getCurrentFilterName = () => {
+  // Get current filter display name - memoized
+  const getCurrentFilterName = useCallback(() => {
     if (selectedAlbumId) {
-      const album = albums.find(a => a.id === selectedAlbumId);
+      const album = albums.find((a) => a.id === selectedAlbumId);
       return album?.title || "Album";
     }
     if (selectedDateRange !== "all") {
-      const option = DATE_RANGE_OPTIONS.find(o => o.value === selectedDateRange);
+      const option = DATE_RANGE_OPTIONS.find(
+        (o) => o.value === selectedDateRange
+      );
       return option?.label || "Date";
     }
     return "Filter";
-  };
+  }, [selectedAlbumId, selectedDateRange, albums]);
 
-  const handleApplyFilters = () => {
+  const handleApplyFilters = useCallback(() => {
     setShowFilterModal(false);
     setCurrentPhotoIndex(0);
     removePhotoFromDelete("");
     refetch();
-  };
+  }, [setCurrentPhotoIndex, removePhotoFromDelete, refetch]);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     setSelectedAlbumId(null);
     setSelectedDateRange("all");
-  };
+  }, [setSelectedAlbumId, setSelectedDateRange]);
 
   const progress = useMemo(() => {
     if (photos.length === 0) return 0;
     return Math.min(currentPhotoIndex / photos.length, 1);
   }, [currentPhotoIndex, photos.length]);
 
+  // Screen background wrapper
   const ScreenBackground: React.FC<{
     children: React.ReactNode;
     centered?: boolean;
@@ -212,15 +247,22 @@ export default function HomeScreen() {
   if (permissionDenied) {
     return (
       <ScreenBackground centered>
-        <ImageOff size={64} color={Colors.textMuted} />
-        <Text style={styles.emptyTitle}>Photo Access Required</Text>
-        <Text style={styles.emptySubtitle}>
-          SnapSort needs access to your photo library to help you clean up your
-          gallery.
-        </Text>
-        <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
-          <Text style={styles.retryButtonText}>Grant Permission</Text>
-        </TouchableOpacity>
+        <EmptyState
+          type="permission"
+          onRetry={() => refetch()}
+        />
+      </ScreenBackground>
+    );
+  }
+
+  // --- Permission undetermined ---
+  if (permissionUndetermined) {
+    return (
+      <ScreenBackground centered>
+        <EmptyState
+          type="permission"
+          onRetry={() => refetch()}
+        />
       </ScreenBackground>
     );
   }
@@ -229,8 +271,7 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <ScreenBackground centered>
-        <ActivityIndicator size="large" color={Colors.accent} />
-        <Text style={styles.loadingText}>Loading your photos...</Text>
+        <LoadingState message="Loading your photos..." />
       </ScreenBackground>
     );
   }
@@ -239,146 +280,31 @@ export default function HomeScreen() {
   if (photos.length === 0) {
     return (
       <ScreenBackground centered>
-        <ImageOff size={64} color={Colors.textMuted} />
-        <Text style={[styles.emptyTitle, {
-          color: Colors.text,
-        }]}>No Photos Found</Text>
-        <Text style={styles.emptySubtitle}>
-          {hasActiveFilter 
-            ? `No photos match your current filter "${getCurrentFilterName()}". \nTry a different filter!`
-            : "Your gallery appears to be empty. Take some photos and come back!"
-          }
-        </Text>
+        {hasActiveFilter ? (
+          <EmptyState
+            type="no-results"
+            hasActiveFilter={hasActiveFilter}
+            filterName={getCurrentFilterName()}
+            onFilterPress={() => setShowFilterModal(true)}
+          />
+        ) : (
+          <EmptyState
+            type="no-photos"
+          />
+        )}
         
-        {/* Filter button for no photos state */}
-        <TouchableOpacity 
-          style={[styles.noPhotosFilterButton, { borderColor: Colors.border }]}
-          onPress={() => setShowFilterModal(true)}
-        >
-          <FolderOpen size={18} color={hasActiveFilter ? Colors.accent : Colors.textSecondary} />
-          <Text style={[
-            styles.noPhotosFilterText, 
-            { color: hasActiveFilter ? Colors.accent : Colors.textSecondary }
-          ]}>
-            {hasActiveFilter ? `Change "${getCurrentFilterName()}" Filter` : "Change Filter"}
-          </Text>
-        </TouchableOpacity>
-
-      {/* Filter Modal */}
-        <Modal
+        {/* Filter Modal */}
+        <FilterModal
           visible={showFilterModal}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={() => setShowFilterModal(false)}
-        >
-          <TouchableOpacity 
-            style={styles.modalOverlay} 
-            activeOpacity={1} 
-            onPress={() => setShowFilterModal(false)}
-          >
-            <TouchableOpacity 
-              activeOpacity={1} 
-              onPress={(e) => e.stopPropagation()}
-              style={{ width: "100%" }}
-            >
-              <View style={[styles.modalContent, { backgroundColor: Colors.surface }]}>
-                <View style={styles.modalHeader}>
-                  <Text style={[styles.modalTitle, { color: Colors.text }]}>Filter Photos</Text>
-                  <TouchableOpacity onPress={() => setShowFilterModal(false)}>
-                    <X size={24} color={Colors.textSecondary} />
-                  </TouchableOpacity>
-                </View>
-
-                <ScrollView style={styles.modalBody}>
-                  {/* Album Section */}
-                  <Text style={[styles.sectionLabel, { color: Colors.textSecondary }]}>
-                    ALBUM
-                  </Text>
-                  <View style={styles.optionGrid}>
-                    <TouchableOpacity
-                      style={[
-                        styles.optionItem,
-                        { borderColor: selectedAlbumId === null ? Colors.accent : Colors.border },
-                        selectedAlbumId === null && { backgroundColor: Colors.accentLight }
-                      ]}
-                      onPress={() => setSelectedAlbumId(null)}
-                    >
-                      <Text style={[
-                        styles.optionText,
-                        { color: selectedAlbumId === null ? Colors.accent : Colors.text }
-                      ]}>
-                        All Photos
-                      </Text>
-                    </TouchableOpacity>
-                    {albums.map((album) => (
-                      <TouchableOpacity
-                        key={album.id}
-                        style={[
-                          styles.optionItem,
-                          { borderColor: selectedAlbumId === album.id ? Colors.accent : Colors.border },
-                          selectedAlbumId === album.id && { backgroundColor: Colors.accentLight }
-                        ]}
-                        onPress={() => setSelectedAlbumId(album.id)}
-                      >
-                        <Text style={[
-                          styles.optionText,
-                          { color: selectedAlbumId === album.id ? Colors.accent : Colors.text }
-                        ]}>
-                          {album.title} ({album.assetCount})
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-
-                  {/* Date Range Section */}
-                  <Text style={[styles.sectionLabel, { color: Colors.textSecondary }]}>
-                    DATE RANGE
-                  </Text>
-                  <View style={styles.optionGrid}>
-                    {DATE_RANGE_OPTIONS.map((option) => (
-                      <TouchableOpacity
-                        key={option.value}
-                        style={[
-                          styles.optionItem,
-                          { borderColor: selectedDateRange === option.value ? Colors.accent : Colors.border },
-                          selectedDateRange === option.value && { backgroundColor: Colors.accentLight }
-                        ]}
-                        onPress={() => setSelectedDateRange(option.value)}
-                      >
-                        <Text style={[
-                          styles.optionText,
-                          { color: selectedDateRange === option.value ? Colors.accent : Colors.text }
-                        ]}>
-                          {option.label}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </ScrollView>
-
-                {/* Modal Actions */}
-                <View style={[styles.modalActions, { borderTopColor: Colors.border }]}>
-                  <TouchableOpacity
-                    style={[styles.clearButton, { borderColor: Colors.border }]}
-                    onPress={handleClearFilters}
-                  >
-                    <Text style={[styles.clearButtonText, { color: Colors.textSecondary }]}>
-                      Clear All
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.applyButton, { backgroundColor: Colors.accent }]}
-                    onPress={handleApplyFilters}
-                  >
-                    <Text style={[styles.applyButtonText, { color: Colors.white }]}>
-                      Apply Filters
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        </Modal>
+          onClose={() => setShowFilterModal(false)}
+          albums={albums}
+          selectedAlbumId={selectedAlbumId}
+          selectedDateRange={selectedDateRange}
+          onSelectAlbum={setSelectedAlbumId}
+          onSelectDateRange={setSelectedDateRange}
+          onClearFilters={handleClearFilters}
+          onApplyFilters={handleApplyFilters}
+        />
       </ScreenBackground>
     );
   }
@@ -387,36 +313,12 @@ export default function HomeScreen() {
   if (isFinished) {
     return (
       <ScreenBackground centered>
-        <Text style={styles.finishedEmoji}>🎉</Text>
-        <Text style={[styles.finishedTitle, {
-          color: Colors.text,
-        }]}>All Done!</Text>
-        <Text style={styles.finishedSubtitle}>
-          You sorted through {photos.length} photos.{"\n"}
-          {deletedPhotos.length} marked for deletion.
-        </Text>
-
-        {deletedPhotos.length > 0 && (
-          <TouchableOpacity style={styles.reviewButton} onPress={handleReview}>
-            <LinearGradient
-              colors={[Colors.gradientAltStart, Colors.gradientAltEnd]}
-              start={[0, 0]}
-              end={[1, 1]}
-              style={styles.reviewButtonGradient}
-            >
-              <Trash2 size={20} color={Colors.white} />
-              <Text style={styles.reviewButtonText}>
-                Review {deletedPhotos.length} Photos
-              </Text>
-              <ArrowRight size={18} color={Colors.white} />
-            </LinearGradient>
-          </TouchableOpacity>
-        )}
-
-        <TouchableOpacity style={styles.undoAllButton} onPress={handleUndo}>
-          <Undo2 size={18} color={Colors.textSecondary} />
-          <Text style={styles.undoAllText}>Undo Last</Text>
-        </TouchableOpacity>
+        <FinishedState
+          totalPhotos={photos.length}
+          deletedCount={deletedPhotos.length}
+          onReview={deletedPhotos.length > 0 ? handleReview : undefined}
+          onUndo={sortingHistory.length > 0 ? handleUndo : undefined}
+        />
       </ScreenBackground>
     );
   }
@@ -428,18 +330,25 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View>
           <Text style={[styles.title, { color: Colors.text }]}>SnapSort</Text>
-          <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>Swipe to sort your photos</Text>
+          <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>
+            Swipe to sort your photos
+          </Text>
         </View>
         <View style={styles.headerRight}>
           <View style={[styles.counter, { borderColor: Colors.border }]}>
             <Text style={[styles.counterText, { color: Colors.text }]}>
               {currentPhotoIndex + 1}
-              <Text style={[styles.counterTotal, { color: Colors.textSecondary }]}> / {photos.length}</Text>
+              <Text style={[styles.counterTotal, { color: Colors.textSecondary }]}>
+                {" "}
+                / {photos.length}
+              </Text>
             </Text>
           </View>
           <TouchableOpacity
             style={[styles.settingsButton, { borderColor: Colors.border }]}
             onPress={() => router.push("/settings")}
+            accessibilityLabel="Open settings"
+            accessibilityRole="button"
           >
             <Settings size={20} color={Colors.textSecondary} />
           </TouchableOpacity>
@@ -483,13 +392,21 @@ export default function HomeScreen() {
         style={[styles.controls, { paddingBottom: insets.bottom + Spacing.md }]}
       >
         <TouchableOpacity
-          style={[styles.controlButton, styles.undoButton, { borderColor: Colors.border }]}
+          style={[
+            styles.controlButton,
+            styles.undoButton,
+            { borderColor: Colors.border },
+          ]}
           onPress={handleUndo}
           disabled={sortingHistory.length === 0}
+          accessibilityLabel="Undo last action"
+          accessibilityRole="button"
         >
           <Undo2
             size={24}
-            color={sortingHistory.length === 0 ? Colors.textMuted : Colors.text}
+            color={
+              sortingHistory.length === 0 ? Colors.textMuted : Colors.text
+            }
           />
         </TouchableOpacity>
 
@@ -521,6 +438,8 @@ export default function HomeScreen() {
             }
           }}
           disabled={deletedPhotos.length === 0}
+          accessibilityLabel={`Review ${deletedPhotos.length} photos to delete`}
+          accessibilityRole="button"
         >
           <LinearGradient
             colors={[Colors.gradientAltStart, Colors.gradientAltEnd]}
@@ -535,120 +454,23 @@ export default function HomeScreen() {
       </View>
 
       {/* Filter Modal */}
-      <Modal
+      <FilterModal
         visible={showFilterModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowFilterModal(false)}
-      >
-        <TouchableOpacity 
-          style={styles.modalOverlay} 
-          activeOpacity={1} 
-          onPress={() => setShowFilterModal(false)}
-        >
-          <TouchableOpacity 
-            activeOpacity={1} 
-            onPress={(e) => e.stopPropagation()}
-            style={{ width: "100%" }}
-          >
-            <View style={[styles.modalContent, { backgroundColor: Colors.surface }]}>
-              <View style={styles.modalHeader}>
-                <Text style={[styles.modalTitle, { color: Colors.text }]}>Filter Photos</Text>
-                <TouchableOpacity onPress={() => setShowFilterModal(false)}>
-                  <X size={24} color={Colors.textSecondary} />
-                </TouchableOpacity>
-              </View>
+        onClose={() => setShowFilterModal(false)}
+        albums={albums}
+        selectedAlbumId={selectedAlbumId}
+        selectedDateRange={selectedDateRange}
+        onSelectAlbum={setSelectedAlbumId}
+        onSelectDateRange={setSelectedDateRange}
+        onClearFilters={handleClearFilters}
+        onApplyFilters={handleApplyFilters}
+      />
 
-              <ScrollView style={styles.modalBody}>
-                {/* Album Section */}
-                <Text style={[styles.sectionLabel, { color: Colors.textSecondary }]}>
-                  ALBUM
-                </Text>
-                <View style={styles.optionGrid}>
-                  <TouchableOpacity
-                    style={[
-                      styles.optionItem,
-                      { borderColor: selectedAlbumId === null ? Colors.accent : Colors.border },
-                      selectedAlbumId === null && { backgroundColor: Colors.accentLight }
-                    ]}
-                    onPress={() => setSelectedAlbumId(null)}
-                  >
-                    <Text style={[
-                      styles.optionText,
-                      { color: selectedAlbumId === null ? Colors.accent : Colors.text }
-                    ]}>
-                      All Photos
-                    </Text>
-                  </TouchableOpacity>
-                  {albums.map((album) => (
-                    <TouchableOpacity
-                      key={album.id}
-                      style={[
-                        styles.optionItem,
-                        { borderColor: selectedAlbumId === album.id ? Colors.accent : Colors.border },
-                        selectedAlbumId === album.id && { backgroundColor: Colors.accentLight }
-                      ]}
-                      onPress={() => setSelectedAlbumId(album.id)}
-                    >
-                      <Text style={[
-                        styles.optionText,
-                        { color: selectedAlbumId === album.id ? Colors.accent : Colors.text }
-                      ]}>
-                        {album.title} ({album.assetCount})
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {/* Date Range Section */}
-                <Text style={[styles.sectionLabel, { color: Colors.textSecondary }]}>
-                  DATE RANGE
-                </Text>
-                <View style={styles.optionGrid}>
-                  {DATE_RANGE_OPTIONS.map((option) => (
-                    <TouchableOpacity
-                      key={option.value}
-                      style={[
-                        styles.optionItem,
-                        { borderColor: selectedDateRange === option.value ? Colors.accent : Colors.border },
-                        selectedDateRange === option.value && { backgroundColor: Colors.accentLight }
-                      ]}
-                      onPress={() => setSelectedDateRange(option.value)}
-                    >
-                      <Text style={[
-                        styles.optionText,
-                        { color: selectedDateRange === option.value ? Colors.accent : Colors.text }
-                      ]}>
-                        {option.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </ScrollView>
-
-              {/* Modal Actions */}
-              <View style={[styles.modalActions, { borderTopColor: Colors.border }]}>
-                <TouchableOpacity
-                  style={[styles.clearButton, { borderColor: Colors.border }]}
-                  onPress={handleClearFilters}
-                >
-                  <Text style={[styles.clearButtonText, { color: Colors.textSecondary }]}>
-                    Clear All
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.applyButton, { backgroundColor: Colors.accent }]}
-                  onPress={handleApplyFilters}
-                >
-                  <Text style={[styles.applyButtonText, { color: Colors.white }]}>
-                    Apply Filters
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
+      {/* Tutorial Modal */}
+      <SwipeTutorial
+        visible={showTutorial}
+        onComplete={handleTutorialComplete}
+      />
     </ScreenBackground>
   );
 }
@@ -710,19 +532,6 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
     borderWidth: 1,
     borderColor: Colors.border,
-  },
-  filterButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-  },
-  filterButtonText: {
-    fontSize: 13,
-    fontWeight: "600",
   },
   progressContainer: {
     paddingHorizontal: Spacing.lg,
@@ -799,90 +608,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: Colors.white,
   },
-  // Empty / Loading states
-  loadingText: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    marginTop: Spacing.lg,
-  },
-  emptyTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginTop: Spacing.lg,
-    textAlign: "center",
-  },
-  emptySubtitle: {
-    fontSize: 15,
-    color: Colors.textSecondary,
-    marginTop: Spacing.sm,
-    textAlign: "center",
-    lineHeight: 22,
-  },
-  noPhotosFilterButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: Spacing.xl,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-  },
-  noPhotosFilterText: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  retryButton: {
-    marginTop: Spacing.xl,
-    backgroundColor: Colors.accent,
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.full,
-  },
-  retryButtonText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  // Finished state
-  finishedEmoji: {
-    fontSize: 64,
-  },
-  finishedTitle: {
-    fontSize: 28,
-    fontWeight: "800",
-    marginTop: Spacing.md,
-  },
-  finishedSubtitle: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    marginTop: Spacing.sm,
-    textAlign: "center",
-    lineHeight: 24,
-  },
-  reviewButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginTop: Spacing.xl,
-    backgroundColor: "transparent",
-    paddingHorizontal: 0,
-    paddingVertical: 0,
-    borderRadius: BorderRadius.full,
-  },
-  reviewButtonGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.full,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
-    shadowRadius: 12,
-    elevation: 6,
-  },
   deletedBadgeGradient: {
     flexDirection: "row",
     alignItems: "center",
@@ -891,100 +616,5 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: BorderRadius.full,
   },
-  reviewButtonText: {
-    color: Colors.white,
-    fontSize: 17,
-    fontWeight: "700",
-  },
-  undoAllButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: Spacing.lg,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-  },
-  undoAllText: {
-    color: Colors.textSecondary,
-    fontSize: 15,
-    fontWeight: "500",
-  },
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: Colors.overlay,
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    paddingBottom: Spacing.lg,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  modalBody: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
-  },
-  sectionLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 1,
-    marginTop: Spacing.md,
-    marginBottom: Spacing.sm,
-  },
-  optionGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: Spacing.sm,
-  },
-  optionItem: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-  },
-  optionText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  modalActions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
-    marginTop: Spacing.md,
-    borderTopWidth: 1,
-  },
-  clearButton: {
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-  },
-  clearButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  applyButton: {
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.full,
-  },
-  applyButtonText: {
-    fontSize: 15,
-    fontWeight: "700",
-  },
 });
+
