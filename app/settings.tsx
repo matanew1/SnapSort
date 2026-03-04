@@ -3,34 +3,28 @@ import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useMediaLibrary } from "@/hooks";
 import { useAppStore } from "@/store";
 import Constants from "expo-constants";
-import { LinearGradient } from "expo-linear-gradient";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import {
   ArrowLeft,
   Camera,
   ChevronRight,
-  ExternalLink,
   Github,
-  Info,
   Moon,
-  RefreshCw,
   RotateCcw,
   Shield,
-  Sparkles,
-  Sun,
-  Trash2,
-  Zap,
+  Sun
 } from "lucide-react-native";
 import React from "react";
 import {
   Alert,
   Linking,
+  ScrollView,
   StyleSheet,
   Switch,
   Text,
   TouchableOpacity,
   View,
-  ScrollView,
 } from "react-native";
 
 interface SettingsRowProps {
@@ -94,9 +88,7 @@ function SettingsRow({
         )}
       </View>
       {right && <View style={styles.rowRight}>{right}</View>}
-      {onPress && !right && (
-        <ChevronRight size={16} color={Colors.textMuted} />
-      )}
+      {onPress && !right && <ChevronRight size={16} color={Colors.textMuted} />}
     </TouchableOpacity>
   );
 }
@@ -106,13 +98,14 @@ export default function SettingsScreen() {
   const isDark = useAppStore((s) => s.isDarkMode);
   const toggleDark = useAppStore((s) => s.toggleDarkMode);
   const Colors = getColors(isDark);
-  const { permissionDenied, permissionUndetermined, refetch } = useMediaLibrary();
+  const { permissionDenied, permissionUndetermined, refetch } =
+    useMediaLibrary();
 
   const permissionStatus = permissionUndetermined
     ? "Unknown"
     : permissionDenied
-    ? "Denied"
-    : "Granted";
+      ? "Denied"
+      : "Granted";
 
   const handleReset = () => {
     Alert.alert(
@@ -128,7 +121,7 @@ export default function SettingsScreen() {
             reset();
           },
         },
-      ]
+      ],
     );
   };
 
@@ -139,13 +132,18 @@ export default function SettingsScreen() {
         <TouchableOpacity
           style={[
             styles.backButton,
-            { backgroundColor: Colors.surfaceLight, borderColor: Colors.border },
+            {
+              backgroundColor: Colors.surfaceLight,
+              borderColor: Colors.border,
+            },
           ]}
           onPress={() => router.back()}
         >
           <ArrowLeft size={20} color={Colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: Colors.text }]}>Settings</Text>
+        <Text style={[styles.headerTitle, { color: Colors.text }]}>
+          Settings
+        </Text>
         <View style={{ width: 42 }} />
       </View>
 
@@ -155,16 +153,15 @@ export default function SettingsScreen() {
       >
         {/* App identity card */}
         <View style={styles.appCard}>
-          <LinearGradient
-            colors={[Colors.accent, Colors.accentSecondary ?? Colors.accent]}
-            start={[0, 0]}
-            end={[1, 1]}
-            style={styles.appIconGradient}
-          >
-            <Zap size={28} color="#fff" fill="#fff" />
-          </LinearGradient>
+          <Image
+            source={require("@/assets/ios/AppIcon~ios-marketing.png")}
+            style={styles.appNameIcon}
+            contentFit="contain"
+          />
           <View>
-            <Text style={[styles.appName, { color: Colors.text }]}>SnapSort</Text>
+            <Text style={[styles.appName, { color: Colors.text }]}>
+              SnapSort
+            </Text>
             <Text style={[styles.appVersion, { color: Colors.textSecondary }]}>
               Version {Constants.expoConfig?.version ?? "1.0.0"}
             </Text>
@@ -178,7 +175,13 @@ export default function SettingsScreen() {
           </Text>
           <View style={[styles.group, { borderColor: Colors.border }]}>
             <SettingsRow
-              icon={isDark ? <Moon size={16} color="#fff" /> : <Sun size={16} color="#fff" />}
+              icon={
+                isDark ? (
+                  <Moon size={16} color="#fff" />
+                ) : (
+                  <Sun size={16} color="#fff" />
+                )
+              }
               iconBg={isDark ? Colors.accent : "#F59E0B"}
               label="Dark Mode"
               sublabel={isDark ? "Currently dark" : "Currently light"}
@@ -215,7 +218,9 @@ export default function SettingsScreen() {
                       backgroundColor: permissionDenied
                         ? Colors.deleteLight
                         : Colors.accentLight,
-                      borderColor: permissionDenied ? Colors.delete : Colors.accent,
+                      borderColor: permissionDenied
+                        ? Colors.delete
+                        : Colors.accent,
                     },
                   ]}
                   onPress={() => {
@@ -226,7 +231,9 @@ export default function SettingsScreen() {
                   <Text
                     style={[
                       styles.smallButtonText,
-                      { color: permissionDenied ? Colors.delete : Colors.accent },
+                      {
+                        color: permissionDenied ? Colors.delete : Colors.accent,
+                      },
                     ]}
                   >
                     {permissionDenied ? "Open Settings" : "Refresh"}
@@ -269,10 +276,14 @@ export default function SettingsScreen() {
               iconBg="#24292E"
               label="View on GitHub"
               sublabel="Source code and contributions"
-              onPress={() => Linking.openURL("https://github.com/matanew1/SnapSort")}
+              onPress={() =>
+                Linking.openURL("https://github.com/matanew1/SnapSort")
+              }
               isFirst
             />
-            <View style={[styles.rowDivider, { backgroundColor: Colors.border }]} />
+            <View
+              style={[styles.rowDivider, { backgroundColor: Colors.border }]}
+            />
             <SettingsRow
               icon={<Shield size={16} color="#fff" />}
               iconBg={Colors.info ?? Colors.secondary ?? Colors.accent}
@@ -330,17 +341,11 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
     marginTop: Spacing.sm,
   },
-  appIconGradient: {
+  appNameIcon: {
     width: 60,
     height: 60,
     borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#6C63FF",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.5,
-    shadowRadius: 16,
-    elevation: 8,
+    backgroundColor: "#000",
   },
   appName: {
     fontSize: 22,

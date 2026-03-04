@@ -9,7 +9,7 @@ const config: ExpoConfig = {
   slug: "SnapSort",
   version: packageJson.version,
   orientation: "portrait",
-  icon: "./assets/images/icon.png",
+  icon: "./assets/ios/AppIcon~ios-marketing.png",
   scheme: "snapsort",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
@@ -18,17 +18,20 @@ const config: ExpoConfig = {
   },
   android: {
     adaptiveIcon: {
-      backgroundColor: "#E6F4FE",
-      foregroundImage: "./assets/images/android-icon-foreground.png",
-      backgroundImage: "./assets/images/android-icon-background.png",
-      monochromeImage: "./assets/images/android-icon-monochrome.png",
+      backgroundColor: "#000000",
+      foregroundImage:
+        "./assets/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+      backgroundImage:
+        "./assets/android/res/mipmap-xxxhdpi/ic_launcher_background.png",
+      monochromeImage:
+        "./assets/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png",
     },
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
   },
   web: {
     output: "static",
-    favicon: "./assets/images/favicon.png",
+    favicon: "./assets/web/favicon.ico",
   },
   plugins: [
     [
@@ -36,8 +39,7 @@ const config: ExpoConfig = {
       {
         photosPermission:
           "Allow SnapSort to access your photos to help you clean up your gallery.",
-        savePhotosPermission:
-          "Allow SnapSort to save/delete photos.",
+        savePhotosPermission: "Allow SnapSort to save/delete photos.",
         isAccessMediaLocationEnabled: true,
       },
     ],
@@ -45,10 +47,10 @@ const config: ExpoConfig = {
     [
       "expo-splash-screen",
       {
-        image: "./assets/images/splash-icon.png",
+        image: "./assets/ios/AppIcon~ios-marketing.png",
         imageWidth: 200,
         resizeMode: "contain",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#000000",
         dark: {
           backgroundColor: "#000000",
         },
@@ -62,4 +64,3 @@ const config: ExpoConfig = {
 };
 
 export default config;
-

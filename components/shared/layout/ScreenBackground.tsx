@@ -1,13 +1,12 @@
 import { getColors } from "@/constants/theme";
 import { useAppStore } from "@/store";
-import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface ScreenBackgroundProps {
   children: React.ReactNode;
-  edges?: Array<"top" | "bottom" | "left" | "right">;
+  edges?: ("top" | "bottom" | "left" | "right")[];
   withGradient?: boolean;
 }
 

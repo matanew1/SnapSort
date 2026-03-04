@@ -1,44 +1,50 @@
 import {
-  AIBadge,
-  AISimilarPhotos,
-  AISuggestions,
-  EmptyState,
-  FilterModal,
-  FinishedState,
-  LoadingState,
-  ScreenBackground,
-  SwipeCard,
-  SwipeTutorial,
+    AIBadge,
+    AISimilarPhotos,
+    AISuggestions,
+    EmptyState,
+    FilterModal,
+    FinishedState,
+    LoadingState,
+    ScreenBackground,
+    SwipeCard,
+    SwipeTutorial,
 } from "@/components";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import {
-  useAIAnalysis,
-  useAppPreferences,
-  useHaptics,
-  useMediaLibrary,
+    useAIAnalysis,
+    useAppPreferences,
+    useHaptics,
+    useMediaLibrary,
 } from "@/hooks";
 import { useAppStore } from "@/store";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import {
-  Heart,
-  RotateCcw,
-  Settings,
-  SlidersHorizontal,
-  Trash2,
-  Zap,
+    Heart,
+    RotateCcw,
+    Settings,
+    SlidersHorizontal,
+    Trash2
 } from "lucide-react-native";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import {
-  Animated,
-  Dimensions,
-  Easing,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Animated,
+    Dimensions,
+    Easing,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -118,12 +124,12 @@ export default function HomeScreen() {
 
   const deletedPhotos = useMemo(
     () => photos.filter((p) => selectedPhotosForDelete.includes(p.id)),
-    [photos, selectedPhotosForDelete]
+    [photos, selectedPhotosForDelete],
   );
 
   const currentPhotoAnalysis = useMemo(
     () => aiAnalysis.analyses[currentPhotoIndex],
-    [aiAnalysis.analyses, currentPhotoIndex]
+    [aiAnalysis.analyses, currentPhotoIndex],
   );
 
   const handleApplySuggestion = useCallback(
@@ -133,7 +139,7 @@ export default function HomeScreen() {
       });
       setDismissedSuggestions(true);
     },
-    [addPhotoToDelete]
+    [addPhotoToDelete],
   );
 
   const handleDeleteSimilarPhotos = useCallback(
@@ -145,7 +151,7 @@ export default function HomeScreen() {
       });
       setShowAISimilarPhotos(false);
     },
-    [addPhotoToDelete, selectedPhotosForDelete]
+    [addPhotoToDelete, selectedPhotosForDelete],
   );
 
   // Animate progress bar
@@ -163,8 +169,17 @@ export default function HomeScreen() {
   useEffect(() => {
     if (deletedPhotos.length > 0) {
       Animated.sequence([
-        Animated.timing(deleteButtonAnim, { toValue: 1.15, duration: 150, useNativeDriver: true }),
-        Animated.spring(deleteButtonAnim, { toValue: 1, tension: 80, friction: 6, useNativeDriver: true }),
+        Animated.timing(deleteButtonAnim, {
+          toValue: 1.15,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.spring(deleteButtonAnim, {
+          toValue: 1,
+          tension: 80,
+          friction: 6,
+          useNativeDriver: true,
+        }),
       ]).start();
     }
   }, [deletedPhotos.length]);
@@ -178,7 +193,13 @@ export default function HomeScreen() {
         refetch(deletedCount);
         router.setParams({ deletedCount: undefined });
       }
-    }, [params.deletedCount, refetch, router, setCurrentPhotoIndex, removePhotoFromDelete])
+    }, [
+      params.deletedCount,
+      refetch,
+      router,
+      setCurrentPhotoIndex,
+      removePhotoFromDelete,
+    ]),
   );
 
   const isFinished = currentPhotoIndex >= photos.length && photos.length > 0;
@@ -189,10 +210,21 @@ export default function HomeScreen() {
       if (!photo) return;
       triggerSwipeFeedback(direction);
       if (direction === "delete") addPhotoToDelete(photo.id);
-      addToHistory({ index: currentPhotoIndex, action: direction, timestamp: Date.now() });
+      addToHistory({
+        index: currentPhotoIndex,
+        action: direction,
+        timestamp: Date.now(),
+      });
       setCurrentPhotoIndex(currentPhotoIndex + 1);
     },
-    [currentPhotoIndex, photos, addPhotoToDelete, addToHistory, setCurrentPhotoIndex, triggerSwipeFeedback]
+    [
+      currentPhotoIndex,
+      photos,
+      addPhotoToDelete,
+      addToHistory,
+      setCurrentPhotoIndex,
+      triggerSwipeFeedback,
+    ],
   );
 
   const handleUndo = useCallback(() => {
@@ -204,7 +236,13 @@ export default function HomeScreen() {
       const photo = photos[lastAction.index];
       if (photo) removePhotoFromDelete(photo.id);
     }
-  }, [sortingHistory.length, undoLastAction, setCurrentPhotoIndex, removePhotoFromDelete, photos]);
+  }, [
+    sortingHistory.length,
+    undoLastAction,
+    setCurrentPhotoIndex,
+    removePhotoFromDelete,
+    photos,
+  ]);
 
   const handleReview = useCallback(() => {
     router.push({
@@ -216,7 +254,8 @@ export default function HomeScreen() {
     });
   }, [deletedPhotos, router]);
 
-  const hasActiveFilter = selectedAlbumId !== null || selectedDateRange !== "all";
+  const hasActiveFilter =
+    selectedAlbumId !== null || selectedDateRange !== "all";
 
   const getCurrentFilterName = useCallback(() => {
     if (selectedAlbumId) {
@@ -224,7 +263,9 @@ export default function HomeScreen() {
       return album?.title || "Album";
     }
     if (selectedDateRange !== "all") {
-      const option = DATE_RANGE_OPTIONS.find((o) => o.value === selectedDateRange);
+      const option = DATE_RANGE_OPTIONS.find(
+        (o) => o.value === selectedDateRange,
+      );
       return option?.label || "Date";
     }
     return "Filter";
@@ -302,12 +343,11 @@ export default function HomeScreen() {
       >
         {/* Logo & Title */}
         <View style={styles.headerLeft}>
-          <LinearGradient
-            colors={[Colors.accent, Colors.accentSecondary ?? Colors.accent]}
-            style={styles.logoGradient}
-          >
-            <Zap size={18} color={Colors.white} fill={Colors.white} />
-          </LinearGradient>
+          <Image
+            source={require("@/assets/ios/AppIcon~ios-marketing.png")}
+            style={styles.logoImage}
+            contentFit="contain"
+          />
           <View>
             <Text style={[styles.title, { color: Colors.text }]}>SnapSort</Text>
             <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>
@@ -325,7 +365,10 @@ export default function HomeScreen() {
             <View
               style={[
                 styles.counter,
-                { backgroundColor: Colors.surfaceLight, borderColor: Colors.border },
+                {
+                  backgroundColor: Colors.surfaceLight,
+                  borderColor: Colors.border,
+                },
               ]}
             >
               <Text style={[styles.counterText, { color: Colors.accent }]}>
@@ -360,7 +403,10 @@ export default function HomeScreen() {
           <TouchableOpacity
             style={[
               styles.iconButton,
-              { backgroundColor: Colors.surfaceLight, borderColor: Colors.border },
+              {
+                backgroundColor: Colors.surfaceLight,
+                borderColor: Colors.border,
+              },
             ]}
             onPress={() => router.push("/settings")}
           >
@@ -378,9 +424,14 @@ export default function HomeScreen() {
               { backgroundColor: Colors.surfaceLight },
             ]}
           >
-            <Animated.View style={[styles.progressFill, { width: progressWidth }]}>
+            <Animated.View
+              style={[styles.progressFill, { width: progressWidth }]}
+            >
               <LinearGradient
-                colors={[Colors.accent, Colors.accentSecondary ?? Colors.accent]}
+                colors={[
+                  Colors.accent,
+                  Colors.accentSecondary ?? Colors.accent,
+                ]}
                 start={[0, 0]}
                 end={[1, 0]}
                 style={StyleSheet.absoluteFill}
@@ -401,10 +452,22 @@ export default function HomeScreen() {
           <>
             {/* Background cards for depth effect */}
             {photos[currentPhotoIndex + 2] && (
-              <View style={[styles.bgCard, styles.bgCard3, { backgroundColor: Colors.surface }]} />
+              <View
+                style={[
+                  styles.bgCard,
+                  styles.bgCard3,
+                  { backgroundColor: Colors.surface },
+                ]}
+              />
             )}
             {photos[currentPhotoIndex + 1] && (
-              <View style={[styles.bgCard, styles.bgCard2, { backgroundColor: Colors.surfaceLight }]} />
+              <View
+                style={[
+                  styles.bgCard,
+                  styles.bgCard2,
+                  { backgroundColor: Colors.surfaceLight },
+                ]}
+              />
             )}
             {photos[currentPhotoIndex] && (
               <View style={styles.cardContainer}>
@@ -433,13 +496,15 @@ export default function HomeScreen() {
       </View>
 
       {/* AI Suggestions */}
-      {!mainContent && !dismissedSuggestions && aiAnalysis.suggestions.length > 0 && (
-        <AISuggestions
-          suggestions={aiAnalysis.suggestions}
-          onApplySuggestion={handleApplySuggestion}
-          onDismiss={() => setDismissedSuggestions(true)}
-        />
-      )}
+      {!mainContent &&
+        !dismissedSuggestions &&
+        aiAnalysis.suggestions.length > 0 && (
+          <AISuggestions
+            suggestions={aiAnalysis.suggestions}
+            onApplySuggestion={handleApplySuggestion}
+            onDismiss={() => setDismissedSuggestions(true)}
+          />
+        )}
 
       {/* AI Similar Photos */}
       {!mainContent && aiAnalysis.similarityGroups.length > 0 && (
@@ -452,7 +517,12 @@ export default function HomeScreen() {
 
       {/* Bottom Controls */}
       {!mainContent && (
-        <View style={[styles.controls, { paddingBottom: insets.bottom > 0 ? 0 : Spacing.md }]}>
+        <View
+          style={[
+            styles.controls,
+            { paddingBottom: insets.bottom > 0 ? 0 : Spacing.md },
+          ]}
+        >
           {/* Undo button */}
           <TouchableOpacity
             style={[
@@ -474,11 +544,20 @@ export default function HomeScreen() {
           <View style={styles.swipeHints}>
             <View style={styles.hintItem}>
               <Trash2 size={13} color={Colors.delete} />
-              <Text style={[styles.hintText, { color: Colors.delete }]}>DELETE</Text>
+              <Text style={[styles.hintText, { color: Colors.delete }]}>
+                DELETE
+              </Text>
             </View>
-            <View style={[styles.hintDivider, { backgroundColor: Colors.textMuted }]} />
+            <View
+              style={[
+                styles.hintDivider,
+                { backgroundColor: Colors.textMuted },
+              ]}
+            />
             <View style={styles.hintItem}>
-              <Text style={[styles.hintText, { color: Colors.keep }]}>KEEP</Text>
+              <Text style={[styles.hintText, { color: Colors.keep }]}>
+                KEEP
+              </Text>
               <Heart size={13} color={Colors.keep} fill={Colors.keep} />
             </View>
           </View>
@@ -510,7 +589,9 @@ export default function HomeScreen() {
                 style={styles.deleteBadgeGradient}
               >
                 <Trash2 size={16} color={Colors.white} />
-                <Text style={styles.deleteBadgeCount}>{deletedPhotos.length}</Text>
+                <Text style={styles.deleteBadgeCount}>
+                  {deletedPhotos.length}
+                </Text>
               </LinearGradient>
             </TouchableOpacity>
           </Animated.View>
@@ -531,7 +612,10 @@ export default function HomeScreen() {
       />
 
       {/* Tutorial */}
-      <SwipeTutorial visible={showTutorial} onComplete={handleTutorialComplete} />
+      <SwipeTutorial
+        visible={showTutorial}
+        onComplete={handleTutorialComplete}
+      />
     </ScreenBackground>
   );
 }
@@ -550,17 +634,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: Spacing.sm,
   },
-  logoGradient: {
+  logoImage: {
     width: 38,
     height: 38,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#6C63FF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 6,
+    borderRadius: 10,
+    backgroundColor: "#000",
   },
   title: {
     fontSize: 22,
