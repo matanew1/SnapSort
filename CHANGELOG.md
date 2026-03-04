@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/matanew1/SnapSort/compare/v1.2.0...v1.3.0) (2026-03-04)
+
+
+### Features
+
+* Add empty state to the review screen, update the project README with detailed information, and bump the app version. ([40a5dbc](https://github.com/matanew1/SnapSort/commit/40a5dbcce996327f2edfb618c31159f5b0a2e3eb))
+
 ## [1.2.0](https://github.com/matanew1/SnapSort/compare/v1.1.5...v1.2.0) (2026-03-04)
 
 
