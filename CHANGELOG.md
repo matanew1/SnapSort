@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/matanew1/SnapSort/compare/v1.6.0...v1.7.0) (2026-03-04)
+
+
+### Features
+
+* Implement automated version bumping for `app.json` and `package.json`, refine splash screen behavior, and enhance the filter modal UI. ([92ba800](https://github.com/matanew1/SnapSort/commit/92ba80043e29aa8c4ef79614cef066c7dbd93b18))
+
 ## [1.6.0](https://github.com/matanew1/SnapSort/compare/v1.5.0...v1.6.0) (2026-03-04)
 
 
