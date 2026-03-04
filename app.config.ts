@@ -1,0 +1,65 @@
+import "dotenv/config";
+
+import { ExpoConfig } from "expo/config";
+
+const packageJson = require("./package.json");
+
+const config: ExpoConfig = {
+  name: "SnapSort",
+  slug: "SnapSort",
+  version: packageJson.version,
+  orientation: "portrait",
+  icon: "./assets/images/icon.png",
+  scheme: "snapsort",
+  userInterfaceStyle: "automatic",
+  newArchEnabled: true,
+  ios: {
+    supportsTablet: true,
+  },
+  android: {
+    adaptiveIcon: {
+      backgroundColor: "#E6F4FE",
+      foregroundImage: "./assets/images/android-icon-foreground.png",
+      backgroundImage: "./assets/images/android-icon-background.png",
+      monochromeImage: "./assets/images/android-icon-monochrome.png",
+    },
+    edgeToEdgeEnabled: true,
+    predictiveBackGestureEnabled: false,
+  },
+  web: {
+    output: "static",
+    favicon: "./assets/images/favicon.png",
+  },
+  plugins: [
+    [
+      "expo-media-library",
+      {
+        photosPermission:
+          "Allow SnapSort to access your photos to help you clean up your gallery.",
+        savePhotosPermission:
+          "Allow SnapSort to save/delete photos.",
+        isAccessMediaLocationEnabled: true,
+      },
+    ],
+    "expo-router",
+    [
+      "expo-splash-screen",
+      {
+        image: "./assets/images/splash-icon.png",
+        imageWidth: 200,
+        resizeMode: "contain",
+        backgroundColor: "#ffffff",
+        dark: {
+          backgroundColor: "#000000",
+        },
+      },
+    ],
+  ],
+  experiments: {
+    typedRoutes: true,
+    reactCompiler: true,
+  },
+};
+
+export default config;
+
