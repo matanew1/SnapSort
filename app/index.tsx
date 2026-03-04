@@ -70,9 +70,6 @@ export default function HomeScreen() {
     removePhotoFromDelete,
   } = useAppStore();
 
-  // Local state for card key animation
-  const [cardKey, setCardKey] = useState(0);
-
   // Derived state: deleted photos as PhotoAsset objects
   const deletedPhotos = useMemo(() => {
     return photos.filter((p) => selectedPhotosForDelete.includes(p.id));
@@ -86,7 +83,6 @@ export default function HomeScreen() {
         // Reset state and refetch with deletion count
         setCurrentPhotoIndex(0);
         removePhotoFromDelete(""); // Clear all deletions by resetting
-        setCardKey((prev) => prev + 1);
         refetch(deletedCount);
         // Clear the param
         router.setParams({ deletedCount: undefined });
@@ -117,7 +113,6 @@ export default function HomeScreen() {
         timestamp: Date.now(),
       });
       setCurrentPhotoIndex(currentPhotoIndex + 1);
-      setCardKey((prev) => prev + 1);
     },
     [
       currentPhotoIndex,
@@ -135,7 +130,6 @@ export default function HomeScreen() {
     if (!lastAction) return;
 
     setCurrentPhotoIndex(lastAction.index);
-    setCardKey((prev) => prev + 1);
 
     if (lastAction.action === "delete") {
       const photo = photos[lastAction.index];
@@ -270,14 +264,293 @@ export default function HomeScreen() {
           </Text>
         </TouchableOpacity>
 
-        {/* Filter Modal */}
+      {/* Filter Modal */}
         <Modal
           visible={showFilterModal}
           animationType="slide"
           transparent={true}
           onRequestClose={() => setShowFilterModal(false)}
         >
-          <View style={styles.modalOverlay}>
+          <TouchableOpacity 
+            style={styles.modalOverlay} 
+            activeOpacity={1} 
+            onPress={() => setShowFilterModal(false)}
+          >
+            <TouchableOpacity 
+              activeOpacity={1} 
+              onPress={(e) => e.stopPropagation()}
+              style={{ width: "100%" }}
+            >
+              <View style={[styles.modalContent, { backgroundColor: Colors.surface }]}>
+                <View style={styles.modalHeader}>
+                  <Text style={[styles.modalTitle, { color: Colors.text }]}>Filter Photos</Text>
+                  <TouchableOpacity onPress={() => setShowFilterModal(false)}>
+                    <X size={24} color={Colors.textSecondary} />
+                  </TouchableOpacity>
+                </View>
+
+                <ScrollView style={styles.modalBody}>
+                  {/* Album Section */}
+                  <Text style={[styles.sectionLabel, { color: Colors.textSecondary }]}>
+                    ALBUM
+                  </Text>
+                  <View style={styles.optionGrid}>
+                    <TouchableOpacity
+                      style={[
+                        styles.optionItem,
+                        { borderColor: selectedAlbumId === null ? Colors.accent : Colors.border },
+                        selectedAlbumId === null && { backgroundColor: Colors.accentLight }
+                      ]}
+                      onPress={() => setSelectedAlbumId(null)}
+                    >
+                      <Text style={[
+                        styles.optionText,
+                        { color: selectedAlbumId === null ? Colors.accent : Colors.text }
+                      ]}>
+                        All Photos
+                      </Text>
+                    </TouchableOpacity>
+                    {albums.map((album) => (
+                      <TouchableOpacity
+                        key={album.id}
+                        style={[
+                          styles.optionItem,
+                          { borderColor: selectedAlbumId === album.id ? Colors.accent : Colors.border },
+                          selectedAlbumId === album.id && { backgroundColor: Colors.accentLight }
+                        ]}
+                        onPress={() => setSelectedAlbumId(album.id)}
+                      >
+                        <Text style={[
+                          styles.optionText,
+                          { color: selectedAlbumId === album.id ? Colors.accent : Colors.text }
+                        ]}>
+                          {album.title} ({album.assetCount})
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  {/* Date Range Section */}
+                  <Text style={[styles.sectionLabel, { color: Colors.textSecondary }]}>
+                    DATE RANGE
+                  </Text>
+                  <View style={styles.optionGrid}>
+                    {DATE_RANGE_OPTIONS.map((option) => (
+                      <TouchableOpacity
+                        key={option.value}
+                        style={[
+                          styles.optionItem,
+                          { borderColor: selectedDateRange === option.value ? Colors.accent : Colors.border },
+                          selectedDateRange === option.value && { backgroundColor: Colors.accentLight }
+                        ]}
+                        onPress={() => setSelectedDateRange(option.value)}
+                      >
+                        <Text style={[
+                          styles.optionText,
+                          { color: selectedDateRange === option.value ? Colors.accent : Colors.text }
+                        ]}>
+                          {option.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </ScrollView>
+
+                {/* Modal Actions */}
+                <View style={[styles.modalActions, { borderTopColor: Colors.border }]}>
+                  <TouchableOpacity
+                    style={[styles.clearButton, { borderColor: Colors.border }]}
+                    onPress={handleClearFilters}
+                  >
+                    <Text style={[styles.clearButtonText, { color: Colors.textSecondary }]}>
+                      Clear All
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.applyButton, { backgroundColor: Colors.accent }]}
+                    onPress={handleApplyFilters}
+                  >
+                    <Text style={[styles.applyButtonText, { color: Colors.white }]}>
+                      Apply Filters
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </Modal>
+      </ScreenBackground>
+    );
+  }
+
+  // --- Finished swiping ---
+  if (isFinished) {
+    return (
+      <ScreenBackground centered>
+        <Text style={styles.finishedEmoji}>🎉</Text>
+        <Text style={[styles.finishedTitle, {
+          color: Colors.text,
+        }]}>All Done!</Text>
+        <Text style={styles.finishedSubtitle}>
+          You sorted through {photos.length} photos.{"\n"}
+          {deletedPhotos.length} marked for deletion.
+        </Text>
+
+        {deletedPhotos.length > 0 && (
+          <TouchableOpacity style={styles.reviewButton} onPress={handleReview}>
+            <LinearGradient
+              colors={[Colors.gradientAltStart, Colors.gradientAltEnd]}
+              start={[0, 0]}
+              end={[1, 1]}
+              style={styles.reviewButtonGradient}
+            >
+              <Trash2 size={20} color={Colors.white} />
+              <Text style={styles.reviewButtonText}>
+                Review {deletedPhotos.length} Photos
+              </Text>
+              <ArrowRight size={18} color={Colors.white} />
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
+
+        <TouchableOpacity style={styles.undoAllButton} onPress={handleUndo}>
+          <Undo2 size={18} color={Colors.textSecondary} />
+          <Text style={styles.undoAllText}>Undo Last</Text>
+        </TouchableOpacity>
+      </ScreenBackground>
+    );
+  }
+
+  // --- Main swipe view ---
+  return (
+    <ScreenBackground>
+      {/* Header */}
+      <View style={styles.header}>
+        <View>
+          <Text style={[styles.title, { color: Colors.text }]}>SnapSort</Text>
+          <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>Swipe to sort your photos</Text>
+        </View>
+        <View style={styles.headerRight}>
+          <View style={[styles.counter, { borderColor: Colors.border }]}>
+            <Text style={[styles.counterText, { color: Colors.text }]}>
+              {currentPhotoIndex + 1}
+              <Text style={[styles.counterTotal, { color: Colors.textSecondary }]}> / {photos.length}</Text>
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.settingsButton, { borderColor: Colors.border }]}
+            onPress={() => router.push("/settings")}
+          >
+            <Settings size={20} color={Colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Progress bar */}
+      <View style={styles.progressContainer}>
+        <View style={styles.progressTrack}>
+          <View
+            style={[styles.progressFill, { width: `${progress * 100}%` }]}
+          />
+        </View>
+      </View>
+
+      {/* Card stack */}
+      <View style={styles.cardStack}>
+        {/* Render up to 2 cards for the stacked effect */}
+        {photos
+          .slice(currentPhotoIndex, currentPhotoIndex + 2)
+          .reverse()
+          .map((photo, i, arr) => {
+            const isTop = i === arr.length - 1;
+            return (
+              <SwipeCard
+                key={`${photo.id}`}
+                uri={photo.uri}
+                onSwipe={handleSwipe}
+                isTop={isTop}
+                hasActiveFilter={hasActiveFilter}
+                getCurrentFilterName={getCurrentFilterName}
+                onFilterPress={() => setShowFilterModal(true)}
+                onGoBack={() => setShowFilterModal(false)}
+              />
+            );
+          })}
+      </View>
+
+      {/* Bottom controls */}
+      <View
+        style={[styles.controls, { paddingBottom: insets.bottom + Spacing.md }]}
+      >
+        <TouchableOpacity
+          style={[styles.controlButton, styles.undoButton, { borderColor: Colors.border }]}
+          onPress={handleUndo}
+          disabled={sortingHistory.length === 0}
+        >
+          <Undo2
+            size={24}
+            color={sortingHistory.length === 0 ? Colors.textMuted : Colors.text}
+          />
+        </TouchableOpacity>
+
+        <View style={styles.swipeHints}>
+          <View style={styles.hintItem}>
+            <Trash2 size={14} color={Colors.delete} />
+            <Text style={[styles.hintText, { color: Colors.delete }]}>
+              DELETE
+            </Text>
+          </View>
+          <View style={styles.hintDivider} />
+          <View style={styles.hintItem}>
+            <Text style={[styles.hintText, { color: Colors.keep }]}>KEEP</Text>
+            <Heart size={14} color={Colors.keep} fill={Colors.keep} />
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={styles.deletedBadge}
+          onPress={() => {
+            if (deletedPhotos.length > 0) {
+              router.push({
+                pathname: "/review",
+                params: {
+                  assetIds: deletedPhotos.map((p) => p.id).join(","),
+                  assetUris: deletedPhotos.map((p) => p.uri).join(","),
+                },
+              });
+            }
+          }}
+          disabled={deletedPhotos.length === 0}
+        >
+          <LinearGradient
+            colors={[Colors.gradientAltStart, Colors.gradientAltEnd]}
+            start={[0, 0]}
+            end={[1, 1]}
+            style={styles.deletedBadgeGradient}
+          >
+            <Trash2 size={16} color={Colors.white} />
+            <Text style={styles.deletedCount}>{deletedPhotos.length}</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+
+      {/* Filter Modal */}
+      <Modal
+        visible={showFilterModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowFilterModal(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setShowFilterModal(false)}
+        >
+          <TouchableOpacity 
+            activeOpacity={1} 
+            onPress={(e) => e.stopPropagation()}
+            style={{ width: "100%" }}
+          >
             <View style={[styles.modalContent, { backgroundColor: Colors.surface }]}>
               <View style={styles.modalHeader}>
                 <Text style={[styles.modalTitle, { color: Colors.text }]}>Filter Photos</Text>
@@ -373,267 +646,8 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
-        </Modal>
-      </ScreenBackground>
-    );
-  }
-
-  // --- Finished swiping ---
-  if (isFinished) {
-    return (
-      <ScreenBackground centered>
-        <Text style={styles.finishedEmoji}>🎉</Text>
-        <Text style={[styles.finishedTitle, {
-          color: Colors.text,
-        }]}>All Done!</Text>
-        <Text style={styles.finishedSubtitle}>
-          You sorted through {photos.length} photos.{"\n"}
-          {deletedPhotos.length} marked for deletion.
-        </Text>
-
-        {deletedPhotos.length > 0 && (
-          <TouchableOpacity style={styles.reviewButton} onPress={handleReview}>
-            <LinearGradient
-              colors={[Colors.gradientAltStart, Colors.gradientAltEnd]}
-              start={[0, 0]}
-              end={[1, 1]}
-              style={styles.reviewButtonGradient}
-            >
-              <Trash2 size={20} color={Colors.white} />
-              <Text style={styles.reviewButtonText}>
-                Review {deletedPhotos.length} Photos
-              </Text>
-              <ArrowRight size={18} color={Colors.white} />
-            </LinearGradient>
           </TouchableOpacity>
-        )}
-
-        <TouchableOpacity style={styles.undoAllButton} onPress={handleUndo}>
-          <Undo2 size={18} color={Colors.textSecondary} />
-          <Text style={styles.undoAllText}>Undo Last</Text>
         </TouchableOpacity>
-      </ScreenBackground>
-    );
-  }
-
-  // --- Main swipe view ---
-  return (
-    <ScreenBackground>
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={[styles.title, { color: Colors.text }]}>SnapSort</Text>
-          <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>Swipe to sort your photos</Text>
-        </View>
-        <View style={styles.headerRight}>
-          <View style={[styles.counter, { borderColor: Colors.border }]}>
-            <Text style={[styles.counterText, { color: Colors.text }]}>
-              {currentPhotoIndex + 1}
-              <Text style={[styles.counterTotal, { color: Colors.textSecondary }]}> / {photos.length}</Text>
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={[styles.settingsButton, { borderColor: Colors.border }]}
-            onPress={() => router.push("/settings")}
-          >
-            <Settings size={20} color={Colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Progress bar */}
-      <View style={styles.progressContainer}>
-        <View style={styles.progressTrack}>
-          <View
-            style={[styles.progressFill, { width: `${progress * 100}%` }]}
-          />
-        </View>
-      </View>
-
-      {/* Card stack */}
-      <View style={styles.cardStack}>
-        {/* Render up to 2 cards for the stacked effect */}
-        {photos
-          .slice(currentPhotoIndex, currentPhotoIndex + 2)
-          .reverse()
-          .map((photo, i, arr) => {
-            const isTop = i === arr.length - 1;
-            return (
-              <SwipeCard
-                key={`${photo.id}-${cardKey}-${isTop ? "top" : "bottom"}`}
-                uri={photo.uri}
-                onSwipe={handleSwipe}
-                isTop={isTop}
-                hasActiveFilter={hasActiveFilter}
-                getCurrentFilterName={getCurrentFilterName}
-                onFilterPress={() => setShowFilterModal(true)}
-                onGoBack={() => setShowFilterModal(false)}
-              />
-            );
-          })}
-      </View>
-
-      {/* Bottom controls */}
-      <View
-        style={[styles.controls, { paddingBottom: insets.bottom + Spacing.md }]}
-      >
-        <TouchableOpacity
-          style={[styles.controlButton, styles.undoButton, { borderColor: Colors.border }]}
-          onPress={handleUndo}
-          disabled={sortingHistory.length === 0}
-        >
-          <Undo2
-            size={24}
-            color={sortingHistory.length === 0 ? Colors.textMuted : Colors.text}
-          />
-        </TouchableOpacity>
-
-        <View style={styles.swipeHints}>
-          <View style={styles.hintItem}>
-            <Trash2 size={14} color={Colors.delete} />
-            <Text style={[styles.hintText, { color: Colors.delete }]}>
-              DELETE
-            </Text>
-          </View>
-          <View style={styles.hintDivider} />
-          <View style={styles.hintItem}>
-            <Text style={[styles.hintText, { color: Colors.keep }]}>KEEP</Text>
-            <Heart size={14} color={Colors.keep} fill={Colors.keep} />
-          </View>
-        </View>
-
-        <TouchableOpacity
-          style={styles.deletedBadge}
-          onPress={() => {
-            if (deletedPhotos.length > 0) {
-              router.push({
-                pathname: "/review",
-                params: {
-                  assetIds: deletedPhotos.map((p) => p.id).join(","),
-                  assetUris: deletedPhotos.map((p) => p.uri).join(","),
-                },
-              });
-            }
-          }}
-          disabled={deletedPhotos.length === 0}
-        >
-          <LinearGradient
-            colors={[Colors.gradientAltStart, Colors.gradientAltEnd]}
-            start={[0, 0]}
-            end={[1, 1]}
-            style={styles.deletedBadgeGradient}
-          >
-            <Trash2 size={16} color={Colors.white} />
-            <Text style={styles.deletedCount}>{deletedPhotos.length}</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
-
-      {/* Filter Modal */}
-      <Modal
-        visible={showFilterModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowFilterModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: Colors.surface }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: Colors.text }]}>Filter Photos</Text>
-              <TouchableOpacity onPress={() => setShowFilterModal(false)}>
-                <X size={24} color={Colors.textSecondary} />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.modalBody}>
-              {/* Album Section */}
-              <Text style={[styles.sectionLabel, { color: Colors.textSecondary }]}>
-                ALBUM
-              </Text>
-              <View style={styles.optionGrid}>
-                <TouchableOpacity
-                  style={[
-                    styles.optionItem,
-                    { borderColor: selectedAlbumId === null ? Colors.accent : Colors.border },
-                    selectedAlbumId === null && { backgroundColor: Colors.accentLight }
-                  ]}
-                  onPress={() => setSelectedAlbumId(null)}
-                >
-                  <Text style={[
-                    styles.optionText,
-                    { color: selectedAlbumId === null ? Colors.accent : Colors.text }
-                  ]}>
-                    All Photos
-                  </Text>
-                </TouchableOpacity>
-                {albums.map((album) => (
-                  <TouchableOpacity
-                    key={album.id}
-                    style={[
-                      styles.optionItem,
-                      { borderColor: selectedAlbumId === album.id ? Colors.accent : Colors.border },
-                      selectedAlbumId === album.id && { backgroundColor: Colors.accentLight }
-                    ]}
-                    onPress={() => setSelectedAlbumId(album.id)}
-                  >
-                    <Text style={[
-                      styles.optionText,
-                      { color: selectedAlbumId === album.id ? Colors.accent : Colors.text }
-                    ]}>
-                      {album.title} ({album.assetCount})
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* Date Range Section */}
-              <Text style={[styles.sectionLabel, { color: Colors.textSecondary }]}>
-                DATE RANGE
-              </Text>
-              <View style={styles.optionGrid}>
-                {DATE_RANGE_OPTIONS.map((option) => (
-                  <TouchableOpacity
-                    key={option.value}
-                    style={[
-                      styles.optionItem,
-                      { borderColor: selectedDateRange === option.value ? Colors.accent : Colors.border },
-                      selectedDateRange === option.value && { backgroundColor: Colors.accentLight }
-                    ]}
-                    onPress={() => setSelectedDateRange(option.value)}
-                  >
-                    <Text style={[
-                      styles.optionText,
-                      { color: selectedDateRange === option.value ? Colors.accent : Colors.text }
-                    ]}>
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </ScrollView>
-
-            {/* Modal Actions */}
-            <View style={[styles.modalActions, { borderTopColor: Colors.border }]}>
-              <TouchableOpacity
-                style={[styles.clearButton, { borderColor: Colors.border }]}
-                onPress={handleClearFilters}
-              >
-                <Text style={[styles.clearButtonText, { color: Colors.textSecondary }]}>
-                  Clear All
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.applyButton, { backgroundColor: Colors.accent }]}
-                onPress={handleApplyFilters}
-              >
-                <Text style={[styles.applyButtonText, { color: Colors.white }]}>
-                  Apply Filters
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
       </Modal>
     </ScreenBackground>
   );
@@ -904,8 +918,7 @@ const styles = StyleSheet.create({
   modalContent: {
     borderTopLeftRadius: BorderRadius.xl,
     borderTopRightRadius: BorderRadius.xl,
-    maxHeight: "80%",
-    paddingBottom: Spacing.xl,
+    paddingBottom: Spacing.lg,
   },
   modalHeader: {
     flexDirection: "row",

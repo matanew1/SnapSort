@@ -1,5 +1,3 @@
-import { BorderRadius, Colors, getColors } from "@/constants/theme";
-import { useAppStore } from "@/store";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { ChevronDown, FolderOpen, Heart, Trash2 } from "lucide-react-native";
@@ -15,6 +13,9 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+
+import { BorderRadius, Colors, getColors } from "@/constants/theme";
+import { useAppStore } from "@/store";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
@@ -44,15 +45,31 @@ export function SwipeCard({
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const cardScale = useSharedValue(isTop ? 1 : 0.95);
+  const isExiting = useSharedValue(false);
+  const exitDirection = useSharedValue<"keep" | "delete">("keep");
 
+  // Reset values when card becomes top
   React.useEffect(() => {
-    cardScale.value = withSpring(isTop ? 1 : 0.95, {
-      damping: 20,
-      stiffness: 150,
-    });
-  }, [isTop, cardScale]);
+    if (isTop) {
+      translateX.value = 0;
+      translateY.value = 0;
+      isExiting.value = false;
+      cardScale.value = withSpring(1, {
+        damping: 20,
+        stiffness: 150,
+      });
+    } else {
+      cardScale.value = withSpring(0.95, {
+        damping: 20,
+        stiffness: 150,
+      });
+    }
+  }, [isTop, translateX, translateY, cardScale, isExiting]);
 
   const handleSwipe = (direction: "keep" | "delete") => {
+    if (!isTop) return;
+    isExiting.value = true;
+    exitDirection.value = direction;
     onSwipe(direction);
   };
 
@@ -63,17 +80,19 @@ export function SwipeCard({
       translateY.value = event.translationY * 0.4;
     })
     .onEnd((event) => {
+      if (isExiting.value) return;
+      
       if (Math.abs(event.translationX) > SWIPE_THRESHOLD) {
         const direction = event.translationX > 0 ? "keep" : "delete";
         const targetX =
           event.translationX > 0 ? SCREEN_WIDTH * 1.5 : -SCREEN_WIDTH * 1.5;
 
-        translateX.value = withTiming(targetX, { duration: 300 }, () => {
-          runOnJS(handleSwipe)(direction);
-        });
+        translateX.value = withTiming(targetX, { duration: 250 });
         translateY.value = withTiming(event.translationY * 0.8, {
-          duration: 300,
+          duration: 250,
         });
+        
+        runOnJS(handleSwipe)(direction);
       } else {
         translateX.value = withSpring(0, { damping: 20, stiffness: 200 });
         translateY.value = withSpring(0, { damping: 20, stiffness: 200 });
@@ -95,6 +114,7 @@ export function SwipeCard({
         { rotate: `${rotate}deg` },
         { scale: cardScale.value },
       ],
+      zIndex: isTop ? 10 : 1,
     };
   });
 
@@ -164,13 +184,13 @@ export function SwipeCard({
                   onPress={onFilterPress}
                 >
                   {hasActiveFilter ? (
-                    <ChevronDown size={16} color={Colors.accent} />
+                    <ChevronDown size={16} color={Colors.text} />
                   ) : (
-                    <FolderOpen size={16} color={Colors.textSecondary} />
+                    <FolderOpen size={16} color={Colors.text} />
                   )}
                   <Text style={[
                     styles.filterButtonText, 
-                    { color: hasActiveFilter ? Colors.accent : Colors.textSecondary }
+                    { color: Colors.text }
                   ]}>
                     {getCurrentFilterName ? getCurrentFilterName() : "Filter"}
                   </Text>
@@ -317,3 +337,4 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
 });
+
