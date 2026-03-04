@@ -1,52 +1,57 @@
 import {
-    AIBadge,
-    AISimilarPhotos,
-    AISuggestions,
-    EmptyState,
-    FilterModal,
-    FinishedState,
-    LoadingState,
-    ScreenBackground,
-    SwipeCard,
-    SwipeTutorial,
+  AIBadge,
+  AISimilarPhotos,
+  AISuggestions,
+  EmptyState,
+  FilterModal,
+  FinishedState,
+  LoadingState,
+  ScreenBackground,
+  SwipeCard,
+  SwipeTutorial,
 } from "@/components";
+import {
+  dimensions,
+  scale,
+  scaleFont,
+  verticalScale
+} from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import {
-    useAIAnalysis,
-    useAppPreferences,
-    useHaptics,
-    useMediaLibrary,
+  useAIAnalysis,
+  useAppPreferences,
+  useHaptics,
+  useMediaLibrary,
 } from "@/hooks";
 import { useAppStore } from "@/store";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import {
-    Heart,
-    RotateCcw,
-    Settings,
-    SlidersHorizontal,
-    Trash2
+  Heart,
+  RotateCcw,
+  Settings,
+  SlidersHorizontal,
+  Trash2,
 } from "lucide-react-native";
 import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import {
-    Animated,
-    Dimensions,
-    Easing,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Easing,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const { width: SCREEN_WIDTH } = dimensions;
 
 export const DATE_RANGE_OPTIONS = [
   { label: "All Time", value: "all" },
@@ -635,18 +640,18 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   logoImage: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
+    width: scale(38),
+    height: scale(38),
+    borderRadius: scale(10),
     backgroundColor: "#000",
   },
   title: {
-    fontSize: 22,
+    fontSize: scaleFont(22),
     fontWeight: "800",
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: scaleFont(12),
     fontWeight: "500",
     marginTop: 1,
   },
@@ -664,16 +669,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   counterText: {
-    fontSize: 15,
+    fontSize: scaleFont(15),
     fontWeight: "800",
   },
   counterTotal: {
-    fontSize: 13,
+    fontSize: scaleFont(13),
     fontWeight: "500",
   },
   iconButton: {
-    width: 38,
-    height: 38,
+    width: scale(38),
+    height: scale(38),
     borderRadius: BorderRadius.md,
     justifyContent: "center",
     alignItems: "center",
@@ -721,16 +726,16 @@ const styles = StyleSheet.create({
   },
   bgCard: {
     position: "absolute",
-    width: Dimensions.get("window").width - 32,
-    height: Dimensions.get("window").height * 0.68,
+    width: dimensions.width - scale(32),
+    height: dimensions.isTablet ? verticalScale(550) : dimensions.height * 0.68,
     borderRadius: BorderRadius.xxl,
   },
   bgCard2: {
-    transform: [{ scale: 0.95 }, { translateY: 10 }],
+    transform: [{ scale: 0.95 }, { translateY: verticalScale(10) }],
     opacity: 0.6,
   },
   bgCard3: {
-    transform: [{ scale: 0.9 }, { translateY: 20 }],
+    transform: [{ scale: 0.9 }, { translateY: verticalScale(20) }],
     opacity: 0.3,
   },
   controls: {
@@ -742,8 +747,8 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.md,
   },
   controlButton: {
-    width: 50,
-    height: 50,
+    width: scale(50),
+    height: scale(50),
     borderRadius: BorderRadius.full,
     justifyContent: "center",
     alignItems: "center",

@@ -1,4 +1,9 @@
 import { ScreenBackground } from "@/components";
+import {
+  moderateScale,
+  scale,
+  scaleFont
+} from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useMediaLibrary } from "@/hooks";
 import { useAppStore } from "@/store";
@@ -13,7 +18,7 @@ import {
   Moon,
   RotateCcw,
   Shield,
-  Sun
+  Sun,
 } from "lucide-react-native";
 import React from "react";
 import {
@@ -317,8 +322,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   backButton: {
-    width: 42,
-    height: 42,
+    width: moderateScale(42),
+    height: moderateScale(42),
     borderRadius: BorderRadius.md,
     justifyContent: "center",
     alignItems: "center",
@@ -327,7 +332,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     textAlign: "center",
-    fontSize: 18,
+    fontSize: scaleFont(18),
     fontWeight: "700",
   },
   scrollContent: {
@@ -342,18 +347,18 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   appNameIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 18,
+    width: scale(60),
+    height: scale(60),
+    borderRadius: scale(18),
     backgroundColor: "#000",
   },
   appName: {
-    fontSize: 22,
+    fontSize: scaleFont(22),
     fontWeight: "800",
     letterSpacing: -0.5,
   },
   appVersion: {
-    fontSize: 13,
+    fontSize: scaleFont(13),
     fontWeight: "500",
     marginTop: 2,
   },
@@ -362,7 +367,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
   },
   sectionLabel: {
-    fontSize: 11,
+    fontSize: scaleFont(11),
     fontWeight: "700",
     letterSpacing: 1.2,
     marginBottom: Spacing.sm,
@@ -385,9 +390,9 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   rowIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
+    width: scale(34),
+    height: scale(34),
+    borderRadius: scale(10),
     justifyContent: "center",
     alignItems: "center",
   },
@@ -395,11 +400,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   rowLabel: {
-    fontSize: 15,
+    fontSize: scaleFont(15),
     fontWeight: "600",
   },
   rowSublabel: {
-    fontSize: 12,
+    fontSize: scaleFont(12),
     marginTop: 2,
   },
   rowRight: {
@@ -416,7 +421,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   smallButtonText: {
-    fontSize: 12,
+    fontSize: scaleFont(12),
     fontWeight: "700",
   },
   footer: {
@@ -425,10 +430,10 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   footerText: {
-    fontSize: 13,
+    fontSize: scaleFont(13),
     fontWeight: "500",
   },
   footerVersion: {
-    fontSize: 12,
+    fontSize: scaleFont(12),
   },
 });

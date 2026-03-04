@@ -1,7 +1,4 @@
-/**
- * SnapSort Native — Modern Professional Theme v3.0
- * Clean dark theme, subtle accents, professional appearance
- */
+import { moderateScale, scaleFont } from "./responsive";
 
 export const Colors = {
   // Base — clean dark, professional
@@ -148,35 +145,63 @@ export function getColors(isDark: boolean) {
 }
 
 export const Spacing = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
-  xxxl: 64,
+  xs: moderateScale(4),
+  sm: moderateScale(8),
+  md: moderateScale(16),
+  lg: moderateScale(24),
+  xl: moderateScale(32),
+  xxl: moderateScale(48),
+  xxxl: moderateScale(64),
 };
 
 export const BorderRadius = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 24,
-  xxl: 32,
-  xxxl: 40,
+  xs: moderateScale(4),
+  sm: moderateScale(8),
+  md: moderateScale(12),
+  lg: moderateScale(16),
+  xl: moderateScale(24),
+  xxl: moderateScale(32),
+  xxxl: moderateScale(40),
   full: 9999,
 };
 
 export const Typography = {
-  hero: { fontSize: 40, fontWeight: "900" as const, letterSpacing: -1.5 },
-  h1: { fontSize: 32, fontWeight: "800" as const, letterSpacing: -1 },
-  h2: { fontSize: 24, fontWeight: "700" as const, letterSpacing: -0.5 },
-  h3: { fontSize: 20, fontWeight: "700" as const, letterSpacing: -0.3 },
-  h4: { fontSize: 17, fontWeight: "600" as const },
-  body: { fontSize: 15, fontWeight: "400" as const, lineHeight: 22 },
-  bodyBold: { fontSize: 15, fontWeight: "600" as const },
-  caption: { fontSize: 13, fontWeight: "500" as const },
-  label: { fontSize: 11, fontWeight: "700" as const, letterSpacing: 1.2 },
-  micro: { fontSize: 10, fontWeight: "600" as const, letterSpacing: 0.5 },
+  hero: {
+    fontSize: scaleFont(40),
+    fontWeight: "900" as const,
+    letterSpacing: -1.5,
+  },
+  h1: {
+    fontSize: scaleFont(32),
+    fontWeight: "800" as const,
+    letterSpacing: -1,
+  },
+  h2: {
+    fontSize: scaleFont(24),
+    fontWeight: "700" as const,
+    letterSpacing: -0.5,
+  },
+  h3: {
+    fontSize: scaleFont(20),
+    fontWeight: "700" as const,
+    letterSpacing: -0.3,
+  },
+  h4: { fontSize: scaleFont(17), fontWeight: "600" as const },
+  body: {
+    fontSize: scaleFont(15),
+    fontWeight: "400" as const,
+    lineHeight: scaleFont(22),
+  },
+  bodyBold: { fontSize: scaleFont(15), fontWeight: "600" as const },
+  caption: { fontSize: scaleFont(13), fontWeight: "500" as const },
+  label: {
+    fontSize: scaleFont(11),
+    fontWeight: "700" as const,
+    letterSpacing: 1.2,
+  },
+  micro: {
+    fontSize: scaleFont(10),
+    fontWeight: "600" as const,
+    letterSpacing: 0.5,
+  },
 };

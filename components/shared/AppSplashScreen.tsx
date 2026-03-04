@@ -1,3 +1,8 @@
+import {
+    scale,
+    scaleFont,
+    verticalScale
+} from "@/constants/responsive";
 import { getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
 import { Image } from "expo-image";
@@ -112,9 +117,9 @@ const styles = StyleSheet.create({
     width: "80%",
   },
   logoContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 24,
+    width: scale(100),
+    height: scale(100),
+    borderRadius: scale(24),
     backgroundColor: "#000",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
@@ -129,18 +134,18 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   title: {
-    fontSize: 32,
+    fontSize: scaleFont(32),
     fontWeight: "800",
     letterSpacing: -1,
     marginBottom: Spacing.xs,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: scaleFont(16),
     fontWeight: "500",
     marginBottom: Spacing.xxl,
   },
   progressContainer: {
-    width: 200,
+    width: scale(200),
     height: 4,
     borderRadius: 2,
     overflow: "hidden",
@@ -151,8 +156,8 @@ const styles = StyleSheet.create({
   },
   footer: {
     position: "absolute",
-    bottom: 50,
-    fontSize: 12,
+    bottom: verticalScale(50),
+    fontSize: scaleFont(12),
     fontWeight: "600",
     letterSpacing: 1,
   },

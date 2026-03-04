@@ -1,13 +1,21 @@
+import {
+    scale,
+    scaleFont
+} from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
 import { LinearGradient } from "expo-linear-gradient";
-import { AlertCircle, Lightbulb, Trash2, X } from "lucide-react-native";
+import { Lightbulb, Trash2, X } from "lucide-react-native";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Animated, { FadeIn, FadeOut, SlideInUp } from "react-native-reanimated";
+import Animated, { FadeOut, SlideInUp } from "react-native-reanimated";
 
 interface AISuggestionsProps {
-  suggestions: { suggestion: string; photoIds: string[]; priority: "high" | "medium" | "low" }[];
+  suggestions: {
+    suggestion: string;
+    photoIds: string[];
+    priority: "high" | "medium" | "low";
+  }[];
   onApplySuggestion?: (photoIds: string[]) => void;
   onDismiss?: () => void;
 }
@@ -28,8 +36,8 @@ export function AISuggestions({
     topSuggestion.priority === "high"
       ? Colors.danger
       : topSuggestion.priority === "medium"
-      ? Colors.warning ?? "#FFB800"
-      : Colors.info ?? Colors.secondary ?? Colors.accent;
+        ? (Colors.warning ?? "#FFB800")
+        : (Colors.info ?? Colors.secondary ?? Colors.accent);
 
   const handleDismiss = () => {
     setDismissed(true);
@@ -48,10 +56,7 @@ export function AISuggestions({
       style={styles.container}
     >
       <LinearGradient
-        colors={[
-          priorityColor + "15",
-          priorityColor + "08",
-        ]}
+        colors={[priorityColor + "15", priorityColor + "08"]}
         style={[
           styles.card,
           {
@@ -64,7 +69,9 @@ export function AISuggestions({
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={[styles.iconBg, { backgroundColor: priorityColor + "20" }]}>
+          <View
+            style={[styles.iconBg, { backgroundColor: priorityColor + "20" }]}
+          >
             <Lightbulb size={16} color={priorityColor} />
           </View>
           <View style={styles.headerContent}>
@@ -90,12 +97,16 @@ export function AISuggestions({
           <View
             style={[
               styles.countBadge,
-              { backgroundColor: priorityColor + "20", borderColor: priorityColor + "40" },
+              {
+                backgroundColor: priorityColor + "20",
+                borderColor: priorityColor + "40",
+              },
             ]}
           >
             <Trash2 size={12} color={priorityColor} />
             <Text style={[styles.countText, { color: priorityColor }]}>
-              {topSuggestion.photoIds.length} photo{topSuggestion.photoIds.length !== 1 ? "s" : ""}
+              {topSuggestion.photoIds.length} photo
+              {topSuggestion.photoIds.length !== 1 ? "s" : ""}
             </Text>
           </View>
         </View>
@@ -129,7 +140,8 @@ export function AISuggestions({
         {/* More suggestions indicator */}
         {suggestions.length > 1 && (
           <Text style={[styles.moreText, { color: Colors.textMuted }]}>
-            +{suggestions.length - 1} more suggestion{suggestions.length - 1 !== 1 ? "s" : ""}
+            +{suggestions.length - 1} more suggestion
+            {suggestions.length - 1 !== 1 ? "s" : ""}
           </Text>
         )}
       </LinearGradient>
@@ -154,9 +166,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   iconBg: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+    width: scale(32),
+    height: scale(32),
+    borderRadius: scale(8),
     justifyContent: "center",
     alignItems: "center",
   },
@@ -164,11 +176,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 14,
+    fontSize: scaleFont(14),
     fontWeight: "700",
   },
   priority: {
-    fontSize: 10,
+    fontSize: scaleFont(10),
     fontWeight: "700",
     letterSpacing: 0.5,
     marginTop: 2,
@@ -181,9 +193,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   suggestion: {
-    fontSize: 13,
+    fontSize: scaleFont(13),
     fontWeight: "500",
-    lineHeight: 18,
+    lineHeight: scaleFont(18),
     marginBottom: Spacing.sm,
   },
   countRow: {
@@ -200,7 +212,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   countText: {
-    fontSize: 12,
+    fontSize: scaleFont(12),
     fontWeight: "700",
   },
   actions: {
@@ -216,7 +228,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dismissText: {
-    fontSize: 13,
+    fontSize: scaleFont(13),
     fontWeight: "700",
   },
   applyBtnWrapper: {
@@ -238,7 +250,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   applyText: {
-    fontSize: 13,
+    fontSize: scaleFont(13),
     fontWeight: "700",
     color: "#fff",
   },

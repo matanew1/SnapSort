@@ -1,22 +1,26 @@
+import {
+    scale,
+    scaleFont
+} from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
 import { LinearGradient } from "expo-linear-gradient";
 import {
-  CheckCircle,
-  FolderOpen,
-  Image as ImageIcon,
-  RefreshCw,
-  Sparkles,
-  Trash2,
+    CheckCircle,
+    FolderOpen,
+    Image as ImageIcon,
+    RefreshCw,
+    Sparkles,
+    Trash2,
 } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
 import {
-  Animated,
-  Easing,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Animated,
+    Easing,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 type EmptyStateType =
@@ -66,7 +70,7 @@ export function EmptyState({
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   }, []);
 
@@ -103,12 +107,17 @@ export function EmptyState({
             {onRequestPermission && (
               <TouchableOpacity onPress={onRequestPermission}>
                 <LinearGradient
-                  colors={[Colors.accent, Colors.accentSecondary ?? Colors.accent]}
+                  colors={[
+                    Colors.accent,
+                    Colors.accentSecondary ?? Colors.accent,
+                  ]}
                   start={[0, 0]}
                   end={[1, 0]}
                   style={styles.primaryButton}
                 >
-                  <Text style={[styles.primaryButtonText, { color: Colors.white }]}>
+                  <Text
+                    style={[styles.primaryButtonText, { color: Colors.white }]}
+                  >
                     Grant Access
                   </Text>
                 </LinearGradient>
@@ -251,7 +260,7 @@ export function LoadingState({
         duration: 1200,
         easing: Easing.linear,
         useNativeDriver: true,
-      })
+      }),
     ).start();
 
     Animated.loop(
@@ -266,7 +275,7 @@ export function LoadingState({
           duration: 800,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   }, []);
 
@@ -280,7 +289,10 @@ export function LoadingState({
       <Animated.View
         style={[
           styles.iconCircle,
-          { backgroundColor: Colors.primaryLight, transform: [{ scale: pulseAnim }] },
+          {
+            backgroundColor: Colors.primaryLight,
+            transform: [{ scale: pulseAnim }],
+          },
         ]}
       >
         <Animated.View style={{ transform: [{ rotate: spin }] }}>
@@ -366,7 +378,10 @@ export function FinishedState({
         <View
           style={[
             styles.statCard,
-            { backgroundColor: Colors.keepLight, borderColor: Colors.keep + "40" },
+            {
+              backgroundColor: Colors.keepLight,
+              borderColor: Colors.keep + "40",
+            },
           ]}
         >
           <Text style={[styles.statNumber, { color: Colors.keep }]}>
@@ -432,9 +447,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   iconCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: scale(100),
+    height: scale(100),
+    borderRadius: scale(50),
     justifyContent: "center",
     alignItems: "center",
   },
@@ -442,9 +457,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   trophyCircle: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
+    width: scale(110),
+    height: scale(110),
+    borderRadius: scale(55),
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#6C63FF",
@@ -454,16 +469,16 @@ const styles = StyleSheet.create({
     elevation: 12,
   },
   title: {
-    fontSize: 28,
+    fontSize: scaleFont(28),
     fontWeight: "700" as const,
     letterSpacing: -0.5,
     textAlign: "center",
     marginBottom: Spacing.sm,
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: scaleFont(15),
     textAlign: "center",
-    lineHeight: 22,
+    lineHeight: scaleFont(22),
     marginBottom: Spacing.xl,
   },
   statsRow: {
@@ -479,12 +494,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   statNumber: {
-    fontSize: 36,
+    fontSize: scaleFont(36),
     fontWeight: "800",
     letterSpacing: -1,
   },
   statLabel: {
-    fontSize: 13,
+    fontSize: scaleFont(13),
     fontWeight: "600",
     marginTop: 4,
   },
@@ -502,7 +517,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   primaryButtonText: {
-    fontSize: 16,
+    fontSize: scaleFont(16),
     fontWeight: "700",
   },
   reviewButtonWrapper: {
@@ -520,11 +535,11 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
   },
   outlineButtonText: {
-    fontSize: 15,
+    fontSize: scaleFont(15),
     fontWeight: "600",
   },
   loadingText: {
-    fontSize: 15,
+    fontSize: scaleFont(15),
     marginTop: Spacing.lg,
     fontWeight: "500",
   },
@@ -534,9 +549,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
   },
   undoText: {
-    fontSize: 14,
+    fontSize: scaleFont(14),
     fontWeight: "500",
   },
 });
-
-

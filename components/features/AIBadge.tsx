@@ -1,7 +1,10 @@
+import {
+    scaleFont
+} from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
 import { LinearGradient } from "expo-linear-gradient";
-import { AlertTriangle, Sparkles, TrendingUp, Zap } from "lucide-react-native";
+import { AlertTriangle, Sparkles, TrendingUp } from "lucide-react-native";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
@@ -64,20 +67,43 @@ export function AIBadge({
 
       {/* Issues indicator */}
       {(isBlurry || isDark || isBurst) && (
-        <View style={[styles.issueRow, { backgroundColor: Colors.surfaceLight }]}>
+        <View
+          style={[styles.issueRow, { backgroundColor: Colors.surfaceLight }]}
+        >
           {isBlurry && (
-            <View style={[styles.issueBadge, { backgroundColor: Colors.deleteLight }]}>
-              <Text style={[styles.issueText, { color: Colors.delete }]}>Blurry</Text>
+            <View
+              style={[
+                styles.issueBadge,
+                { backgroundColor: Colors.deleteLight },
+              ]}
+            >
+              <Text style={[styles.issueText, { color: Colors.delete }]}>
+                Blurry
+              </Text>
             </View>
           )}
           {isDark && (
-            <View style={[styles.issueBadge, { backgroundColor: Colors.deleteLight }]}>
-              <Text style={[styles.issueText, { color: Colors.delete }]}>Dark</Text>
+            <View
+              style={[
+                styles.issueBadge,
+                { backgroundColor: Colors.deleteLight },
+              ]}
+            >
+              <Text style={[styles.issueText, { color: Colors.delete }]}>
+                Dark
+              </Text>
             </View>
           )}
           {isBurst && (
-            <View style={[styles.issueBadge, { backgroundColor: Colors.accentLight }]}>
-              <Text style={[styles.issueText, { color: Colors.accent }]}>Burst</Text>
+            <View
+              style={[
+                styles.issueBadge,
+                { backgroundColor: Colors.accentLight },
+              ]}
+            >
+              <Text style={[styles.issueText, { color: Colors.accent }]}>
+                Burst
+              </Text>
             </View>
           )}
         </View>
@@ -104,12 +130,12 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   badgeText: {
-    fontSize: 12,
+    fontSize: scaleFont(12),
     fontWeight: "700",
     color: "#fff",
   },
   scoreText: {
-    fontSize: 11,
+    fontSize: scaleFont(11),
     fontWeight: "600",
     color: "rgba(255,255,255,0.8)",
   },
@@ -127,11 +153,11 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   issueText: {
-    fontSize: 10,
+    fontSize: scaleFont(10),
     fontWeight: "700",
   },
   reasonText: {
-    fontSize: 11,
+    fontSize: scaleFont(11),
     marginTop: Spacing.xs,
     fontWeight: "500",
   },

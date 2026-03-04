@@ -1,3 +1,7 @@
+import {
+    dimensions,
+    scaleFont
+} from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
 import { Image } from "expo-image";
@@ -5,18 +9,19 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Copy, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-  Dimensions,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const THUMB_SIZE = (SCREEN_WIDTH - Spacing.lg * 2 - Spacing.sm * 2) / 3;
+const { width: SCREEN_WIDTH } = dimensions;
+const THUMB_SIZE =
+  (SCREEN_WIDTH - Spacing.lg * 2 - Spacing.sm * 2) /
+  (dimensions.isTablet ? 5 : 3);
 
 interface SimilarityGroup {
   groupId: string;
@@ -38,7 +43,9 @@ export function AISimilarPhotos({
 }: AISimilarPhotosProps) {
   const isDark = useAppStore((s) => s.isDarkMode);
   const Colors = getColors(isDark);
-  const [selectedGroup, setSelectedGroup] = useState<SimilarityGroup | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<SimilarityGroup | null>(
+    null,
+  );
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   if (groups.length === 0) return null;
@@ -85,7 +92,11 @@ export function AISimilarPhotos({
     <>
       {/* Floating indicator */}
       {groups.length > 0 && (
-        <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.indicator}>
+        <Animated.View
+          entering={FadeIn}
+          exiting={FadeOut}
+          style={styles.indicator}
+        >
           <LinearGradient
             colors={[Colors.accent, Colors.accentSecondary ?? Colors.accent]}
             style={styles.indicatorGradient}
@@ -110,14 +121,20 @@ export function AISimilarPhotos({
           <View
             style={[
               styles.modalHeader,
-              { backgroundColor: Colors.surface, borderBottomColor: Colors.border },
+              {
+                backgroundColor: Colors.surface,
+                borderBottomColor: Colors.border,
+              },
             ]}
           >
             <Text style={[styles.modalTitle, { color: Colors.text }]}>
               Similar Photos
             </Text>
             <TouchableOpacity
-              style={[styles.closeBtn, { backgroundColor: Colors.surfaceLight }]}
+              style={[
+                styles.closeBtn,
+                { backgroundColor: Colors.surfaceLight },
+              ]}
               onPress={() => setSelectedGroup(null)}
             >
               <X size={16} color={Colors.textSecondary} />
@@ -129,7 +146,9 @@ export function AISimilarPhotos({
             showsVerticalScrollIndicator={false}
           >
             {groups.map((group) => {
-              const groupSelected = group.photos.filter((p) => selected.has(p.id));
+              const groupSelected = group.photos.filter((p) =>
+                selected.has(p.id),
+              );
               const allSelected = groupSelected.length === group.photos.length;
 
               return (
@@ -148,7 +167,12 @@ export function AISimilarPhotos({
                       <Text style={[styles.groupTitle, { color: Colors.text }]}>
                         {group.photos.length} similar photos
                       </Text>
-                      <Text style={[styles.groupSubtitle, { color: Colors.textMuted }]}>
+                      <Text
+                        style={[
+                          styles.groupSubtitle,
+                          { color: Colors.textMuted },
+                        ]}
+                      >
                         {groupSelected.length} selected
                       </Text>
                     </View>
@@ -167,7 +191,9 @@ export function AISimilarPhotos({
                         style={[
                           styles.selectAllText,
                           {
-                            color: allSelected ? Colors.accent : Colors.textSecondary,
+                            color: allSelected
+                              ? Colors.accent
+                              : Colors.textSecondary,
                           },
                         ]}
                       >
@@ -234,7 +260,10 @@ export function AISimilarPhotos({
             <View
               style={[
                 styles.modalFooter,
-                { backgroundColor: Colors.surface, borderTopColor: Colors.border },
+                {
+                  backgroundColor: Colors.surface,
+                  borderTopColor: Colors.border,
+                },
               ]}
             >
               <TouchableOpacity
@@ -244,7 +273,9 @@ export function AISimilarPhotos({
                   setSelectedGroup(null);
                 }}
               >
-                <Text style={[styles.cancelText, { color: Colors.textSecondary }]}>
+                <Text
+                  style={[styles.cancelText, { color: Colors.textSecondary }]}
+                >
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -260,7 +291,8 @@ export function AISimilarPhotos({
                 >
                   <Copy size={16} color="#fff" />
                   <Text style={styles.applyText}>
-                    Delete {selected.size} Duplicate{selected.size !== 1 ? "s" : ""}
+                    Delete {selected.size} Duplicate
+                    {selected.size !== 1 ? "s" : ""}
                   </Text>
                 </LinearGradient>
               </TouchableOpacity>
@@ -304,7 +336,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: scaleFont(18),
     fontWeight: "700",
   },
   closeBtn: {
@@ -332,11 +364,11 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   groupTitle: {
-    fontSize: 14,
+    fontSize: scaleFont(14),
     fontWeight: "700",
   },
   groupSubtitle: {
-    fontSize: 12,
+    fontSize: scaleFont(12),
     marginTop: 2,
   },
   selectAllBtn: {
@@ -345,7 +377,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   selectAllText: {
-    fontSize: 12,
+    fontSize: scaleFont(12),
     fontWeight: "700",
   },
   photosGrid: {
@@ -403,7 +435,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelText: {
-    fontSize: 14,
+    fontSize: scaleFont(14),
     fontWeight: "700",
   },
   applyBtnWrapper: {
@@ -420,7 +452,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   applyText: {
-    fontSize: 14,
+    fontSize: scaleFont(14),
     fontWeight: "700",
     color: "#fff",
   },

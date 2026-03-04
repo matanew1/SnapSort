@@ -1,12 +1,18 @@
+import { dimensions, scale, scaleFont } from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import { Calendar, Check, ChevronDown, FolderOpen, SlidersHorizontal, X } from "lucide-react-native";
+import {
+  Calendar,
+  Check,
+  FolderOpen,
+  SlidersHorizontal,
+  X,
+} from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
 import {
   Animated,
-  Dimensions,
   Easing,
   Modal,
   ScrollView,
@@ -15,12 +21,23 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { height: SCREEN_HEIGHT } = dimensions;
 
-export type DateRange = "all" | "today" | "thisWeek" | "thisMonth" | "thisYear" | "older";
+export type DateRange =
+  | "all"
+  | "today"
+  | "thisWeek"
+  | "thisMonth"
+  | "thisYear"
+  | "older";
 
-export const DATE_RANGE_OPTIONS: { label: string; value: DateRange; icon: string }[] = [
+export const DATE_RANGE_OPTIONS: {
+  label: string;
+  value: DateRange;
+  icon: string;
+}[] = [
   { label: "All Time", value: "all", icon: "∞" },
   { label: "Today", value: "today", icon: "24h" },
   { label: "This Week", value: "thisWeek", icon: "7d" },
@@ -60,6 +77,7 @@ export function FilterModal({
 }: FilterModalProps) {
   const isDark = useAppStore((s) => s.isDarkMode);
   const Colors = getColors(isDark);
+  const insets = useSafeAreaInsets();
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
 
@@ -95,7 +113,8 @@ export function FilterModal({
     }
   }, [visible]);
 
-  const hasActiveFilter = selectedAlbumId !== null || selectedDateRange !== "all";
+  const hasActiveFilter =
+    selectedAlbumId !== null || selectedDateRange !== "all";
 
   return (
     <Modal
@@ -115,10 +134,7 @@ export function FilterModal({
 
       {/* Sheet */}
       <Animated.View
-        style={[
-          styles.sheet,
-          { transform: [{ translateY: slideAnim }] },
-        ]}
+        style={[styles.sheet, { transform: [{ translateY: slideAnim }] }]}
         pointerEvents={visible ? "auto" : "none"}
       >
         <BlurView
@@ -129,7 +145,11 @@ export function FilterModal({
           <View
             style={[
               styles.sheetInner,
-              { backgroundColor: isDark ? "rgba(13,17,23,0.92)" : "rgba(248,250,255,0.95)" },
+              {
+                backgroundColor: isDark
+                  ? "rgba(13,17,23,0.92)"
+                  : "rgba(248,250,255,0.95)",
+              },
             ]}
           >
             {/* Handle */}
@@ -146,16 +166,27 @@ export function FilterModal({
               <View style={styles.headerRight}>
                 {hasActiveFilter && (
                   <TouchableOpacity
-                    style={[styles.clearButton, { borderColor: Colors.borderLight }]}
+                    style={[
+                      styles.clearButton,
+                      { borderColor: Colors.borderLight },
+                    ]}
                     onPress={onClearFilters}
                   >
-                    <Text style={[styles.clearText, { color: Colors.textSecondary }]}>
+                    <Text
+                      style={[
+                        styles.clearText,
+                        { color: Colors.textSecondary },
+                      ]}
+                    >
                       Clear
                     </Text>
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity
-                  style={[styles.closeButton, { backgroundColor: Colors.surfaceLight }]}
+                  style={[
+                    styles.closeButton,
+                    { backgroundColor: Colors.surfaceLight },
+                  ]}
                   onPress={onClose}
                 >
                   <X size={16} color={Colors.textSecondary} />
@@ -171,7 +202,12 @@ export function FilterModal({
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
                   <Calendar size={16} color={Colors.accent} />
-                  <Text style={[styles.sectionTitle, { color: Colors.textSecondary }]}>
+                  <Text
+                    style={[
+                      styles.sectionTitle,
+                      { color: Colors.textSecondary },
+                    ]}
+                  >
                     DATE RANGE
                   </Text>
                 </View>
@@ -197,7 +233,11 @@ export function FilterModal({
                         <Text
                           style={[
                             styles.chipBadge,
-                            { color: isSelected ? Colors.accent : Colors.textMuted },
+                            {
+                              color: isSelected
+                                ? Colors.accent
+                                : Colors.textMuted,
+                            },
                           ]}
                         >
                           {option.icon}
@@ -205,7 +245,11 @@ export function FilterModal({
                         <Text
                           style={[
                             styles.chipText,
-                            { color: isSelected ? Colors.accent : Colors.textSecondary },
+                            {
+                              color: isSelected
+                                ? Colors.accent
+                                : Colors.textSecondary,
+                            },
                           ]}
                         >
                           {option.label}
@@ -221,7 +265,12 @@ export function FilterModal({
                 <View style={styles.section}>
                   <View style={styles.sectionHeader}>
                     <FolderOpen size={16} color={Colors.accent} />
-                    <Text style={[styles.sectionTitle, { color: Colors.textSecondary }]}>
+                    <Text
+                      style={[
+                        styles.sectionTitle,
+                        { color: Colors.textSecondary },
+                      ]}
+                    >
                       ALBUMS
                     </Text>
                   </View>
@@ -292,14 +341,22 @@ export function FilterModal({
                           <View style={styles.albumIcon}>
                             <FolderOpen
                               size={18}
-                              color={isSelected ? Colors.accent : Colors.textSecondary}
+                              color={
+                                isSelected
+                                  ? Colors.accent
+                                  : Colors.textSecondary
+                              }
                             />
                           </View>
                           <View style={styles.albumInfo}>
                             <Text
                               style={[
                                 styles.albumName,
-                                { color: isSelected ? Colors.accent : Colors.text },
+                                {
+                                  color: isSelected
+                                    ? Colors.accent
+                                    : Colors.text,
+                                },
                               ]}
                               numberOfLines={1}
                             >
@@ -316,7 +373,9 @@ export function FilterModal({
                               </Text>
                             )}
                           </View>
-                          {isSelected && <Check size={16} color={Colors.accent} />}
+                          {isSelected && (
+                            <Check size={16} color={Colors.accent} />
+                          )}
                         </TouchableOpacity>
                       );
                     })}
@@ -326,10 +385,24 @@ export function FilterModal({
             </ScrollView>
 
             {/* Apply Button */}
-            <View style={styles.footer}>
-              <TouchableOpacity onPress={onApplyFilters} style={styles.applyWrapper}>
+            <View
+              style={[
+                styles.footer,
+                {
+                  paddingBottom:
+                    Math.max(insets.bottom, Spacing.lg) + Spacing.sm,
+                },
+              ]}
+            >
+              <TouchableOpacity
+                onPress={onApplyFilters}
+                style={styles.applyWrapper}
+              >
                 <LinearGradient
-                  colors={[Colors.accent, Colors.accentSecondary ?? Colors.accent]}
+                  colors={[
+                    Colors.accent,
+                    Colors.accentSecondary ?? Colors.accent,
+                  ]}
                   start={[0, 0]}
                   end={[1, 0]}
                   style={styles.applyButton}
@@ -354,27 +427,31 @@ const styles = StyleSheet.create({
   },
   sheet: {
     position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: dimensions.isTablet ? Spacing.xl : 0,
+    left: dimensions.isTablet ? (dimensions.width - scale(500)) / 2 : 0,
+    right: dimensions.isTablet ? (dimensions.width - scale(500)) / 2 : 0,
+    width: dimensions.isTablet ? scale(500) : "100%",
     maxHeight: SCREEN_HEIGHT * 0.85,
+    borderRadius: dimensions.isTablet ? BorderRadius.xxl : 0,
     borderTopLeftRadius: BorderRadius.xxxl,
     borderTopRightRadius: BorderRadius.xxxl,
     overflow: "hidden",
   },
   sheetBlur: {
     flex: 1,
+    borderRadius: dimensions.isTablet ? BorderRadius.xxl : 0,
     borderTopLeftRadius: BorderRadius.xxxl,
     borderTopRightRadius: BorderRadius.xxxl,
     overflow: "hidden",
   },
   sheetInner: {
     flex: 1,
+    borderRadius: dimensions.isTablet ? BorderRadius.xxl : 0,
     borderTopLeftRadius: BorderRadius.xxxl,
     borderTopRightRadius: BorderRadius.xxxl,
   },
   handle: {
-    width: 40,
+    width: scale(40),
     height: 4,
     borderRadius: 2,
     alignSelf: "center",
@@ -394,7 +471,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: scaleFont(20),
     fontWeight: "700",
   },
   headerRight: {
@@ -409,7 +486,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   clearText: {
-    fontSize: 13,
+    fontSize: scaleFont(13),
     fontWeight: "600",
   },
   closeButton: {
@@ -420,7 +497,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   scrollContent: {
-    paddingBottom: Spacing.md,
+    paddingBottom: Spacing.xl * 2,
   },
   section: {
     paddingHorizontal: Spacing.lg,
@@ -433,7 +510,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   sectionTitle: {
-    fontSize: 11,
+    fontSize: scaleFont(11),
     fontWeight: "700",
     letterSpacing: 1.2,
   },
@@ -452,11 +529,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   chipBadge: {
-    fontSize: 11,
+    fontSize: scaleFont(11),
     fontWeight: "700",
   },
   chipText: {
-    fontSize: 13,
+    fontSize: scaleFont(13),
     fontWeight: "600",
   },
   albumList: {
@@ -472,8 +549,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   albumIcon: {
-    width: 36,
-    height: 36,
+    width: scale(36),
+    height: scale(36),
     borderRadius: BorderRadius.md,
     justifyContent: "center",
     alignItems: "center",
@@ -482,11 +559,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   albumName: {
-    fontSize: 15,
+    fontSize: scaleFont(15),
     fontWeight: "600",
   },
   albumCount: {
-    fontSize: 12,
+    fontSize: scaleFont(12),
     marginTop: 1,
   },
   footer: {
@@ -508,10 +585,9 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   applyText: {
-    fontSize: 16,
+    fontSize: scaleFont(16),
     fontWeight: "700",
   },
 });
 
-// Re-export BorderRadius.xxxl fallback
-const extraStyles = StyleSheet.create({});
+// End of FilterModal

@@ -1,8 +1,9 @@
 import { ScreenBackground } from "@/components";
+import { dimensions, moderateScale, scaleFont } from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
-import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -10,7 +11,6 @@ import {
   ArrowLeft,
   Check,
   CheckSquare,
-  Info,
   Square,
   Trash2,
 } from "lucide-react-native";
@@ -18,7 +18,6 @@ import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Dimensions,
   FlatList,
   StyleSheet,
   Text,
@@ -27,9 +26,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const NUM_COLUMNS = 3;
-const GRID_GAP = 3;
+const { width: SCREEN_WIDTH } = dimensions;
+const NUM_COLUMNS = dimensions.isTablet ? 5 : 3;
+const GRID_GAP = moderateScale(3);
 const THUMB_SIZE = (SCREEN_WIDTH - GRID_GAP * (NUM_COLUMNS + 1)) / NUM_COLUMNS;
 
 interface PhotoAsset {
@@ -42,20 +41,23 @@ export default function ReviewScreen() {
   const router = useRouter();
   const isDark = useAppStore((s) => s.isDarkMode);
   const Colors = getColors(isDark);
-  const params = useLocalSearchParams<{ assetIds?: string; assetUris?: string }>();
+  const params = useLocalSearchParams<{
+    assetIds?: string;
+    assetUris?: string;
+  }>();
 
   const assetIds = useMemo(
     () => (params.assetIds ? params.assetIds.split(",").filter(Boolean) : []),
-    [params.assetIds]
+    [params.assetIds],
   );
   const assetUris = useMemo(
     () => (params.assetUris ? params.assetUris.split(",").filter(Boolean) : []),
-    [params.assetUris]
+    [params.assetUris],
   );
 
   const selectedAssets: PhotoAsset[] = useMemo(
     () => assetIds.map((id, i) => ({ id, uri: assetUris[i] ?? "" })),
-    [assetIds, assetUris]
+    [assetIds, assetUris],
   );
 
   const [deselected, setDeselected] = useState<Set<string>>(new Set());
@@ -73,7 +75,7 @@ export default function ReviewScreen() {
   const selectAll = useCallback(() => setDeselected(new Set()), []);
   const deselectAll = useCallback(
     () => setDeselected(new Set(assetIds)),
-    [assetIds]
+    [assetIds],
   );
 
   const toDeleteCount = selectedAssets.length - deselected.size;
@@ -99,14 +101,17 @@ export default function ReviewScreen() {
                 pathname: "/",
                 params: { deletedCount: toDelete.length.toString() },
               });
-            } catch (error) {
-              Alert.alert("Error", "Failed to delete some photos. Please try again.");
+            } catch {
+              Alert.alert(
+                "Error",
+                "Failed to delete some photos. Please try again.",
+              );
             } finally {
               setIsDeleting(false);
             }
           },
         },
-      ]
+      ],
     );
   }, [selectedAssets, deselected, router]);
 
@@ -117,7 +122,10 @@ export default function ReviewScreen() {
         <TouchableOpacity
           style={[
             styles.backButton,
-            { backgroundColor: Colors.surfaceLight, borderColor: Colors.border },
+            {
+              backgroundColor: Colors.surfaceLight,
+              borderColor: Colors.border,
+            },
           ]}
           onPress={() => router.back()}
         >
@@ -128,7 +136,9 @@ export default function ReviewScreen() {
           <Text style={[styles.headerTitle, { color: Colors.text }]}>
             Review Photos
           </Text>
-          <Text style={[styles.headerSubtitle, { color: Colors.textSecondary }]}>
+          <Text
+            style={[styles.headerSubtitle, { color: Colors.textSecondary }]}
+          >
             {toDeleteCount} of {selectedAssets.length} selected
           </Text>
         </View>
@@ -138,7 +148,9 @@ export default function ReviewScreen() {
           style={[
             styles.selectAllButton,
             {
-              backgroundColor: allSelected ? Colors.accentLight : Colors.surfaceLight,
+              backgroundColor: allSelected
+                ? Colors.accentLight
+                : Colors.surfaceLight,
               borderColor: allSelected ? Colors.accent : Colors.border,
             },
           ]}
@@ -156,7 +168,10 @@ export default function ReviewScreen() {
       <View
         style={[
           styles.infoBanner,
-          { backgroundColor: Colors.deleteLight, borderColor: Colors.delete + "30" },
+          {
+            backgroundColor: Colors.deleteLight,
+            borderColor: Colors.delete + "30",
+          },
         ]}
       >
         <AlertTriangle size={14} color={Colors.delete} />
@@ -187,10 +202,7 @@ export default function ReviewScreen() {
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={() => toggleDeselect(item.id)}
-                style={[
-                  styles.thumb,
-                  !isSelected && styles.thumbDeselected,
-                ]}
+                style={[styles.thumb, !isSelected && styles.thumbDeselected]}
               >
                 <Image
                   source={{ uri: item.uri }}
@@ -249,13 +261,17 @@ export default function ReviewScreen() {
       >
         {/* Stats row */}
         <View style={styles.statsRow}>
-          <View style={[styles.statPill, { backgroundColor: Colors.keepLight }]}>
+          <View
+            style={[styles.statPill, { backgroundColor: Colors.keepLight }]}
+          >
             <Check size={12} color={Colors.keep} />
             <Text style={[styles.statText, { color: Colors.keep }]}>
               {deselected.size} keeping
             </Text>
           </View>
-          <View style={[styles.statPill, { backgroundColor: Colors.deleteLight }]}>
+          <View
+            style={[styles.statPill, { backgroundColor: Colors.deleteLight }]}
+          >
             <Trash2 size={12} color={Colors.delete} />
             <Text style={[styles.statText, { color: Colors.delete }]}>
               {toDeleteCount} deleting
@@ -282,7 +298,9 @@ export default function ReviewScreen() {
             ) : (
               <>
                 <Trash2 size={20} color={Colors.white} />
-                <Text style={[styles.deleteButtonText, { color: Colors.white }]}>
+                <Text
+                  style={[styles.deleteButtonText, { color: Colors.white }]}
+                >
                   Permanently Delete {toDeleteCount} Photo
                   {toDeleteCount !== 1 ? "s" : ""}
                 </Text>
@@ -304,8 +322,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   backButton: {
-    width: 42,
-    height: 42,
+    width: moderateScale(42),
+    height: moderateScale(42),
     borderRadius: BorderRadius.md,
     justifyContent: "center",
     alignItems: "center",
@@ -316,17 +334,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: scaleFont(18),
     fontWeight: "700",
   },
   headerSubtitle: {
-    fontSize: 12,
+    fontSize: scaleFont(12),
     marginTop: 2,
     fontWeight: "500",
   },
   selectAllButton: {
-    width: 42,
-    height: 42,
+    width: moderateScale(42),
+    height: moderateScale(42),
     borderRadius: BorderRadius.md,
     justifyContent: "center",
     alignItems: "center",
@@ -344,7 +362,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   infoText: {
-    fontSize: 12,
+    fontSize: scaleFont(12),
     fontWeight: "600",
   },
   grid: {
@@ -425,7 +443,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   statText: {
-    fontSize: 12,
+    fontSize: scaleFont(12),
     fontWeight: "700",
   },
   deleteButtonWrapper: {
@@ -446,7 +464,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   deleteButtonText: {
-    fontSize: 16,
+    fontSize: scaleFont(16),
     fontWeight: "700",
   },
 });

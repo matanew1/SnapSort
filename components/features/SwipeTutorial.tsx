@@ -1,29 +1,32 @@
+import {
+    scale,
+    scaleFont,
+    verticalScale
+} from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import {
-  ArrowLeft,
-  ArrowRight,
-  Heart,
-  Sparkles,
-  Trash2,
-  Undo2,
-  X,
+    ArrowLeft,
+    ArrowRight,
+    Heart,
+    Sparkles,
+    Trash2,
+    Undo2,
+    X,
 } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Animated,
-  Dimensions,
-  Easing,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Animated,
+    Easing,
+    Modal,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 interface TutorialStep {
   id: string;
@@ -92,8 +95,17 @@ export function SwipeTutorial({ visible, onComplete }: SwipeTutorialProps) {
   useEffect(() => {
     if (visible) {
       Animated.parallel([
-        Animated.timing(backdropAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
-        Animated.spring(cardAnim, { toValue: 1, tension: 70, friction: 10, useNativeDriver: true }),
+        Animated.timing(backdropAnim, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.spring(cardAnim, {
+          toValue: 1,
+          tension: 70,
+          friction: 10,
+          useNativeDriver: true,
+        }),
       ]).start();
 
       Animated.loop(
@@ -110,20 +122,37 @@ export function SwipeTutorial({ visible, onComplete }: SwipeTutorialProps) {
             easing: Easing.inOut(Easing.sin),
             useNativeDriver: true,
           }),
-        ])
+        ]),
       ).start();
     }
   }, [visible]);
 
   const animateStepChange = (nextStep: number) => {
     Animated.parallel([
-      Animated.timing(iconAnim, { toValue: 0, duration: 150, useNativeDriver: true }),
-      Animated.timing(contentAnim, { toValue: 0, duration: 150, useNativeDriver: true }),
+      Animated.timing(iconAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(contentAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }),
     ]).start(() => {
       setCurrentStep(nextStep);
       Animated.parallel([
-        Animated.spring(iconAnim, { toValue: 1, tension: 80, friction: 8, useNativeDriver: true }),
-        Animated.timing(contentAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
+        Animated.spring(iconAnim, {
+          toValue: 1,
+          tension: 80,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(contentAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
       ]).start();
     });
   };
@@ -151,8 +180,16 @@ export function SwipeTutorial({ visible, onComplete }: SwipeTutorialProps) {
 
   const handleComplete = () => {
     Animated.parallel([
-      Animated.timing(backdropAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
-      Animated.timing(cardAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
+      Animated.timing(backdropAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
     ]).start(() => {
       setCurrentStep(0);
       onComplete();
@@ -242,7 +279,12 @@ export function SwipeTutorial({ visible, onComplete }: SwipeTutorialProps) {
   };
 
   return (
-    <Modal visible={visible} transparent animationType="none" statusBarTranslucent>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      statusBarTranslucent
+    >
       {/* Backdrop */}
       <Animated.View style={[styles.backdrop, { opacity: backdropAnim }]} />
 
@@ -281,7 +323,12 @@ export function SwipeTutorial({ visible, onComplete }: SwipeTutorialProps) {
           >
             {/* Skip button */}
             <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-              <View style={[styles.skipIcon, { backgroundColor: Colors.surfaceLight }]}>
+              <View
+                style={[
+                  styles.skipIcon,
+                  { backgroundColor: Colors.surfaceLight },
+                ]}
+              >
                 <X size={16} color={Colors.textSecondary} />
               </View>
             </TouchableOpacity>
@@ -311,7 +358,9 @@ export function SwipeTutorial({ visible, onComplete }: SwipeTutorialProps) {
               <Text style={[styles.title, { color: Colors.text }]}>
                 {step.title}
               </Text>
-              <Text style={[styles.description, { color: Colors.textSecondary }]}>
+              <Text
+                style={[styles.description, { color: Colors.textSecondary }]}
+              >
                 {step.description}
               </Text>
             </Animated.View>
@@ -379,9 +428,9 @@ const styles = StyleSheet.create({
   cardWrapper: {
     position: "absolute",
     top: "50%",
-    left: 24,
-    right: 24,
-    transform: [{ translateY: -220 }],
+    left: scale(24),
+    right: scale(24),
+    transform: [{ translateY: verticalScale(-220) }],
     borderRadius: BorderRadius.xxl,
     overflow: "hidden",
   },
@@ -414,9 +463,9 @@ const styles = StyleSheet.create({
   },
   iconCircle: {},
   iconGradient: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
+    width: scale(110),
+    height: scale(110),
+    borderRadius: scale(55),
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
@@ -431,16 +480,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    fontSize: 24,
+    fontSize: scaleFont(24),
     fontWeight: "800",
     textAlign: "center",
     marginBottom: Spacing.sm,
     letterSpacing: -0.5,
   },
   description: {
-    fontSize: 15,
+    fontSize: scaleFont(15),
     textAlign: "center",
-    lineHeight: 23,
+    lineHeight: scaleFont(23),
     marginBottom: Spacing.xl,
   },
   dotsRow: {
@@ -461,9 +510,9 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   navBack: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: scale(48),
+    height: scale(48),
+    borderRadius: scale(24),
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
@@ -487,7 +536,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   nextText: {
-    fontSize: 16,
+    fontSize: scaleFont(16),
     fontWeight: "700",
     color: "#fff",
   },
