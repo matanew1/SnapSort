@@ -1,9 +1,10 @@
 import { BorderRadius, Colors, getColors } from "@/constants/theme";
 import { useAppStore } from "@/store";
+import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
-import { Heart, Trash2 } from "lucide-react-native";
+import { ChevronDown, FolderOpen, Heart, Trash2 } from "lucide-react-native";
 import React from "react";
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Extrapolation,
@@ -23,9 +24,21 @@ interface SwipeCardProps {
   uri: string;
   onSwipe: (direction: "keep" | "delete") => void;
   isTop: boolean;
+  hasActiveFilter?: boolean;
+  getCurrentFilterName?: () => string;
+  onFilterPress?: () => void;
+  onGoBack?: () => void;
 }
 
-export function SwipeCard({ uri, onSwipe, isTop }: SwipeCardProps) {
+export function SwipeCard({ 
+  uri, 
+  onSwipe, 
+  isTop,
+  hasActiveFilter = false,
+  getCurrentFilterName,
+  onFilterPress,
+  onGoBack,
+}: SwipeCardProps) {
   const isDark = useAppStore((s) => s.isDarkMode);
   const Colors = getColors(isDark);
   const translateX = useSharedValue(0);
@@ -140,6 +153,33 @@ export function SwipeCard({ uri, onSwipe, isTop }: SwipeCardProps) {
   return (
     <GestureDetector gesture={panGesture}>
       <Animated.View style={[styles.cardContainer, cardStyle]}>
+        {/* Floating Buttons - Top Row */}
+        {(onFilterPress || onGoBack) && (
+          <View style={styles.topButtonsRow}>         
+            {/* Filter Button */}
+            {onFilterPress && (
+              <BlurView intensity={100} tint="default" style={styles.filterButtonBlur}>
+                <TouchableOpacity
+                  style={styles.filterButton}
+                  onPress={onFilterPress}
+                >
+                  {hasActiveFilter ? (
+                    <ChevronDown size={16} color={Colors.accent} />
+                  ) : (
+                    <FolderOpen size={16} color={Colors.textSecondary} />
+                  )}
+                  <Text style={[
+                    styles.filterButtonText, 
+                    { color: hasActiveFilter ? Colors.accent : Colors.textSecondary }
+                  ]}>
+                    {getCurrentFilterName ? getCurrentFilterName() : "Filter"}
+                  </Text>
+                </TouchableOpacity>
+              </BlurView>
+            )}
+          </View>
+        )}
+
         <Image
           source={{ uri }}
           style={styles.image}
@@ -190,6 +230,34 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 24,
     elevation: 12,
+  },
+  filterButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    backgroundColor: "transparent",
+  },
+  filterButtonBlur: {
+    borderRadius: BorderRadius.full,
+    overflow: "hidden",
+  },
+  topButtonsRow: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    left: 16,
+    zIndex: 100,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  filterButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
   },
   image: {
     width: "100%",
