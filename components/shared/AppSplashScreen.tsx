@@ -1,10 +1,7 @@
-import {
-    scale,
-    scaleFont,
-    verticalScale
-} from "@/constants/responsive";
+import { scale, scaleFont, verticalScale } from "@/constants/responsive";
 import { getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
+import Constants from "expo-constants";
 import { Image } from "expo-image";
 import React, { useEffect, useRef } from "react";
 import { Animated, Easing, StyleSheet, Text, View } from "react-native";
@@ -99,7 +96,7 @@ export function AppSplashScreen() {
       </Animated.View>
 
       <Text style={[styles.footer, { color: Colors.textMuted }]}>
-        SnapSort v1.4.0
+        SnapSort v{Constants.expoConfig?.version ?? "1.0.0"}
       </Text>
     </View>
   );

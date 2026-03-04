@@ -195,6 +195,7 @@ export function FilterModal({
             </View>
 
             <ScrollView
+              style={styles.scrollView}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.scrollContent}
             >
@@ -394,6 +395,11 @@ export function FilterModal({
                 },
               ]}
             >
+              <BlurView
+                intensity={isDark ? 80 : 95}
+                tint={isDark ? "dark" : "light"}
+                style={StyleSheet.absoluteFill}
+              />
               <TouchableOpacity
                 onPress={onApplyFilters}
                 style={styles.applyWrapper}
@@ -431,7 +437,7 @@ const styles = StyleSheet.create({
     left: dimensions.isTablet ? (dimensions.width - scale(500)) / 2 : 0,
     right: dimensions.isTablet ? (dimensions.width - scale(500)) / 2 : 0,
     width: dimensions.isTablet ? scale(500) : "100%",
-    maxHeight: SCREEN_HEIGHT * 0.85,
+    height: SCREEN_HEIGHT * 0.85,
     borderRadius: dimensions.isTablet ? BorderRadius.xxl : 0,
     borderTopLeftRadius: BorderRadius.xxxl,
     borderTopRightRadius: BorderRadius.xxxl,
@@ -496,12 +502,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
-    paddingBottom: Spacing.xl * 2,
+    paddingBottom: Spacing.xl * 6, // Massive padding to ensure it clears the absolute footer
   },
   section: {
-    paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.lg,
+    paddingHorizontal: Spacing.lg * 2,
+    marginBottom: Spacing.lg * 2,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -567,8 +576,14 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.lg,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "rgba(255,255,255,0.1)",
   },
   applyWrapper: {
     borderRadius: BorderRadius.full,
