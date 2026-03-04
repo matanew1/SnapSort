@@ -1,4 +1,7 @@
 import {
+  AIBadge,
+  AISimilarPhotos,
+  AISuggestions,
   EmptyState,
   FilterModal,
   FinishedState,
@@ -9,6 +12,7 @@ import {
 } from "@/components";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import {
+  useAIAnalysis,
   useAppPreferences,
   useHaptics,
   useMediaLibrary,
@@ -58,6 +62,8 @@ export default function HomeScreen() {
   const { hasSeenTutorial, setHasSeenTutorial } = useAppPreferences();
   const [showTutorial, setShowTutorial] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showAISimilarPhotos, setShowAISimilarPhotos] = useState(false);
+  const [dismissedSuggestions, setDismissedSuggestions] = useState(false);
 
   // Animations
   const headerAnim = useRef(new Animated.Value(0)).current;
@@ -96,6 +102,9 @@ export default function HomeScreen() {
     setSelectedDateRange,
   } = useMediaLibrary();
 
+  // AI Analysis
+  const aiAnalysis = useAIAnalysis(photos);
+
   const {
     currentPhotoIndex,
     setCurrentPhotoIndex,
@@ -110,6 +119,33 @@ export default function HomeScreen() {
   const deletedPhotos = useMemo(
     () => photos.filter((p) => selectedPhotosForDelete.includes(p.id)),
     [photos, selectedPhotosForDelete]
+  );
+
+  const currentPhotoAnalysis = useMemo(
+    () => aiAnalysis.analyses[currentPhotoIndex],
+    [aiAnalysis.analyses, currentPhotoIndex]
+  );
+
+  const handleApplySuggestion = useCallback(
+    (photoIds: string[]) => {
+      photoIds.forEach((id) => {
+        addPhotoToDelete(id);
+      });
+      setDismissedSuggestions(true);
+    },
+    [addPhotoToDelete]
+  );
+
+  const handleDeleteSimilarPhotos = useCallback(
+    (photoIds: string[]) => {
+      photoIds.forEach((id) => {
+        if (!selectedPhotosForDelete.includes(id)) {
+          addPhotoToDelete(id);
+        }
+      });
+      setShowAISimilarPhotos(false);
+    },
+    [addPhotoToDelete, selectedPhotosForDelete]
   );
 
   // Animate progress bar
@@ -371,19 +407,51 @@ export default function HomeScreen() {
               <View style={[styles.bgCard, styles.bgCard2, { backgroundColor: Colors.surfaceLight }]} />
             )}
             {photos[currentPhotoIndex] && (
-              <SwipeCard
+              <View style={styles.cardContainer}>
+                {currentPhotoAnalysis && (
+                  <View style={styles.aiBadgeContainer}>
+                    <AIBadge
+                      qualityScore={currentPhotoAnalysis.qualityScore}
+                      isBlurry={currentPhotoAnalysis.isBlurry}
+                      isDark={currentPhotoAnalysis.isDark}
+                      isBurst={currentPhotoAnalysis.isBurst}
+                      suggestDelete={currentPhotoAnalysis.suggestDelete}
+                      reason={currentPhotoAnalysis.reason}
+                    />
+                  </View>
+                )}
+                <SwipeCard
                 key={currentPhotoIndex}
                 uri={photos[currentPhotoIndex].uri}
                 onSwipe={handleSwipe}
                 onFilterPress={() => setShowFilterModal(true)}
                 hasActiveFilter={hasActiveFilter}
                 getCurrentFilterName={getCurrentFilterName}
-                index={currentPhotoIndex}
-              />
+                  index={currentPhotoIndex}
+                />
+              </View>
             )}
           </>
         )}
       </View>
+
+      {/* AI Suggestions */}
+      {!mainContent && !dismissedSuggestions && aiAnalysis.suggestions.length > 0 && (
+        <AISuggestions
+          suggestions={aiAnalysis.suggestions}
+          onApplySuggestion={handleApplySuggestion}
+          onDismiss={() => setDismissedSuggestions(true)}
+        />
+      )}
+
+      {/* AI Similar Photos */}
+      {!mainContent && aiAnalysis.similarityGroups.length > 0 && (
+        <AISimilarPhotos
+          groups={aiAnalysis.similarityGroups}
+          onSelectPhotosForDeletion={handleDeleteSimilarPhotos}
+          onDismiss={() => setShowAISimilarPhotos(false)}
+        />
+      )}
 
       {/* Bottom Controls */}
       {!mainContent && (
@@ -564,6 +632,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  cardContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  aiBadgeContainer: {
+    position: "absolute",
+    top: Spacing.lg,
+    left: Spacing.lg,
+    zIndex: 10,
   },
   bgCard: {
     position: "absolute",
