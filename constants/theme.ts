@@ -1,96 +1,96 @@
 /**
- * SnapSort Native — Dark premium theme
+ * SnapSort Native — Modern Theme
  */
 
 export const Colors = {
-  // Base colors
-  background: "#0B1020",
-  surface: "#0F1724",
-  surfaceLight: "#111827",
-  card: "#0F1724",
+  // Base colors - Deep navy with warm undertones
+  background: "#0A0E1A",
+  surface: "#131720",
+  surfaceLight: "#1A1F2E",
+  card: "#131720",
 
-  // Text colors
-  text: "#F0F0F5",
-  textSecondary: "#8888A0",
-  textMuted: "#55556A",
+  // Text colors - High contrast for readability
+  text: "#FFFFFF",
+  textSecondary: "#94A3B8",
+  textMuted: "#64748B",
 
-  // Action colors (SnapSort specific)
-  keep: "#10B981",
-  keepLight: "rgba(16, 185, 129, 0.12)",
-  keepGlow: "rgba(16, 185, 129, 0.36)",
+  // Action colors (SnapSort specific) - Vibrant and energetic
+  keep: "#06D6A0",
+  keepLight: "rgba(6, 214, 160, 0.15)",
+  keepGlow: "rgba(6, 214, 160, 0.4)",
 
-  delete: "#FB6F66",
-  deleteLight: "rgba(251, 111, 102, 0.12)",
-  deleteGlow: "rgba(251, 111, 102, 0.36)",
+  delete: "#FF6B6B",
+  deleteLight: "rgba(255, 107, 107, 0.15)",
+  deleteGlow: "rgba(255, 107, 107, 0.4)",
 
-  // Component colors
-  primary: "#7C3AED",
-  secondary: "#06B6D4",
+  // Component colors - Modern and accessible
+  primary: "#3B82F6",
+  secondary: "#14B8A6",
   danger: "#EF4444",
-  success: "#22C55E",
+  success: "#10B981",
   warning: "#F59E0B",
-  disabled: "#3F3F4A",
+  disabled: "#334155",
 
-  // Supporting colors
-  accent: "#7C3AED",
-  accentLight: "rgba(124, 58, 237, 0.12)",
+  // Supporting colors - Bright blue accent
+  accent: "#3B82F6",
+  accentLight: "rgba(59, 130, 246, 0.15)",
 
-  // Gradient presets
-  gradientStart: "#070409",
-  gradientEnd: "#582da3",
-  gradientAltStart: "#FB6F66",
-  gradientAltEnd: "#F97316",
+  // Gradient presets - Sophisticated and modern
+  gradientStart: "#0A0E1A",
+  gradientEnd: "#1E293B",
+  gradientAltStart: "#FF6B6B",
+  gradientAltEnd: "#FF8E53",
 
   // UI colors
-  border: "rgba(255, 255, 255, 0.06)",
-  overlay: "rgba(0, 0, 0, 0.7)",
+  border: "rgba(255, 255, 255, 0.08)",
+  overlay: "rgba(0, 0, 0, 0.75)",
 
   white: "#FFFFFF",
   black: "#000000",
 };
 
 export const LightColors = {
-  // Base colors
-  background: "#F7F9FC",
+  // Base colors - Clean and airy
+  background: "#F8FAFC",
   surface: "#FFFFFF",
-  surfaceLight: "#F3F4F6",
+  surfaceLight: "#F1F5F9",
   card: "#FFFFFF",
 
-  // Text colors
-  text: "#0B1220",
+  // Text colors - Optimized contrast
+  text: "#0F172A",
   textSecondary: "#475569",
-  textMuted: "#6B7280",
+  textMuted: "#64748B",
 
-  // Action colors
+  // Action colors - Vibrant but pleasant
   keep: "#059669",
-  keepLight: "rgba(5,150,105,0.12)",
-  keepGlow: "rgba(5,150,105,0.28)",
+  keepLight: "rgba(5, 150, 105, 0.1)",
+  keepGlow: "rgba(5, 150, 105, 0.25)",
 
-  delete: "#DC2626",
-  deleteLight: "rgba(220,38,38,0.10)",
-  deleteGlow: "rgba(220,38,38,0.22)",
+  delete: "#EF4444",
+  deleteLight: "rgba(239, 68, 68, 0.1)",
+  deleteGlow: "rgba(239, 68, 68, 0.25)",
 
   // Component colors
-  primary: "#5B21B6",
-  secondary: "#0891B2",
+  primary: "#2563EB",
+  secondary: "#0D9488",
   danger: "#DC2626",
   success: "#059669",
-  warning: "#B45309",
-  disabled: "#9CA3AF",
+  warning: "#D97706",
+  disabled: "#CBD5E1",
 
   // Supporting colors
-  accent: "#5B21B6",
-  accentLight: "rgba(91,33,182,0.12)",
+  accent: "#2563EB",
+  accentLight: "rgba(37, 99, 235, 0.1)",
 
   // Gradient presets
-  gradientStart: "#5B21B6",
-  gradientEnd: "#0891B2",
-  gradientAltStart: "#DC2626",
+  gradientStart: "#EFF6FF",
+  gradientEnd: "#DBEAFE",
+  gradientAltStart: "#EF4444",
   gradientAltEnd: "#FB923C",
 
   // UI colors
-  border: "rgba(2,6,23,0.06)",
-  overlay: "rgba(0,0,0,0.05)",
+  border: "rgba(15, 23, 42, 0.08)",
+  overlay: "rgba(0, 0, 0, 0.1)",
 
   white: "#FFFFFF",
   black: "#000000",
