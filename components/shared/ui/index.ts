@@ -1,3 +1,2 @@
-// UI Components
-// (No active UI components currently in use)
-
+export { GradientButton } from "./GradientButton";
+export { IconButton } from "./IconButton";
