@@ -1,5 +1,5 @@
 import {
-  AIBadge, AISimilarPhotos, AISuggestions, EmptyState, FilterModal,
+  EmptyState, FilterModal,
   FinishedState, LoadingState, ScreenBackground, SwipeCard, SwipeTutorial,
 } from "@/components";
 import { dimensions, scale, scaleFont, verticalScale } from "@/constants/responsive";
@@ -9,7 +9,7 @@ import { useAppStore } from "@/store";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { Heart, RotateCcw, Settings, SlidersHorizontal, Sparkles, Trash2, Wand2 } from "lucide-react-native";
+import { Heart, RotateCcw, Settings, SlidersHorizontal, Sparkles, Trash2 } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Easing, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -34,8 +34,6 @@ export default function HomeScreen() {
   const { hasSeenTutorial, setHasSeenTutorial } = useAppPreferences();
   const [showTutorial, setShowTutorial] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [showAISimilarPhotos, setShowAISimilarPhotos] = useState(false);
-  const [dismissedSuggestions, setDismissedSuggestions] = useState(false);
 
   const headerAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
@@ -74,16 +72,6 @@ export default function HomeScreen() {
     () => aiAnalysis.analyses[currentPhotoIndex],
     [aiAnalysis.analyses, currentPhotoIndex],
   );
-
-  const handleApplySuggestion = useCallback((photoIds: string[]) => {
-    photoIds.forEach((id) => addPhotoToDelete(id));
-    setDismissedSuggestions(true);
-  }, [addPhotoToDelete]);
-
-  const handleDeleteSimilarPhotos = useCallback((photoIds: string[]) => {
-    photoIds.forEach((id) => { if (!selectedPhotosForDelete.includes(id)) addPhotoToDelete(id); });
-    setShowAISimilarPhotos(false);
-  }, [addPhotoToDelete, selectedPhotosForDelete]);
 
   useEffect(() => {
     const progress = photos.length > 0 ? currentPhotoIndex / photos.length : 0;
@@ -200,16 +188,16 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.headerRight}>
-          {/* 🦄 Memory Reel
+          {/* 🦄 Memory Reel */}
           <TouchableOpacity
             style={[styles.iconButton, {
-              backgroundColor: highlightCount > 0 ? "rgba(174,64,255,0.12)" : Colors.surfaceLight,
-              borderColor: highlightCount > 0 ? "rgba(174,64,255,0.4)" : Colors.border,
+              backgroundColor: hasActiveFilter ? Colors.accentLight : Colors.surfaceLight,
+              borderColor: hasActiveFilter ? Colors.accent : Colors.border,
             }]}
             onPress={() => router.push("/highlights")}
           >
-            <Sparkles size={18} color={highlightCount > 0 ? "#AE40FF" : Colors.textSecondary} />
-          </TouchableOpacity> */}
+            <Sparkles size={18} color={hasActiveFilter ? Colors.accent : Colors.textSecondary} />
+          </TouchableOpacity>
 
           {/* Filter */}
           <TouchableOpacity
@@ -220,14 +208,6 @@ export default function HomeScreen() {
             onPress={() => setShowFilterModal(true)}
           >
             <SlidersHorizontal size={18} color={hasActiveFilter ? Colors.accent : Colors.textSecondary} />
-          </TouchableOpacity>
-
-          {/* Magic Eraser */}
-          <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: Colors.surfaceLight, borderColor: Colors.border }]}
-            onPress={() => router.push("/eraser")}
-          >
-            <Wand2 size={18} color={Colors.textSecondary} />
           </TouchableOpacity>
 
           {/* Settings */}
@@ -266,34 +246,12 @@ export default function HomeScreen() {
             )}
             {photos[currentPhotoIndex] && (
               <View style={styles.cardContainer}>
-                {currentPhotoAnalysis && (
-                  <View style={styles.aiBadgeContainer}>
-                    <AIBadge
-                      qualityScore={currentPhotoAnalysis.qualityScore}
-                      isBlurry={currentPhotoAnalysis.isBlurry}
-                      isDark={currentPhotoAnalysis.isDark}
-                      isBurst={currentPhotoAnalysis.isBurst}
-                      suggestDelete={currentPhotoAnalysis.suggestDelete}
-                      reason={currentPhotoAnalysis.reason}
-                    />
-                  </View>
-                )}
                 <SwipeCard key={currentPhotoIndex} uri={photos[currentPhotoIndex].uri} onSwipe={handleSwipe} index={currentPhotoIndex} />
               </View>
             )}
           </>
         )}
       </View>
-
-      {/* AI Suggestions */}
-      {!mainContent && !dismissedSuggestions && aiAnalysis.suggestions.length > 0 && (
-        <AISuggestions suggestions={aiAnalysis.suggestions} onApplySuggestion={handleApplySuggestion} onDismiss={() => setDismissedSuggestions(true)} />
-      )}
-
-      {/* AI Similar Photos */}
-      {!mainContent && aiAnalysis.similarityGroups.length > 0 && (
-        <AISimilarPhotos groups={aiAnalysis.similarityGroups} onSelectPhotosForDeletion={handleDeleteSimilarPhotos} onDismiss={() => setShowAISimilarPhotos(false)} />
-      )}
 
       {/* Bottom controls */}
       {!mainContent && (

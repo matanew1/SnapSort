@@ -2,7 +2,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   analyzePhotoQuality,
-  batchAnalyzePhotos,
   detectSimilarPhotos,
   generateCleanupSuggestions,
   PhotoAnalysis,

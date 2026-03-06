@@ -61,7 +61,6 @@ export default function RootLayout() {
           <Stack.Screen name="index" />
           <Stack.Screen name="review" options={{ animation: "slide_from_bottom", gestureEnabled: false }} />
           <Stack.Screen name="settings" options={{ animation: "slide_from_right" }} />
-          <Stack.Screen name="eraser" options={{ animation: "slide_from_right" }} />
           <Stack.Screen name="highlights" options={{ animation: "fade", contentStyle: { backgroundColor: "#000" } }} />
         </Stack>
       </ErrorBoundary>

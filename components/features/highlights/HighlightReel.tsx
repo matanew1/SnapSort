@@ -1,9 +1,9 @@
-import { dimensions, scale, scaleFont } from "@/constants/responsive";
-import { BorderRadius, getColors, Spacing } from "@/constants/theme";
+import { scale, scaleFont } from "@/constants/responsive";
+import { BorderRadius, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { Calendar, ChevronLeft, ChevronRight, Pause, Play, Sparkles, Star } from "lucide-react-native";
+import { Calendar, ChevronLeft, ChevronRight, Sparkles, Star } from "lucide-react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
@@ -48,9 +48,7 @@ function formatDate(creationTime: number): string {
 
 export function HighlightReel({ photos, onClose }: HighlightReelProps) {
   const insets = useSafeAreaInsets();
-  const isDark = useAppStore((s) => s.isDarkMode);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const photoOpacity = useSharedValue(0);
@@ -85,16 +83,6 @@ export function HighlightReel({ photos, onClose }: HighlightReelProps) {
   }, [photos.length, animateIn]);
 
   useEffect(() => { animateIn(0); }, []);
-
-  useEffect(() => {
-    if (isPlaying) {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => navigate("next"), AUTO_ADVANCE_MS);
-    } else {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    }
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [isPlaying, currentIndex]);
 
   const swipeGesture = Gesture.Pan().minDistance(30).onEnd((e) => {
     if (Math.abs(e.translationX) > Math.abs(e.translationY)) {
@@ -184,9 +172,6 @@ export function HighlightReel({ photos, onClose }: HighlightReelProps) {
           </View>
         </View>
         <View style={styles.actionsRow}>
-          <TouchableOpacity onPress={() => setIsPlaying((v) => !v)} style={styles.playBtn}>
-            {isPlaying ? <Pause size={20} color="#fff" /> : <Play size={20} color="#fff" fill="#fff" />}
-          </TouchableOpacity>
           <View style={styles.flex} />
           <View style={styles.aiBadge}>
             <Sparkles size={11} color="#AE40FF" />
@@ -227,7 +212,6 @@ const styles = StyleSheet.create({
   counterText: { fontSize: scaleFont(16), fontWeight: "800", color: "#fff" },
   counterTotal: { fontSize: scaleFont(13), color: "rgba(255,255,255,0.5)", fontWeight: "500" },
   actionsRow: { flexDirection: "row", alignItems: "center", gap: Spacing.sm },
-  playBtn: { width: scale(44), height: scale(44), borderRadius: scale(22), backgroundColor: "rgba(255,255,255,0.15)", borderWidth: 1, borderColor: "rgba(255,255,255,0.2)", justifyContent: "center", alignItems: "center" },
   aiBadge: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: Spacing.md, paddingVertical: 6, backgroundColor: "rgba(174,64,255,0.2)", borderRadius: BorderRadius.full, borderWidth: 1, borderColor: "rgba(174,64,255,0.4)" },
   aiBadgeText: { fontSize: scaleFont(11), fontWeight: "700", color: "#AE40FF" },
 });

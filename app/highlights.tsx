@@ -3,13 +3,11 @@ import { LoadingState } from "@/components/features";
 import { ScreenBackground } from "@/components";
 import { useAIAnalysis } from "@/hooks/useAIAnalysis";
 import { useMediaLibrary } from "@/hooks/useMediaLibrary";
-import { getColors, Spacing } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { scaleFont } from "@/constants/responsive";
-import { useAppStore } from "@/store";
 import { useRouter } from "expo-router";
-import { Sparkles } from "lucide-react-native";
 import React, { useMemo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 const MIN_QUALITY = 60;
@@ -17,8 +15,6 @@ const MAX_HIGHLIGHTS = 20;
 
 export default function HighlightsScreen() {
   const router = useRouter();
-  const isDark = useAppStore((s) => s.isDarkMode);
-  const Colors = getColors(isDark);
 
   const { photos, loading: photosLoading } = useMediaLibrary();
   const { analyses, loading: analysisLoading } = useAIAnalysis(photos);
@@ -58,17 +54,6 @@ export default function HighlightsScreen() {
           onClose={() => router.back()}
         />
       </Animated.View>
-
-      {highlights.length > 0 && (
-        <Animated.View
-          entering={FadeIn.delay(200).duration(400)}
-          style={styles.reelLabel}
-          pointerEvents="none"
-        >
-          <Sparkles size={14} color="#AE40FF" />
-          <Text style={styles.reelLabelText}>Your Top {highlights.length} Shots</Text>
-        </Animated.View>
-      )}
     </View>
   );
 }
