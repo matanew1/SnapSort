@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.1](https://github.com/matanew1/SnapSort/compare/v1.8.0...v1.8.1) (2026-03-06)
+
+
+### Bug Fixes
+
+* remove some problematic and heavy features ([40ce6de](https://github.com/matanew1/SnapSort/commit/40ce6de30f592557741e135c04db0f779b919632))
+
 ## [1.8.0](https://github.com/matanew1/SnapSort/compare/v1.7.4...v1.8.0) (2026-03-06)
 
 ### [1.7.4](https://github.com/matanew1/SnapSort/compare/v1.7.3...v1.7.4) (2026-03-06)
