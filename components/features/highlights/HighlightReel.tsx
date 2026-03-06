@@ -1,14 +1,12 @@
 import { scale, scaleFont } from "@/constants/responsive";
 import { BorderRadius, Spacing } from "@/constants/theme";
-import { useAppStore } from "@/store";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Calendar, ChevronLeft, ChevronRight, Sparkles, Star } from "lucide-react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-reanimated";
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const AUTO_ADVANCE_MS = 4500;
@@ -27,6 +25,21 @@ export interface HighlightPhoto {
   qualityScore: number;
   creationTime: number;
   filename: string;
+  uniquenessText?: string;
+  megapixels?: number;
+  aspectRatio?: number;
+  fileSizeKB?: number;
+  isBlurry?: boolean;
+  isDark?: boolean;
+  isOverexposed?: boolean;
+  isBurst?: boolean;
+  // Enhanced data
+  exposure?: "balanced" | "dark" | "bright";
+  composition?: "portrait" | "landscape" | "square" | "panorama" | "standard";
+  lighting?: "natural" | "artificial" | "low" | "harsh" | "golden_hour" | "blue_hour";
+  hasFace?: boolean;
+  isPanorama?: boolean;
+  colorVibrancy?: "vibrant" | "muted" | "neutral";
 }
 
 interface HighlightReelProps {
@@ -44,6 +57,118 @@ function qualityStars(score: number): number {
 
 function formatDate(creationTime: number): string {
   return new Date(creationTime).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+function generateUniquenessText(photo: HighlightPhoto): string {
+  const parts: string[] = [];
+  
+  // Add uniqueness text from analysis if available
+  if (photo.uniquenessText) {
+    return photo.uniquenessText;
+  }
+  
+  // Generate uniqueness based on megapixels (resolution quality)
+  if (photo.megapixels) {
+    if (photo.megapixels >= 12) {
+      parts.push("Ultra HD");
+    } else if (photo.megapixels >= 8) {
+      parts.push("High Res");
+    } else if (photo.megapixels >= 4) {
+      parts.push("Good Res");
+    } else if (photo.megapixels >= 2) {
+      parts.push("Standard Res");
+    }
+  }
+  
+  // Add composition type
+  if (photo.composition) {
+    const compLabels: Record<string, string> = {
+      portrait: "Portrait",
+      landscape: "Landscape",
+      square: "Square",
+      panorama: "Panorama",
+      standard: "Standard"
+    };
+    if (photo.composition === "panorama" || photo.isPanorama) {
+      parts.push("Panorama");
+    } else if (photo.composition !== "standard") {
+      parts.push(compLabels[photo.composition]);
+    }
+  }
+  
+  // Add lighting conditions
+  if (photo.lighting) {
+    const lightingLabels: Record<string, string> = {
+      natural: "Natural Light",
+      artificial: "Artificial Light",
+      low: "Low Light",
+      harsh: "Harsh Light",
+      golden_hour: "Golden Hour",
+      blue_hour: "Blue Hour"
+    };
+    if (photo.lighting !== "natural" && photo.lighting !== "artificial") {
+      parts.push(lightingLabels[photo.lighting]);
+    }
+  }
+  
+  // Add exposure info
+  if (photo.exposure && photo.exposure !== "balanced") {
+    if (photo.exposure === "dark") {
+      parts.push("Moody");
+    } else if (photo.exposure === "bright") {
+      parts.push("Bright");
+    }
+  }
+  
+  // Add color vibrancy
+  if (photo.colorVibrancy) {
+    const vibrancyLabels: Record<string, string> = {
+      vibrant: "Vibrant Colors",
+      muted: "Muted Tones",
+      neutral: "Neutral"
+    };
+    if (photo.colorVibrancy === "vibrant") {
+      parts.push("Vibrant");
+    } else if (photo.colorVibrancy === "muted") {
+      parts.push("Muted");
+    }
+  }
+  
+  // Add face detection
+  if (photo.hasFace) {
+    parts.push("Portrait");
+  }
+  
+  // Burst photo indicator
+  if (photo.isBurst) {
+    parts.push("Best in Burst");
+  }
+  
+  // File size based detail indicator
+  if (photo.fileSizeKB && photo.fileSizeKB > 5000) {
+    parts.push("High Detail");
+  } else if (photo.fileSizeKB && photo.fileSizeKB > 2000) {
+    parts.push("Detailed");
+  }
+  
+  // Overall quality assessment (only if no other info)
+  if (parts.length === 0 || parts.every(p => 
+    p.includes("Res") || p.includes("Standard") || 
+    p.includes("Portrait") || p.includes("Landscape") ||
+    p.includes("Square") || p.includes("Panorama")
+  )) {
+    if (photo.qualityScore >= 90) {
+      parts.push("Exceptional");
+    } else if (photo.qualityScore >= 80) {
+      parts.push("Excellent");
+    } else if (photo.qualityScore >= 70) {
+      parts.push("Great Shot");
+    } else if (photo.qualityScore >= 60) {
+      parts.push("Good Shot");
+    }
+  }
+  
+  return parts.slice(0, 3).join(" • ");
 }
 
 export function HighlightReel({ photos, onClose }: HighlightReelProps) {
@@ -166,6 +291,42 @@ export function HighlightReel({ photos, onClose }: HighlightReelProps) {
               <Calendar size={11} color="rgba(255,255,255,0.6)" />
               <Text style={styles.dateText}>{photo ? formatDate(photo.creationTime) : ""}</Text>
             </View>
+            {photo && (
+              <>
+                <Text style={styles.uniquenessText}>
+                  {generateUniquenessText(photo)}
+                </Text>
+                <View style={styles.techRow}>
+                  {photo.megapixels && (
+                    <Text style={styles.techText}>
+                      {photo.megapixels.toFixed(1)}MP
+                    </Text>
+                  )}
+                  {photo.exposure && photo.exposure !== "balanced" && (
+                    <Text style={styles.techText}>
+                      {photo.exposure === "dark" ? "🌙" : "☀️"}
+                    </Text>
+                  )}
+                  {photo.lighting && photo.lighting !== "natural" && photo.lighting !== "artificial" && (
+                    <Text style={styles.techText}>
+                      {photo.lighting === "golden_hour" ? "🌅" : photo.lighting === "blue_hour" ? "🌆" : photo.lighting === "low" ? "暗" : "💡"}
+                    </Text>
+                  )}
+                  {photo.colorVibrancy && photo.colorVibrancy === "vibrant" && (
+                    <Text style={styles.techText}>🎨</Text>
+                  )}
+                  {photo.hasFace && (
+                    <Text style={styles.techText}>👤</Text>
+                  )}
+                  {photo.isPanorama && (
+                    <Text style={styles.techText}>🌐</Text>
+                  )}
+                  {photo.isBurst && (
+                    <Text style={styles.techText}>📸</Text>
+                  )}
+                </View>
+              </>
+            )}
           </View>
           <View style={styles.counter}>
             <Text style={styles.counterText}>{currentIndex + 1}<Text style={styles.counterTotal}>/{photos.length}</Text></Text>
@@ -208,6 +369,9 @@ const styles = StyleSheet.create({
   scoreText: { fontSize: scaleFont(11), fontWeight: "700", color: "rgba(255,255,255,0.6)", marginLeft: 4 },
   dateRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   dateText: { fontSize: scaleFont(12), color: "rgba(255,255,255,0.6)", fontWeight: "500" },
+  uniquenessText: { fontSize: scaleFont(10), color: "rgba(174,64,255,0.9)", fontWeight: "600", marginTop: 4 },
+  techRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 3 },
+  techText: { fontSize: scaleFont(10), color: "rgba(255,255,255,0.7)" },
   counter: { backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: Spacing.md, paddingVertical: 5, borderRadius: BorderRadius.full },
   counterText: { fontSize: scaleFont(16), fontWeight: "800", color: "#fff" },
   counterTotal: { fontSize: scaleFont(13), color: "rgba(255,255,255,0.5)", fontWeight: "500" },

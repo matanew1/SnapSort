@@ -23,11 +23,19 @@ export interface PhotoAnalysis {
   isOverexposed: boolean;
   aspectRatio: number;
   megapixels: number;
+  fileSizeKB: number;
   isBurst: boolean;
   burstGroupId?: string;
   isSimilarToNext: boolean;
   suggestDelete: boolean;
   reason?: string;
+  // Enhanced data
+  exposure?: "balanced" | "dark" | "bright";
+  composition?: "portrait" | "landscape" | "square" | "panorama" | "standard";
+  lighting?: "natural" | "artificial" | "low" | "harsh" | "golden_hour" | "blue_hour";
+  hasFace?: boolean;
+  isPanorama?: boolean;
+  colorVibrancy?: "vibrant" | "muted" | "neutral";
 }
 
 export interface SimilarityGroup {
@@ -120,12 +128,89 @@ export async function analyzePhotoQuality(
       reasons.push("Part of burst sequence");
     }
 
+    // Add positive uniqueness reasons for high-quality photos
+    if (qualityScore >= 75) {
+      if (megapixels >= 12) {
+        reasons.push("Ultra High Resolution");
+      } else if (megapixels >= 8) {
+        reasons.push("High Resolution");
+      } else if (megapixels >= 4) {
+        reasons.push("Good Resolution");
+      }
+    }
+
+    // Add positive reasons for good file size
+    if (fileSizeKB > 3000 && qualityScore >= 60) {
+      if (!reasons.some(r => r.includes("Resolution"))) {
+        reasons.push("Detailed Capture");
+      }
+    }
+
+    // Add positive reason for standard aspect ratio with good quality
+    if (isStandardRatio && qualityScore >= 65) {
+      reasons.push("Perfect Aspect Ratio");
+    }
+
+    // Add uniqueness for very high quality
+    if (qualityScore >= 85) {
+      reasons.push("Exceptional Quality");
+    } else if (qualityScore >= 75 && !isBurst && !isBlurry && !isDark && !isOverexposed) {
+      reasons.push("Crisp & Clear");
+    }
+
     // Clamp score to 0-100
     qualityScore = Math.max(0, Math.min(100, qualityScore));
 
     // Determine if should suggest delete
     const suggestDelete =
       qualityScore < 35 || isBlurry || (isDark && qualityScore < 40);
+
+    // Enhanced analysis
+    const exposure: "balanced" | "dark" | "bright" = isDark ? "dark" : isOverexposed ? "bright" : "balanced";
+    
+    // Determine composition based on aspect ratio
+    let composition: "portrait" | "landscape" | "square" | "panorama" | "standard" = "standard";
+    if (aspectRatio < 0.8) {
+      composition = "portrait";
+    } else if (aspectRatio > 2.5) {
+      composition = "panorama";
+    } else if (Math.abs(aspectRatio - 1) < 0.1) {
+      composition = "square";
+    } else if (aspectRatio > 1) {
+      composition = "landscape";
+    }
+    
+    // Detect lighting based on filename and file size
+    let lighting: "natural" | "artificial" | "low" | "harsh" | "golden_hour" | "blue_hour" = "natural";
+    if (photo.filename.toLowerCase().includes("night")) {
+      lighting = "low";
+    } else if (photo.filename.toLowerCase().includes("sunset") || photo.filename.toLowerCase().includes("golden")) {
+      lighting = "golden_hour";
+    } else if (photo.filename.toLowerCase().includes("blue")) {
+      lighting = "blue_hour";
+    } else if (isDark) {
+      lighting = "low";
+    } else if (isOverexposed) {
+      lighting = "harsh";
+    }
+    
+    // Detect face based on filename (placeholder for real face detection)
+    const hasFace = photo.filename.toLowerCase().includes("portrait") || 
+                    photo.filename.toLowerCase().includes("selfie") ||
+                    photo.filename.toLowerCase().includes("face");
+    
+    // Detect panorama
+    const isPanorama = photo.filename.toLowerCase().includes("panorama") || 
+                       photo.filename.toLowerCase().includes(" pano") ||
+                       aspectRatio > 2.5;
+    
+    // Color vibrancy based on file size and quality
+    let colorVibrancy: "vibrant" | "muted" | "neutral" = "neutral";
+    if (fileSizeKB > 4000 && qualityScore >= 70) {
+      colorVibrancy = "vibrant";
+    } else if (fileSizeKB < 200 || isDark) {
+      colorVibrancy = "muted";
+    }
 
     return {
       photoId: photo.id,
@@ -135,13 +220,20 @@ export async function analyzePhotoQuality(
       isOverexposed,
       aspectRatio,
       megapixels,
+      fileSizeKB,
       isBurst,
       burstGroupId: isBurst
         ? `burst_${previousPhoto?.creationTime}`
         : (undefined as any),
-      isSimilarToNext: false, // Will be computed separately
+      isSimilarToNext: false,
       suggestDelete,
       reason: reasons.length > 0 ? reasons.join(", ") : undefined,
+      exposure,
+      composition,
+      lighting,
+      hasFace,
+      isPanorama,
+      colorVibrancy,
     };
   } catch (error) {
     console.error("Error analyzing photo:", error);
@@ -153,9 +245,16 @@ export async function analyzePhotoQuality(
       isOverexposed: false,
       aspectRatio: photo.width / photo.height,
       megapixels: (photo.width * photo.height) / 1000000,
+      fileSizeKB: 0,
       isBurst: false,
       isSimilarToNext: false,
       suggestDelete: false,
+      exposure: "balanced",
+      composition: "standard",
+      lighting: "natural",
+      hasFace: false,
+      isPanorama: false,
+      colorVibrancy: "neutral",
     };
   }
 }

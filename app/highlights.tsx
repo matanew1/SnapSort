@@ -1,10 +1,10 @@
-import { HighlightPhoto, HighlightReel } from "@/components/features/highlights";
-import { LoadingState } from "@/components/features";
 import { ScreenBackground } from "@/components";
+import { LoadingState } from "@/components/features";
+import { HighlightPhoto, HighlightReel } from "@/components/features/highlights";
+import { scaleFont } from "@/constants/responsive";
+import { Spacing } from "@/constants/theme";
 import { useAIAnalysis } from "@/hooks/useAIAnalysis";
 import { useMediaLibrary } from "@/hooks/useMediaLibrary";
-import { Spacing } from "@/constants/theme";
-import { scaleFont } from "@/constants/responsive";
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
@@ -24,13 +24,32 @@ export default function HighlightsScreen() {
   const highlights = useMemo<HighlightPhoto[]>(() => {
     if (photos.length === 0 || analyses.length === 0) return [];
     return photos
-      .map((photo, i) => ({
-        id: photo.id,
-        uri: photo.uri,
-        qualityScore: analyses[i]?.qualityScore ?? 50,
-        creationTime: photo.creationTime,
-        filename: photo.filename,
-      }))
+      .map((photo, i) => {
+        const analysis = analyses[i];
+        
+        return {
+          id: photo.id,
+          uri: photo.uri,
+          qualityScore: analysis?.qualityScore ?? 50,
+          creationTime: photo.creationTime,
+          filename: photo.filename,
+          uniquenessText: undefined, // Will be generated in HighlightReel
+          megapixels: analysis?.megapixels,
+          aspectRatio: analysis?.aspectRatio,
+          fileSizeKB: analysis?.fileSizeKB,
+          isBlurry: analysis?.isBlurry,
+          isDark: analysis?.isDark,
+          isOverexposed: analysis?.isOverexposed,
+          isBurst: analysis?.isBurst,
+          // Enhanced data
+          exposure: analysis?.exposure,
+          composition: analysis?.composition,
+          lighting: analysis?.lighting,
+          hasFace: analysis?.hasFace,
+          isPanorama: analysis?.isPanorama,
+          colorVibrancy: analysis?.colorVibrancy,
+        };
+      })
       .filter((p) => p.qualityScore >= MIN_QUALITY)
       .sort((a, b) => b.qualityScore - a.qualityScore)
       .slice(0, MAX_HIGHLIGHTS);
