@@ -103,7 +103,6 @@ export default function EraserScreen() {
         // Scale coordinates to match canvas size vs displayed size
         const scaleX = canvasRef.current.width / scaledSize.width;
         const scaleY = canvasRef.current.height / scaledSize.height;
-        
         const canvasX = locationX * scaleX;
         const canvasY = locationY * scaleY;
         
