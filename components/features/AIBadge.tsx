@@ -1,5 +1,5 @@
 import {
-    scaleFont
+    scale
 } from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
@@ -130,12 +130,12 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   badgeText: {
-    fontSize: scaleFont(12),
+    fontSize: scale(12),
     fontWeight: "700",
     color: "#fff",
   },
   scoreText: {
-    fontSize: scaleFont(11),
+    fontSize: scale(11),
     fontWeight: "600",
     color: "rgba(255,255,255,0.8)",
   },
@@ -153,11 +153,11 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   issueText: {
-    fontSize: scaleFont(10),
+    fontSize: scale(10),
     fontWeight: "700",
   },
   reasonText: {
-    fontSize: scaleFont(11),
+    fontSize: scale(11),
     marginTop: Spacing.xs,
     fontWeight: "500",
   },

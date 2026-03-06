@@ -33,6 +33,7 @@ import {
   Settings,
   SlidersHorizontal,
   Trash2,
+  Wand2,
 } from "lucide-react-native";
 import React, {
   useCallback,
@@ -386,6 +387,18 @@ export default function HomeScreen() {
           </TouchableOpacity>
 
           {/* Settings button */}
+          <TouchableOpacity
+            style={[
+              styles.iconButton,
+              {
+                backgroundColor: Colors.surfaceLight,
+                borderColor: Colors.border,
+              },
+            ]}
+            onPress={() => router.push("/eraser")}
+          >
+            <Wand2 size={18} color={Colors.textSecondary} />
+          </TouchableOpacity>
           <TouchableOpacity
             style={[
               styles.iconButton,

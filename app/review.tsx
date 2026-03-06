@@ -1,5 +1,5 @@
 import { ScreenBackground } from "@/components";
-import { dimensions, moderateScale, scaleFont } from "@/constants/responsive";
+import { dimensions, scale } from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
 import { Image } from "expo-image";
@@ -28,7 +28,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width: SCREEN_WIDTH } = dimensions;
 const NUM_COLUMNS = dimensions.isTablet ? 5 : 3;
-const GRID_GAP = moderateScale(3);
+const GRID_GAP = scale(3);
 const THUMB_SIZE = (SCREEN_WIDTH - GRID_GAP * (NUM_COLUMNS + 1)) / NUM_COLUMNS;
 
 interface PhotoAsset {
@@ -322,8 +322,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   backButton: {
-    width: moderateScale(42),
-    height: moderateScale(42),
+    width: scale(42),
+    height: scale(42),
     borderRadius: BorderRadius.md,
     justifyContent: "center",
     alignItems: "center",
@@ -334,17 +334,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
-    fontSize: scaleFont(18),
+    fontSize: scale(18),
     fontWeight: "700",
   },
   headerSubtitle: {
-    fontSize: scaleFont(12),
+    fontSize: scale(12),
     marginTop: 2,
     fontWeight: "500",
   },
   selectAllButton: {
-    width: moderateScale(42),
-    height: moderateScale(42),
+    width: scale(42),
+    height: scale(42),
     borderRadius: BorderRadius.md,
     justifyContent: "center",
     alignItems: "center",
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   infoText: {
-    fontSize: scaleFont(12),
+    fontSize: scale(12),
     fontWeight: "600",
   },
   grid: {
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   statText: {
-    fontSize: scaleFont(12),
+    fontSize: scale(12),
     fontWeight: "700",
   },
   deleteButtonWrapper: {
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   deleteButtonText: {
-    fontSize: scaleFont(16),
+    fontSize: scale(16),
     fontWeight: "700",
   },
 });

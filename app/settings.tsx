@@ -1,8 +1,6 @@
 import { ScreenBackground } from "@/components";
 import {
-  moderateScale,
-  scale,
-  scaleFont
+  scale
 } from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useMediaLibrary } from "@/hooks";
@@ -322,8 +320,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   backButton: {
-    width: moderateScale(42),
-    height: moderateScale(42),
+    width: scale(42),
+    height: scale(42),
     borderRadius: BorderRadius.md,
     justifyContent: "center",
     alignItems: "center",
@@ -332,7 +330,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     textAlign: "center",
-    fontSize: scaleFont(18),
+    fontSize: scale(18),
     fontWeight: "700",
   },
   scrollContent: {
@@ -353,12 +351,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
   },
   appName: {
-    fontSize: scaleFont(22),
+    fontSize: scale(22),
     fontWeight: "800",
     letterSpacing: -0.5,
   },
   appVersion: {
-    fontSize: scaleFont(13),
+    fontSize: scale(13),
     fontWeight: "500",
     marginTop: 2,
   },
@@ -367,7 +365,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
   },
   sectionLabel: {
-    fontSize: scaleFont(11),
+    fontSize: scale(11),
     fontWeight: "700",
     letterSpacing: 1.2,
     marginBottom: Spacing.sm,
@@ -400,11 +398,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   rowLabel: {
-    fontSize: scaleFont(15),
+    fontSize: scale(15),
     fontWeight: "600",
   },
   rowSublabel: {
-    fontSize: scaleFont(12),
+    fontSize: scale(12),
     marginTop: 2,
   },
   rowRight: {
@@ -421,7 +419,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   smallButtonText: {
-    fontSize: scaleFont(12),
+    fontSize: scale(12),
     fontWeight: "700",
   },
   footer: {
@@ -430,10 +428,10 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   footerText: {
-    fontSize: scaleFont(13),
+    fontSize: scale(13),
     fontWeight: "500",
   },
   footerVersion: {
-    fontSize: scaleFont(12),
+    fontSize: scale(12),
   },
 });

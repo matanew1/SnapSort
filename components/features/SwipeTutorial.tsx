@@ -1,38 +1,34 @@
-import {
-    scale,
-    scaleFont,
-    verticalScale
-} from "@/constants/responsive";
+import { scale, verticalScale } from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import {
-    ArrowLeft,
-    ArrowRight,
-    Heart,
-    Sparkles,
-    Trash2,
-    Undo2,
-    X,
+  ArrowLeft,
+  ArrowRight,
+  Heart,
+  Sparkles,
+  Trash2,
+  Undo2,
+  X,
 } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    Animated,
-    Easing,
-    Modal,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Animated,
+  Dimensions,
+  Easing,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-
 
 interface TutorialStep {
   id: string;
   title: string;
   description: string;
-  type: "welcome" | "keep" | "trash" | "undo";
+  type: "welcome" | "keep" | "trash" | "undo" | "ai";
   gradientColors: [string, string];
   accentColor: string;
 }
@@ -42,7 +38,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     id: "welcome",
     title: "Welcome to SnapSort",
     description:
-      "The fastest way to declutter your photo library. Swipe through your photos and decide what to keep or delete.",
+      "The fastest way to declutter your photo library. Let's walk you through the basics.",
     type: "welcome",
     gradientColors: ["#6C63FF", "#FF6B9D"],
     accentColor: "#6C63FF",
@@ -60,7 +56,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     id: "trash",
     title: "Swipe Left to Delete",
     description:
-      "Want to remove a photo? Swipe left or tap the trash button. Photos are queued for review before permanent deletion.",
+      "Want to remove a photo? Swipe left or tap the trash button. Don't worry, you can review them before they're gone forever.",
     type: "trash",
     gradientColors: ["#FF4D6D", "#FF8E53"],
     accentColor: "#FF4D6D",
@@ -69,13 +65,45 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     id: "undo",
     title: "Made a Mistake?",
     description:
-      "No worries! Tap the undo button to go back and change your decision on any photo.",
+      "No problem! Just tap the undo button to bring back the last photo you swiped.",
     type: "undo",
     gradientColors: ["#00D4FF", "#6C63FF"],
     accentColor: "#00D4FF",
   },
+  {
+    id: "ai",
+    title: "Powered by AI",
+    description:
+      "SnapSort's AI analyzes your photos to find duplicates, suggest the best shots, and help you organize even faster.",
+    type: "ai",
+    gradientColors: ["#AE40FF", "#8033FF"],
+    accentColor: "#AE40FF",
+  },
 ];
 
+const useOrientation = () => {
+  const [orientation, setOrientation] = useState("portrait");
+
+  useEffect(() => {
+    const updateOrientation = () => {
+      const { width, height } = Dimensions.get("window");
+      if (width < height) {
+        setOrientation("portrait");
+      } else {
+        setOrientation("landscape");
+      }
+    };
+
+    updateOrientation();
+    const subscription = Dimensions.addEventListener("change", updateOrientation);
+
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
+
+  return orientation;
+};
 interface SwipeTutorialProps {
   visible: boolean;
   onComplete: () => void;
@@ -85,82 +113,84 @@ export function SwipeTutorial({ visible, onComplete }: SwipeTutorialProps) {
   const isDark = useAppStore((s) => s.isDarkMode);
   const Colors = getColors(isDark);
   const [currentStep, setCurrentStep] = useState(0);
+  const orientation = useOrientation();
 
   const backdropAnim = useRef(new Animated.Value(0)).current;
   const cardAnim = useRef(new Animated.Value(0)).current;
-  const iconAnim = useRef(new Animated.Value(0)).current;
   const contentAnim = useRef(new Animated.Value(0)).current;
   const floatAnim = useRef(new Animated.Value(0)).current;
+  const iconAnims = useRef(
+    TUTORIAL_STEPS.map(() => new Animated.Value(0))
+  ).current;
 
-  useEffect(() => {
-    if (visible) {
-      Animated.parallel([
-        Animated.timing(backdropAnim, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-        Animated.spring(cardAnim, {
-          toValue: 1,
-          tension: 70,
-          friction: 10,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(floatAnim, {
-            toValue: 1,
-            duration: 1800,
-            easing: Easing.inOut(Easing.sin),
-            useNativeDriver: true,
-          }),
-          Animated.timing(floatAnim, {
-            toValue: 0,
-            duration: 1800,
-            easing: Easing.inOut(Easing.sin),
-            useNativeDriver: true,
-          }),
-        ]),
-      ).start();
-    }
-  }, [visible]);
-
-  const animateStepChange = (nextStep: number) => {
+  const animateIn = () => {
     Animated.parallel([
-      Animated.timing(iconAnim, {
-        toValue: 0,
-        duration: 150,
+      Animated.timing(backdropAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.spring(cardAnim, {
+        toValue: 1,
+        tension: 70,
+        friction: 10,
         useNativeDriver: true,
       }),
       Animated.timing(contentAnim, {
-        toValue: 0,
-        duration: 150,
+        toValue: 1,
+        duration: 400,
+        delay: 200,
         useNativeDriver: true,
       }),
-    ]).start(() => {
-      setCurrentStep(nextStep);
-      Animated.parallel([
-        Animated.spring(iconAnim, {
+    ]).start();
+
+    startIconAnimation(0);
+  };
+
+  const startIconAnimation = (index: number) => {
+    iconAnims[index].setValue(0);
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(iconAnims[index], {
           toValue: 1,
-          tension: 80,
-          friction: 8,
+          duration: 1500,
+          easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
-        Animated.timing(contentAnim, {
-          toValue: 1,
-          duration: 300,
+        Animated.timing(iconAnims[index], {
+          toValue: 0,
+          duration: 1500,
+          easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
-      ]).start();
-    });
+      ])
+    ).start();
   };
 
   useEffect(() => {
-    iconAnim.setValue(1);
-    contentAnim.setValue(1);
-  }, []);
+    if (visible) {
+      animateIn();
+    }
+  }, [visible]);
+
+  useEffect(() => {
+    startIconAnimation(currentStep);
+  }, [currentStep]);
+
+  const animateStepChange = (nextStep: number) => {
+    Animated.timing(contentAnim, {
+      toValue: 0,
+      duration: 150,
+      useNativeDriver: true,
+    }).start(() => {
+      setCurrentStep(nextStep);
+      Animated.timing(contentAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
 
   const handleNext = () => {
     if (currentStep < TUTORIAL_STEPS.length - 1) {
@@ -179,18 +209,11 @@ export function SwipeTutorial({ visible, onComplete }: SwipeTutorialProps) {
   const handleSkip = () => handleComplete();
 
   const handleComplete = () => {
-    Animated.parallel([
-      Animated.timing(backdropAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(cardAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
+    Animated.timing(backdropAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
       setCurrentStep(0);
       onComplete();
     });
@@ -198,85 +221,30 @@ export function SwipeTutorial({ visible, onComplete }: SwipeTutorialProps) {
 
   const step = TUTORIAL_STEPS[currentStep];
 
-  const floatTranslate = floatAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -10],
-  });
-
-  const renderIcon = () => {
-    switch (step.type) {
+  const getIconForStep = (
+    stepType: TutorialStep["type"],
+    size: number,
+    color: string
+  ) => {
+    switch (stepType) {
       case "welcome":
-        return (
-          <Animated.View
-            style={[
-              styles.iconCircle,
-              { transform: [{ translateY: floatTranslate }] },
-            ]}
-          >
-            <LinearGradient
-              colors={step.gradientColors}
-              style={styles.iconGradient}
-            >
-              <Sparkles size={48} color="#fff" />
-            </LinearGradient>
-          </Animated.View>
-        );
+        return <Sparkles size={size} color={color} />;
       case "keep":
-        return (
-          <Animated.View
-            style={[
-              styles.iconCircle,
-              { transform: [{ translateY: floatTranslate }] },
-            ]}
-          >
-            <LinearGradient
-              colors={step.gradientColors}
-              style={styles.iconGradient}
-            >
-              <View style={styles.swipeIconRow}>
-                <ArrowRight size={28} color="#fff" />
-                <Heart size={40} color="#fff" fill="#fff" />
-              </View>
-            </LinearGradient>
-          </Animated.View>
-        );
+        return <Heart size={size} color={color} />;
       case "trash":
-        return (
-          <Animated.View
-            style={[
-              styles.iconCircle,
-              { transform: [{ translateY: floatTranslate }] },
-            ]}
-          >
-            <LinearGradient
-              colors={step.gradientColors}
-              style={styles.iconGradient}
-            >
-              <View style={styles.swipeIconRow}>
-                <Trash2 size={40} color="#fff" />
-                <ArrowLeft size={28} color="#fff" />
-              </View>
-            </LinearGradient>
-          </Animated.View>
-        );
+        return <Trash2 size={size} color={color} />;
       case "undo":
-        return (
-          <Animated.View
-            style={[
-              styles.iconCircle,
-              { transform: [{ translateY: floatTranslate }] },
-            ]}
-          >
-            <LinearGradient
-              colors={step.gradientColors}
-              style={styles.iconGradient}
-            >
-              <Undo2 size={48} color="#fff" />
-            </LinearGradient>
-          </Animated.View>
-        );
+        return <Undo2 size={size} color={color} />;
+      case "ai":
+        return <Sparkles size={size} color={color} />;
+      default:
+        return null;
     }
   };
+
+  const isLandscape = orientation === "landscape";
+  const cardWidth = isLandscape ? "60%" : "100%";
+  const cardPadding = isLandscape ? Spacing.lg : Spacing.xl;
 
   return (
     <Modal
@@ -285,137 +253,164 @@ export function SwipeTutorial({ visible, onComplete }: SwipeTutorialProps) {
       animationType="none"
       statusBarTranslucent
     >
-      {/* Backdrop */}
       <Animated.View style={[styles.backdrop, { opacity: backdropAnim }]} />
 
-      {/* Card */}
-      <Animated.View
-        style={[
-          styles.cardWrapper,
-          {
-            opacity: cardAnim,
-            transform: [
-              {
-                scale: cardAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.85, 1],
-                }),
-              },
-            ],
-          },
-        ]}
-      >
-        <BlurView
-          intensity={isDark ? 40 : 60}
-          tint={isDark ? "dark" : "light"}
-          style={styles.cardBlur}
-        >
-          <View
-            style={[
-              styles.card,
-              {
-                backgroundColor: isDark
-                  ? "rgba(13,17,23,0.95)"
-                  : "rgba(255,255,255,0.97)",
-                borderColor: Colors.borderLight,
-              },
-            ]}
-          >
-            {/* Skip button */}
-            <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-              <View
-                style={[
-                  styles.skipIcon,
-                  { backgroundColor: Colors.surfaceLight },
-                ]}
-              >
-                <X size={16} color={Colors.textSecondary} />
-              </View>
-            </TouchableOpacity>
-
-            {/* Icon */}
-            <Animated.View
-              style={[
-                styles.iconWrapper,
+      <View style={styles.container}>
+        <Animated.View
+          style={[
+            styles.cardWrapper,
+            {
+              width: cardWidth,
+              opacity: cardAnim,
+              transform: [
                 {
-                  opacity: iconAnim,
-                  transform: [
-                    {
-                      scale: iconAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0.7, 1],
-                      }),
-                    },
-                  ],
+                  translateY: cardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [isLandscape ? 50 : 100, 0],
+                  }),
+                },
+                {
+                  scale: cardAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.9, 1],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <BlurView
+            intensity={isDark ? 50 : 80}
+            tint={isDark ? "dark" : "light"}
+            style={styles.cardBlur}
+          >
+            <View
+              style={[
+                styles.card,
+                {
+                  padding: cardPadding,
+                  backgroundColor: Colors.background,
+                  borderColor: Colors.border,
                 },
               ]}
             >
-              {renderIcon()}
-            </Animated.View>
-
-            {/* Content */}
-            <Animated.View style={{ opacity: contentAnim, width: "100%" }}>
-              <Text style={[styles.title, { color: Colors.text }]}>
-                {step.title}
-              </Text>
-              <Text
-                style={[styles.description, { color: Colors.textSecondary }]}
+              <TouchableOpacity
+                style={[
+                  styles.skipButton,
+                  { backgroundColor: Colors.surfaceLight },
+                ]}
+                onPress={handleSkip}
               >
-                {step.description}
-              </Text>
-            </Animated.View>
-
-            {/* Progress dots */}
-            <View style={styles.dotsRow}>
-              {TUTORIAL_STEPS.map((_, i) => (
-                <Animated.View
-                  key={i}
-                  style={[
-                    styles.dot,
-                    {
-                      backgroundColor:
-                        i === currentStep ? step.accentColor : Colors.border,
-                      width: i === currentStep ? 24 : 8,
-                    },
-                  ]}
-                />
-              ))}
-            </View>
-
-            {/* Navigation */}
-            <View style={styles.nav}>
-              {currentStep > 0 ? (
-                <TouchableOpacity
-                  style={[styles.navBack, { borderColor: Colors.borderLight }]}
-                  onPress={handlePrevious}
-                >
-                  <ArrowLeft size={20} color={Colors.text} />
-                </TouchableOpacity>
-              ) : (
-                <View style={{ width: 48 }} />
-              )}
-
-              <TouchableOpacity onPress={handleNext} style={styles.nextWrapper}>
-                <LinearGradient
-                  colors={step.gradientColors}
-                  start={[0, 0]}
-                  end={[1, 0]}
-                  style={styles.nextButton}
-                >
-                  <Text style={styles.nextText}>
-                    {currentStep === TUTORIAL_STEPS.length - 1
-                      ? "Get Started"
-                      : "Next"}
-                  </Text>
-                  {currentStep < TUTORIAL_STEPS.length - 1 && (
-                    <ArrowRight size={18} color="#fff" />
-                  )}
-                </LinearGradient>
+                <X size={scale(18)} color={Colors.textSecondary} />
               </TouchableOpacity>
+
+              <View style={styles.header}>
+                <View style={styles.iconContainer}>
+                  {TUTORIAL_STEPS.map((s, index) => {
+                    const isCurrent = currentStep === index;
+                    const anim = iconAnims[index];
+
+                    const opacity = anim.interpolate({
+                      inputRange: [0, 0.5, 1],
+                      outputRange: [0.5, 1, 0.5],
+                    });
+                    const scaleAnim = anim.interpolate({
+                      inputRange: [0, 0.5, 1],
+                      outputRange: [1, 1.2, 1],
+                    });
+                    return (
+                      <Animated.View
+                        key={s.id}
+                        style={[
+                          styles.icon,
+                          {
+                            backgroundColor: isCurrent
+                              ? s.accentColor
+                              : Colors.surface,
+                            opacity: isCurrent ? 1 : opacity,
+                            transform: [{ scale: isCurrent ? 1 : scaleAnim }],
+                          },
+                        ]}
+                      >
+                        {getIconForStep(
+                          s.type,
+                          scale(24),
+                          isCurrent ? "#fff" : Colors.textSecondary
+                        )}
+                      </Animated.View>
+                    );
+                  })}
+                </View>
+              </View>
+
+              <Animated.View
+                style={[styles.content, { opacity: contentAnim }]}
+              >
+                <Text style={[styles.title, { color: Colors.text }]}>
+                  {step.title}
+                </Text>
+                <Text
+                  style={[styles.description, { color: Colors.textSecondary }]}
+                >
+                  {step.description}
+                </Text>
+              </Animated.View>
+              <View style={styles.dotsRow}>
+                {TUTORIAL_STEPS.map((_, i) => (
+                  <View
+                    key={i}
+                    style={[
+                      styles.dot,
+                      {
+                        backgroundColor:
+                          i === currentStep ? step.accentColor : Colors.border,
+                        width: i === currentStep ? scale(24) : scale(8),
+                      },
+                    ]}
+                  />
+                ))}
+              </View>
+
+              <View style={styles.nav}>
+                {currentStep > 0 ? (
+                  <TouchableOpacity
+                    style={[
+                      styles.navBack,
+                      { borderColor: Colors.borderLight },
+                    ]}
+                    onPress={handlePrevious}
+                  >
+                    <ArrowLeft size={scale(20)} color={Colors.text} />
+                  </TouchableOpacity>
+                ) : (
+                  <View style={{ width: scale(48) }} />
+                )}
+
+                <TouchableOpacity
+                  onPress={handleNext}
+                  style={styles.nextWrapper}
+                >
+                  <LinearGradient
+                    colors={step.gradientColors}
+                    start={[0, 0]}
+                    end={[1, 0]}
+                    style={styles.nextButton}
+                  >
+                    <Text style={styles.nextText}>
+                      {currentStep === TUTORIAL_STEPS.length - 1
+                        ? "Let's Go!"
+                        : "Next"}
+                    </Text>
+                    {currentStep < TUTORIAL_STEPS.length - 1 && (
+                      <ArrowRight size={scale(18)} color="#fff" />
+                    )}
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </BlurView>
-      </Animated.View>
+          </BlurView>
+        </Animated.View>
+      </View>
     </Modal>
   );
 }
@@ -423,16 +418,22 @@ export function SwipeTutorial({ visible, onComplete }: SwipeTutorialProps) {
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.75)",
+    backgroundColor: "rgba(0,0,0,0.6)",
+  },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing.lg,
   },
   cardWrapper: {
-    position: "absolute",
-    top: "50%",
-    left: scale(24),
-    right: scale(24),
-    transform: [{ translateY: verticalScale(-220) }],
     borderRadius: BorderRadius.xxl,
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 30,
+    elevation: 20,
   },
   cardBlur: {
     borderRadius: BorderRadius.xxl,
@@ -440,7 +441,6 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: BorderRadius.xxl,
-    padding: Spacing.xl,
     alignItems: "center",
     borderWidth: 1,
   },
@@ -449,48 +449,48 @@ const styles = StyleSheet.create({
     top: Spacing.md,
     right: Spacing.md,
     zIndex: 10,
-  },
-  skipIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: scale(32),
+    height: scale(32),
+    borderRadius: scale(16),
     justifyContent: "center",
     alignItems: "center",
   },
-  iconWrapper: {
-    marginBottom: Spacing.xl,
-    marginTop: Spacing.sm,
+  header: {
+    marginBottom: Spacing.lg,
+    alignItems: "center",
   },
-  iconCircle: {},
-  iconGradient: {
-    width: scale(110),
-    height: scale(110),
-    borderRadius: scale(55),
+  iconContainer: {
+    flexDirection: "row",
+    gap: Spacing.md,
+  },
+  icon: {
+    width: scale(52),
+    height: scale(52),
+    borderRadius: scale(26),
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 20,
-    elevation: 12,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  swipeIconRow: {
-    flexDirection: "row",
+  content: {
+    width: "100%",
     alignItems: "center",
-    gap: 8,
+    marginBottom: Spacing.xl,
   },
   title: {
-    fontSize: scaleFont(24),
+    fontSize: scale(26),
     fontWeight: "800",
     textAlign: "center",
     marginBottom: Spacing.sm,
-    letterSpacing: -0.5,
   },
   description: {
-    fontSize: scaleFont(15),
+    fontSize: scale(16),
     textAlign: "center",
-    lineHeight: scaleFont(23),
-    marginBottom: Spacing.xl,
+    lineHeight: scale(24),
+    maxWidth: "90%",
   },
   dotsRow: {
     flexDirection: "row",
@@ -499,8 +499,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dot: {
-    height: 8,
-    borderRadius: 4,
+    height: scale(8),
+    borderRadius: scale(4),
   },
   nav: {
     flexDirection: "row",
@@ -521,11 +521,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: BorderRadius.full,
     overflow: "hidden",
-    shadowColor: "#6C63FF",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 8,
   },
   nextButton: {
     flexDirection: "row",
@@ -536,7 +531,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   nextText: {
-    fontSize: scaleFont(16),
+    fontSize: scale(16),
     fontWeight: "700",
     color: "#fff",
   },

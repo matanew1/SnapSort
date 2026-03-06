@@ -1,6 +1,5 @@
 import {
-    scale,
-    scaleFont
+    scale
 } from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
@@ -469,16 +468,16 @@ const styles = StyleSheet.create({
     elevation: 12,
   },
   title: {
-    fontSize: scaleFont(28),
+    fontSize: scale(28),
     fontWeight: "700" as const,
     letterSpacing: -0.5,
     textAlign: "center",
     marginBottom: Spacing.sm,
   },
   subtitle: {
-    fontSize: scaleFont(15),
+    fontSize: scale(15),
     textAlign: "center",
-    lineHeight: scaleFont(22),
+    lineHeight: scale(22),
     marginBottom: Spacing.xl,
   },
   statsRow: {
@@ -494,12 +493,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   statNumber: {
-    fontSize: scaleFont(36),
+    fontSize: scale(36),
     fontWeight: "800",
     letterSpacing: -1,
   },
   statLabel: {
-    fontSize: scaleFont(13),
+    fontSize: scale(13),
     fontWeight: "600",
     marginTop: 4,
   },
@@ -517,7 +516,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   primaryButtonText: {
-    fontSize: scaleFont(16),
+    fontSize: scale(16),
     fontWeight: "700",
   },
   reviewButtonWrapper: {
@@ -535,11 +534,11 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
   },
   outlineButtonText: {
-    fontSize: scaleFont(15),
+    fontSize: scale(15),
     fontWeight: "600",
   },
   loadingText: {
-    fontSize: scaleFont(15),
+    fontSize: scale(15),
     marginTop: Spacing.lg,
     fontWeight: "500",
   },
@@ -549,7 +548,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
   },
   undoText: {
-    fontSize: scaleFont(14),
+    fontSize: scale(14),
     fontWeight: "500",
   },
 });

@@ -1,6 +1,6 @@
 import {
     dimensions,
-    scaleFont
+    scale
 } from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   modalTitle: {
-    fontSize: scaleFont(18),
+    fontSize: scale(18),
     fontWeight: "700",
   },
   closeBtn: {
@@ -364,11 +364,11 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   groupTitle: {
-    fontSize: scaleFont(14),
+    fontSize: scale(14),
     fontWeight: "700",
   },
   groupSubtitle: {
-    fontSize: scaleFont(12),
+    fontSize: scale(12),
     marginTop: 2,
   },
   selectAllBtn: {
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   selectAllText: {
-    fontSize: scaleFont(12),
+    fontSize: scale(12),
     fontWeight: "700",
   },
   photosGrid: {
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelText: {
-    fontSize: scaleFont(14),
+    fontSize: scale(14),
     fontWeight: "700",
   },
   applyBtnWrapper: {
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   applyText: {
-    fontSize: scaleFont(14),
+    fontSize: scale(14),
     fontWeight: "700",
     color: "#fff",
   },

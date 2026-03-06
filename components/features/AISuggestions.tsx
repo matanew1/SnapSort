@@ -1,6 +1,5 @@
 import {
-    scale,
-    scaleFont
+    scale
 } from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
@@ -176,11 +175,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: scaleFont(14),
+    fontSize: scale(14),
     fontWeight: "700",
   },
   priority: {
-    fontSize: scaleFont(10),
+    fontSize: scale(10),
     fontWeight: "700",
     letterSpacing: 0.5,
     marginTop: 2,
@@ -193,9 +192,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   suggestion: {
-    fontSize: scaleFont(13),
+    fontSize: scale(13),
     fontWeight: "500",
-    lineHeight: scaleFont(18),
+    lineHeight: scale(18),
     marginBottom: Spacing.sm,
   },
   countRow: {
@@ -212,7 +211,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   countText: {
-    fontSize: scaleFont(12),
+    fontSize: scale(12),
     fontWeight: "700",
   },
   actions: {
@@ -228,7 +227,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dismissText: {
-    fontSize: scaleFont(13),
+    fontSize: scale(13),
     fontWeight: "700",
   },
   applyBtnWrapper: {
@@ -250,7 +249,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   applyText: {
-    fontSize: scaleFont(13),
+    fontSize: scale(13),
     fontWeight: "700",
     color: "#fff",
   },

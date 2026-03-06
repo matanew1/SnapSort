@@ -1,4 +1,4 @@
-import { dimensions, scale, scaleFont } from "@/constants/responsive";
+import { dimensions, scale } from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
 import { BlurView } from "expo-blur";
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   headerTitle: {
-    fontSize: scaleFont(20),
+    fontSize: scale(20),
     fontWeight: "700",
   },
   headerRight: {
@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   clearText: {
-    fontSize: scaleFont(13),
+    fontSize: scale(13),
     fontWeight: "600",
   },
   closeButton: {
@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   sectionTitle: {
-    fontSize: scaleFont(11),
+    fontSize: scale(11),
     fontWeight: "700",
     letterSpacing: 1.2,
   },
@@ -538,11 +538,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   chipBadge: {
-    fontSize: scaleFont(11),
+    fontSize: scale(11),
     fontWeight: "700",
   },
   chipText: {
-    fontSize: scaleFont(13),
+    fontSize: scale(13),
     fontWeight: "600",
   },
   albumList: {
@@ -568,11 +568,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   albumName: {
-    fontSize: scaleFont(15),
+    fontSize: scale(15),
     fontWeight: "600",
   },
   albumCount: {
-    fontSize: scaleFont(12),
+    fontSize: scale(12),
     marginTop: 1,
   },
   footer: {
@@ -600,7 +600,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   applyText: {
-    fontSize: scaleFont(16),
+    fontSize: scale(16),
     fontWeight: "700",
   },
 });

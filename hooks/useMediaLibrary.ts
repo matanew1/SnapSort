@@ -85,7 +85,7 @@ export function useMediaLibrary() {
   const requestAndFetch = useCallback(async (deletedCount?: number) => {
     setLoading(true);
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
+      const { status } = await MediaLibrary.requestPermissionsAsync(false);
       setPermissionStatus(status === "granted" ? "granted" : "denied");
 
       if (status !== "granted") {
