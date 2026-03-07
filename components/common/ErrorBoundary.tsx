@@ -1,7 +1,6 @@
-import { BorderRadius, Colors, Spacing } from '@/constants/theme';
-import { useAppStore } from '@/store';
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BorderRadius, Spacing } from "@/constants/theme";
+import React, { Component, ErrorInfo, ReactNode } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface Props {
   children: ReactNode;
@@ -13,6 +12,9 @@ interface State {
   error: Error | null;
 }
 
+// NOTE: Hooks cannot be called inside class components.
+// We use hardcoded dark-safe colors here for the fallback UI.
+// If you need theme support, wrap with a functional component consumer.
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -24,7 +26,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // In production, forward to your analytics/crash service:
+    // crashlytics().recordError(error);
+    // Analytics.track('app_crash', { message: error.message });
+    console.error("[ErrorBoundary]", error.message, errorInfo.componentStack);
   }
 
   handleRetry = () => {
@@ -37,22 +42,14 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
-      const isDark = useAppStore.getState().isDarkMode;
-      const theme = isDark ? Colors : Colors;
-
       return (
         <View style={styles.container}>
           <Text style={styles.emoji}>😵</Text>
-          <Text style={[styles.title, { color: theme.text }]}>
-            Something went wrong
+          <Text style={styles.title}>Something went wrong</Text>
+          <Text style={styles.message}>
+            {this.state.error?.message || "An unexpected error occurred"}
           </Text>
-          <Text style={[styles.message, { color: theme.textSecondary }]}>
-            {this.state.error?.message || 'An unexpected error occurred'}
-          </Text>
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: theme.accent }]}
-            onPress={this.handleRetry}
-          >
+          <TouchableOpacity style={styles.button} onPress={this.handleRetry}>
             <Text style={styles.buttonText}>Try Again</Text>
           </TouchableOpacity>
         </View>
@@ -66,9 +63,10 @@ export class ErrorBoundary extends Component<Props, State> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: Spacing.xl,
+    backgroundColor: "#080B14",
   },
   emoji: {
     fontSize: 64,
@@ -76,23 +74,27 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: "700",
+    color: "#EDF2FF",
     marginBottom: Spacing.sm,
+    textAlign: "center",
   },
   message: {
     fontSize: 15,
-    textAlign: 'center',
+    color: "#8B95A8",
+    textAlign: "center",
     marginBottom: Spacing.xl,
+    lineHeight: 22,
   },
   button: {
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.full,
+    backgroundColor: "#6C63FF",
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });
-

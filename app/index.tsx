@@ -13,7 +13,7 @@ import {
   scaleFont,
   verticalScale,
 } from "@/constants/responsive";
-import { BorderRadius, getColors, Spacing } from "@/constants/theme";
+import { BorderRadius, getColors, Shadows, Spacing } from "@/constants/theme";
 import {
   useAIAnalysis,
   useAppPreferences,
@@ -34,7 +34,7 @@ import {
   Settings,
   SlidersHorizontal,
   Trash2,
-  Wand2,
+  Wand2
 } from "lucide-react-native";
 import React, {
   useCallback,
@@ -76,65 +76,59 @@ export default function HomeScreen() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
 
-  // ─── streak state ────────────────────────────────────────────────
+  // ─── streak ────────────────────────────────────────────────────
   const [streakType, setStreakType] = useState<StreakType>(null);
   const [streakCount, setStreakCount] = useState(0);
   const streakAnim = useRef(new Animated.Value(0)).current;
 
-  // ─── header / progress / delete-badge anims ──────────────────────
+  // ─── animations ────────────────────────────────────────────────
   const headerAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
   const deleteButtonAnim = useRef(new Animated.Value(1)).current;
-
-  // ─── background card parallax ────────────────────────────────────
   const dragProgressAnim = useRef(new Animated.Value(0)).current;
 
-  // Interpolated values for bg card 2
+  // ─── bg card parallax ──────────────────────────────────────────
   const bgCard2Scale = dragProgressAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.95, 1.0],
+    outputRange: [0.94, 1.0],
   });
   const bgCard2TranslateY = dragProgressAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [verticalScale(10), verticalScale(2)],
+    outputRange: [verticalScale(12), verticalScale(2)],
   });
   const bgCard2Opacity = dragProgressAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.6, 0.92],
+    outputRange: [0.55, 0.90],
   });
-
-  // Interpolated values for bg card 3
   const bgCard3Scale = dragProgressAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.9, 0.97],
+    outputRange: [0.88, 0.97],
   });
   const bgCard3TranslateY = dragProgressAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [verticalScale(20), verticalScale(10)],
+    outputRange: [verticalScale(24), verticalScale(12)],
   });
   const bgCard3Opacity = dragProgressAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.3, 0.62],
+    outputRange: [0.25, 0.58],
   });
 
   const handleDragProgress = useCallback(
     (progress: number) => {
-      // abs value: both keep and delete directions lift the bg cards
       dragProgressAnim.setValue(Math.abs(progress));
     },
     [dragProgressAnim],
   );
 
-  // ─── tutorial ────────────────────────────────────────────────────
+  // ─── lifecycle ─────────────────────────────────────────────────
   useEffect(() => {
     if (!hasSeenTutorial) setShowTutorial(true);
   }, [hasSeenTutorial]);
 
-  // ─── header entrance ─────────────────────────────────────────────
   useEffect(() => {
     Animated.timing(headerAnim, {
       toValue: 1,
-      duration: 700,
+      duration: 650,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start();
@@ -145,7 +139,7 @@ export default function HomeScreen() {
     setHasSeenTutorial(true);
   }, [setHasSeenTutorial]);
 
-  // ─── media library ───────────────────────────────────────────────
+  // ─── media library ─────────────────────────────────────────────
   const {
     photos,
     loading,
@@ -161,7 +155,7 @@ export default function HomeScreen() {
 
   const aiAnalysis = useAIAnalysis(photos);
 
-  // ─── store ───────────────────────────────────────────────────────
+  // ─── store ─────────────────────────────────────────────────────
   const {
     currentPhotoIndex,
     setCurrentPhotoIndex,
@@ -184,7 +178,7 @@ export default function HomeScreen() {
     [aiAnalysis.analyses, currentPhotoIndex],
   );
 
-  // ─── progress bar ────────────────────────────────────────────────
+  // ─── progress bar ──────────────────────────────────────────────
   useEffect(() => {
     const progress = photos.length > 0 ? currentPhotoIndex / photos.length : 0;
     Animated.spring(progressAnim, {
@@ -195,26 +189,26 @@ export default function HomeScreen() {
     }).start();
   }, [currentPhotoIndex, photos.length]);
 
-  // ─── delete badge pulse ──────────────────────────────────────────
+  // ─── delete badge pulse ────────────────────────────────────────
   useEffect(() => {
     if (deletedPhotos.length > 0) {
       Animated.sequence([
         Animated.timing(deleteButtonAnim, {
-          toValue: 1.15,
-          duration: 150,
+          toValue: 1.18,
+          duration: 130,
           useNativeDriver: true,
         }),
         Animated.spring(deleteButtonAnim, {
           toValue: 1,
-          tension: 80,
-          friction: 6,
+          tension: 90,
+          friction: 5,
           useNativeDriver: true,
         }),
       ]).start();
     }
   }, [deletedPhotos.length]);
 
-  // ─── streak pulse animation ──────────────────────────────────────
+  // ─── streak pulse ──────────────────────────────────────────────
   useEffect(() => {
     if (streakCount >= 3) {
       streakAnim.setValue(0);
@@ -226,7 +220,7 @@ export default function HomeScreen() {
           useNativeDriver: true,
         }),
         Animated.spring(streakAnim, {
-          toValue: 0.85,
+          toValue: 0.88,
           tension: 80,
           friction: 6,
           useNativeDriver: true,
@@ -235,7 +229,7 @@ export default function HomeScreen() {
     }
   }, [streakCount]);
 
-  // ─── handle focus / back from review ────────────────────────────
+  // ─── focus / return from review ────────────────────────────────
   useFocusEffect(
     useCallback(() => {
       if (params.deletedCount) {
@@ -247,23 +241,17 @@ export default function HomeScreen() {
         setStreakType(null);
         setStreakCount(0);
       }
-    }, [
-      params.deletedCount,
-      refetch,
-      router,
-      setCurrentPhotoIndex,
-      clearPhotosToDelete,
-    ]),
+    }, [params.deletedCount, refetch, router, setCurrentPhotoIndex, clearPhotosToDelete]),
   );
 
-  const isFinished =
-    currentPhotoIndex >= photos.length && photos.length > 0;
+  const isFinished = currentPhotoIndex >= photos.length && photos.length > 0;
 
-  // ─── handleSwipe ─────────────────────────────────────────────────
+  // ─── swipe handler ─────────────────────────────────────────────
   const handleSwipe = useCallback(
     (direction: "keep" | "delete") => {
       const photo = photos[currentPhotoIndex];
       if (!photo) return;
+
       triggerSwipeFeedback(direction);
       if (direction === "delete") addPhotoToDelete(photo.id);
       addToHistory({
@@ -273,18 +261,13 @@ export default function HomeScreen() {
       });
       setCurrentPhotoIndex(currentPhotoIndex + 1);
 
-      // Update streak
       setStreakType((prev) => {
         const newType = direction === "keep" ? "keep" : "delete";
-        if (prev === newType) {
-          setStreakCount((c) => c + 1);
-        } else {
-          setStreakCount(1);
-        }
+        if (prev === newType) setStreakCount((c) => c + 1);
+        else setStreakCount(1);
         return newType;
       });
 
-      // Reset drag progress
       dragProgressAnim.setValue(0);
     },
     [
@@ -298,7 +281,7 @@ export default function HomeScreen() {
     ],
   );
 
-  // ─── handleUndo ──────────────────────────────────────────────────
+  // ─── undo ──────────────────────────────────────────────────────
   const handleUndo = useCallback(() => {
     if (sortingHistory.length === 0) return;
     const lastAction = undoLastAction();
@@ -319,7 +302,7 @@ export default function HomeScreen() {
     dragProgressAnim,
   ]);
 
-  // ─── review ──────────────────────────────────────────────────────
+  // ─── review ────────────────────────────────────────────────────
   const handleReview = useCallback(() => {
     router.push({
       pathname: "/review",
@@ -330,8 +313,7 @@ export default function HomeScreen() {
     });
   }, [deletedPhotos, router]);
 
-  const hasActiveFilter =
-    selectedAlbumId !== null || selectedDateRange !== "all";
+  const hasActiveFilter = selectedAlbumId !== null || selectedDateRange !== "all";
 
   const getCurrentFilterName = useCallback(() => {
     if (selectedAlbumId) {
@@ -339,9 +321,7 @@ export default function HomeScreen() {
       return album?.title || "Album";
     }
     if (selectedDateRange !== "all") {
-      const option = DATE_RANGE_OPTIONS.find(
-        (o) => o.value === selectedDateRange,
-      );
+      const option = DATE_RANGE_OPTIONS.find((o) => o.value === selectedDateRange);
       return option?.label || "Date";
     }
     return "Filter";
@@ -364,16 +344,11 @@ export default function HomeScreen() {
     outputRange: ["0%", "100%"],
   });
 
-  // ─── card stack content ──────────────────────────────────────────
+  // ─── card stack content ────────────────────────────────────────
   const renderMainContent = () => {
     if (loading) return <LoadingState />;
     if (permissionDenied)
-      return (
-        <EmptyState
-          type="no-permission"
-          onRequestPermission={() => refetch()}
-        />
-      );
+      return <EmptyState type="no-permission" onRequestPermission={() => refetch()} />;
     if (permissionUndetermined)
       return <EmptyState type="permission-undetermined" />;
     if (photos.length === 0)
@@ -382,9 +357,7 @@ export default function HomeScreen() {
           type="no-photos-in-filter"
           onFilterPress={() => setShowFilterModal(true)}
           hasActiveFilter={hasActiveFilter}
-          filterName={
-            hasActiveFilter ? getCurrentFilterName() : undefined
-          }
+          filterName={hasActiveFilter ? getCurrentFilterName() : undefined}
         />
       );
     if (isFinished)
@@ -400,8 +373,6 @@ export default function HomeScreen() {
   };
 
   const mainContent = renderMainContent();
-
-  // ─── current photo metadata for SwipeCard ────────────────────────
   const currentPhoto = photos[currentPhotoIndex];
   const currentMetadata = currentPhoto
     ? {
@@ -414,12 +385,16 @@ export default function HomeScreen() {
 
   const bgCardDimStyle = {
     width: dimensions.width - scale(32),
-    height: dimensions.isTablet
-      ? verticalScale(550)
-      : dimensions.height * 0.68,
+    height: dimensions.isTablet ? verticalScale(550) : dimensions.height * 0.66,
     borderRadius: BorderRadius.xxl,
     position: "absolute" as const,
   };
+
+  // ─── Streak gradient colours ────────────────────────────────────
+  const streakGradientColors: [string, string] =
+    streakType === "keep"
+      ? [Colors.keepLight, Colors.keepGlow]
+      : [Colors.deleteLight, Colors.deleteGlow];
 
   return (
     <ScreenBackground>
@@ -433,7 +408,7 @@ export default function HomeScreen() {
               {
                 translateY: headerAnim.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [-20, 0],
+                  outputRange: [-24, 0],
                 }),
               },
             ],
@@ -441,11 +416,13 @@ export default function HomeScreen() {
         ]}
       >
         <View style={styles.headerLeft}>
-          <Image
-            source={require("@/assets/ios/AppIcon~ios-marketing.png")}
-            style={styles.logoImage}
-            contentFit="contain"
-          />
+          <View style={styles.logoWrapper}>
+            <Image
+              source={require("@/assets/ios/AppIcon~ios-marketing.png")}
+              style={styles.logoImage}
+              contentFit="contain"
+            />
+          </View>
           <View>
             <Text style={[styles.title, { color: Colors.text }]}>
               SnapSort
@@ -459,21 +436,18 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.headerRight}>
-          {/* ✨ Batch Cleanup */}
+          {/* Magic Cleanup */}
           <TouchableOpacity
             style={[
               styles.iconButton,
               {
-                backgroundColor: Colors.surfaceLight,
-                borderColor: Colors.border,
+                backgroundColor: Colors.primaryLight,
+                borderColor: "rgba(108,99,255,0.22)",
               },
             ]}
             onPress={() => router.push("/batch")}
           >
-            <Wand2
-              size={18}
-              color={Colors.textSecondary}
-            />
+            <Wand2 size={18} color={Colors.accent} />
           </TouchableOpacity>
 
           {/* Filter */}
@@ -484,18 +458,14 @@ export default function HomeScreen() {
                 backgroundColor: hasActiveFilter
                   ? Colors.accentLight
                   : Colors.surfaceLight,
-                borderColor: hasActiveFilter
-                  ? Colors.accent
-                  : Colors.border,
+                borderColor: hasActiveFilter ? Colors.accent : Colors.border,
               },
             ]}
             onPress={() => setShowFilterModal(true)}
           >
             <SlidersHorizontal
               size={18}
-              color={
-                hasActiveFilter ? Colors.accent : Colors.textSecondary
-              }
+              color={hasActiveFilter ? Colors.accent : Colors.textSecondary}
             />
           </TouchableOpacity>
 
@@ -503,10 +473,7 @@ export default function HomeScreen() {
           <TouchableOpacity
             style={[
               styles.iconButton,
-              {
-                backgroundColor: Colors.surfaceLight,
-                borderColor: Colors.border,
-              },
+              { backgroundColor: Colors.surfaceLight, borderColor: Colors.border },
             ]}
             onPress={() => router.push("/settings")}
           >
@@ -519,28 +486,20 @@ export default function HomeScreen() {
       {photos.length > 0 && !isFinished && (
         <View style={styles.progressContainer}>
           <View
-            style={[
-              styles.progressTrack,
-              { backgroundColor: Colors.surfaceLight },
-            ]}
+            style={[styles.progressTrack, { backgroundColor: Colors.surfaceLight }]}
           >
             <Animated.View
               style={[styles.progressFill, { width: progressWidth }]}
             >
               <LinearGradient
-                colors={[
-                  Colors.accent,
-                  Colors.accentSecondary ?? Colors.accent,
-                ]}
+                colors={[Colors.accent, Colors.accentSecondary ?? Colors.accent]}
                 start={[0, 0]}
                 end={[1, 0]}
                 style={StyleSheet.absoluteFill}
               />
             </Animated.View>
           </View>
-          <Text
-            style={[styles.progressLabel, { color: Colors.textMuted }]}
-          >
+          <Text style={[styles.progressLabel, { color: Colors.textMuted }]}>
             {Math.round((currentPhotoIndex / photos.length) * 100)}%
           </Text>
         </View>
@@ -556,41 +515,41 @@ export default function HomeScreen() {
                 {
                   scale: streakAnim.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [0.85, 1],
+                    outputRange: [0.82, 1],
                   }),
                 },
               ],
             },
           ]}
         >
-          <View
+          <LinearGradient
+            colors={streakGradientColors}
+            start={[0, 0]}
+            end={[1, 0]}
             style={[
               styles.streakBadge,
               {
-                backgroundColor:
-                  streakType === "keep"
-                    ? Colors.keepLight
-                    : Colors.deleteLight,
                 borderColor:
                   streakType === "keep"
-                    ? Colors.keep + "45"
-                    : Colors.delete + "45",
+                    ? Colors.keepGlow
+                    : Colors.deleteGlow,
               },
             ]}
           >
-            <Text style={styles.streakEmoji}>🔥</Text>
+            <Text style={styles.streakEmoji}>
+              {streakCount >= 10 ? "🔥" : streakCount >= 5 ? "⚡" : "✨"}
+            </Text>
             <Text
               style={[
                 styles.streakText,
                 {
-                  color:
-                    streakType === "keep" ? Colors.keep : Colors.delete,
+                  color: streakType === "keep" ? Colors.keep : Colors.delete,
                 },
               ]}
             >
-              {streakCount} {streakType === "keep" ? "kept" : "deleted"}
+              {streakCount}× {streakType === "keep" ? "keeping" : "clearing"}
             </Text>
-          </View>
+          </LinearGradient>
         </Animated.View>
       )}
 
@@ -600,34 +559,38 @@ export default function HomeScreen() {
           mainContent
         ) : (
           <>
-            {/* Background card 3 (deepest) */}
+            {/* Card 3 — deepest */}
             {photos[currentPhotoIndex + 2] && (
-              <Animated.View
-                style={[
-                  bgCardDimStyle,
-                  {
-                    backgroundColor: Colors.surface,
-                    transform: [
-                      { scale: bgCard3Scale },
-                      { translateY: bgCard3TranslateY },
-                    ],
-                    opacity: bgCard3Opacity,
-                  },
-                ]}
-              />
-            )}
-            {/* Background card 2 */}
-            {photos[currentPhotoIndex + 1] && (
               <Animated.View
                 style={[
                   bgCardDimStyle,
                   {
                     backgroundColor: Colors.surfaceLight,
                     transform: [
+                      { scale: bgCard3Scale },
+                      { translateY: bgCard3TranslateY },
+                    ],
+                    opacity: bgCard3Opacity,
+                    borderWidth: 1,
+                    borderColor: Colors.border,
+                  },
+                ]}
+              />
+            )}
+            {/* Card 2 */}
+            {photos[currentPhotoIndex + 1] && (
+              <Animated.View
+                style={[
+                  bgCardDimStyle,
+                  {
+                    backgroundColor: Colors.surface,
+                    transform: [
                       { scale: bgCard2Scale },
                       { translateY: bgCard2TranslateY },
                     ],
                     opacity: bgCard2Opacity,
+                    borderWidth: 1,
+                    borderColor: Colors.borderLight,
                   },
                 ]}
               />
@@ -655,10 +618,7 @@ export default function HomeScreen() {
         <View
           style={[
             styles.controls,
-            {
-              paddingBottom:
-                insets.bottom > 0 ? 0 : Spacing.md,
-            },
+            { paddingBottom: insets.bottom > 0 ? 0 : Spacing.md },
           ]}
         >
           {/* Undo */}
@@ -669,53 +629,42 @@ export default function HomeScreen() {
               {
                 backgroundColor: Colors.surfaceLight,
                 borderColor: Colors.border,
-                opacity: sortingHistory.length === 0 ? 0.4 : 1,
+                opacity: sortingHistory.length === 0 ? 0.35 : 1,
               },
             ]}
             onPress={handleUndo}
             disabled={sortingHistory.length === 0}
           >
-            <RotateCcw size={20} color={Colors.textSecondary} />
+            <RotateCcw size={19} color={Colors.textSecondary} />
           </TouchableOpacity>
 
-          {/* Swipe hints */}
-          <View style={styles.swipeHints}>
-            <View style={styles.hintItem}>
-              <Trash2 size={13} color={Colors.delete} />
-              <Text style={[styles.hintText, { color: Colors.delete }]}>
-                DELETE
-              </Text>
-            </View>
-            <View
-              style={[
-                styles.hintDivider,
-                { backgroundColor: Colors.textMuted },
-              ]}
-            />
-            <View style={styles.hintItem}>
-              <Text style={[styles.hintText, { color: Colors.keep }]}>
-                KEEP
-              </Text>
-              <Heart size={13} color={Colors.keep} fill={Colors.keep} />
-            </View>
+          {/* Swipe hint pill */}
+          <View
+            style={[
+              styles.swipeHintPill,
+              {
+                backgroundColor: Colors.surfaceLight,
+                borderColor: Colors.border,
+              },
+            ]}
+          >
+            <Trash2 size={12} color={Colors.delete} />
+            <Text style={[styles.hintText, { color: Colors.textMuted }]}>
+              swipe
+            </Text>
+            <Heart size={12} color={Colors.keep} fill={Colors.keep} />
           </View>
 
           {/* Delete badge */}
-          <Animated.View
-            style={{ transform: [{ scale: deleteButtonAnim }] }}
-          >
+          <Animated.View style={{ transform: [{ scale: deleteButtonAnim }] }}>
             <TouchableOpacity
               onPress={() => {
                 if (deletedPhotos.length > 0) {
                   router.push({
                     pathname: "/review",
                     params: {
-                      assetIds: deletedPhotos
-                        .map((p) => p.id)
-                        .join(","),
-                      assetUris: deletedPhotos
-                        .map((p) => p.uri)
-                        .join(","),
+                      assetIds: deletedPhotos.map((p) => p.id).join(","),
+                      assetUris: deletedPhotos.map((p) => p.uri).join(","),
                     },
                   });
                 }
@@ -723,7 +672,7 @@ export default function HomeScreen() {
               disabled={deletedPhotos.length === 0}
               style={[
                 styles.deleteBadge,
-                { opacity: deletedPhotos.length === 0 ? 0.4 : 1 },
+                { opacity: deletedPhotos.length === 0 ? 0.35 : 1 },
               ]}
             >
               <LinearGradient
@@ -732,7 +681,7 @@ export default function HomeScreen() {
                 end={[1, 1]}
                 style={styles.deleteBadgeGradient}
               >
-                <Trash2 size={16} color={Colors.white} />
+                <Trash2 size={15} color={Colors.white} />
                 <Text style={styles.deleteBadgeCount}>
                   {deletedPhotos.length}
                 </Text>
@@ -777,6 +726,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: Spacing.sm,
   },
+  logoWrapper: {
+    borderRadius: scale(12),
+    overflow: "hidden",
+    ...Shadows.sm,
+  },
   logoImage: {
     width: scale(38),
     height: scale(38),
@@ -805,8 +759,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    position: "relative",
-    overflow: "visible",
   },
   progressContainer: {
     flexDirection: "row",
@@ -817,7 +769,7 @@ const styles = StyleSheet.create({
   },
   progressTrack: {
     flex: 1,
-    height: 5,
+    height: 4,
     borderRadius: BorderRadius.full,
     overflow: "hidden",
   },
@@ -827,7 +779,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   progressLabel: {
-    fontSize: 11,
+    fontSize: scaleFont(11),
     fontWeight: "700",
     minWidth: 32,
     textAlign: "right",
@@ -839,13 +791,13 @@ const styles = StyleSheet.create({
   streakBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 14,
-    paddingVertical: 5,
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
   },
-  streakEmoji: { fontSize: scaleFont(13) },
+  streakEmoji: { fontSize: scaleFont(14) },
   streakText: {
     fontSize: scaleFont(12),
     fontWeight: "700",
@@ -877,33 +829,36 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   undoButton: { borderWidth: 1 },
-  swipeHints: {
+  swipeHintPill: {
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.md,
-  },
-  hintItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
   },
   hintText: {
-    fontSize: 10,
-    fontWeight: "800",
-    letterSpacing: 1.5,
+    fontSize: scaleFont(11),
+    fontWeight: "700",
+    letterSpacing: 1.0,
   },
-  hintDivider: { width: 1, height: 12, opacity: 0.4 },
   deleteBadge: {
     borderRadius: BorderRadius.full,
     overflow: "hidden",
+    ...Shadows.accent("#FF4D6D"),
   },
   deleteBadgeGradient: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: BorderRadius.full,
   },
-  deleteBadgeCount: { fontSize: 15, fontWeight: "800", color: "#fff" },
+  deleteBadgeCount: {
+    fontSize: scaleFont(15),
+    fontWeight: "800",
+    color: "#fff",
+  },
 });

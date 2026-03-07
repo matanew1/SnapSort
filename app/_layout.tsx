@@ -21,19 +21,21 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepare() {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Preload critical assets here (fonts, remote config, etc.)
+        await new Promise<void>((resolve) => setTimeout(resolve, 800));
       } catch (e) {
-        console.warn(e);
+        console.warn("[Layout] Prepare error:", e);
       } finally {
         if (!splashHidden.current) {
           try {
             await SplashScreen.hideAsync();
             splashHidden.current = true;
           } catch (e) {
-            console.log("Splash hide error (safe to ignore):", e);
+            // Safe to ignore — splash may already be hidden
           }
         }
-        setTimeout(() => setShowApp(true), 1500);
+        // Allow splash animation to complete
+        setTimeout(() => setShowApp(true), 1200);
       }
     }
     prepare();
@@ -41,7 +43,9 @@ export default function RootLayout() {
 
   if (!showApp) {
     return (
-      <GestureHandlerRootView style={[styles.root, { backgroundColor: Colors.background }]}>
+      <GestureHandlerRootView
+        style={[styles.root, { backgroundColor: Colors.background }]}
+      >
         <AppSplashScreen />
         <StatusBar style={isDark ? "light" : "dark"} />
       </GestureHandlerRootView>
@@ -49,7 +53,9 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={[styles.root, { backgroundColor: Colors.background }]}>
+    <GestureHandlerRootView
+      style={[styles.root, { backgroundColor: Colors.background }]}
+    >
       <ErrorBoundary>
         <Stack
           screenOptions={{
@@ -59,8 +65,24 @@ export default function RootLayout() {
           }}
         >
           <Stack.Screen name="index" />
-          <Stack.Screen name="review" options={{ animation: "slide_from_bottom", gestureEnabled: false }} />
-          <Stack.Screen name="settings" options={{ animation: "slide_from_right" }} />
+          <Stack.Screen
+            name="review"
+            options={{
+              animation: "slide_from_bottom",
+              gestureEnabled: false,
+            }}
+          />
+          <Stack.Screen
+            name="batch"
+            options={{
+              animation: "slide_from_bottom",
+              gestureEnabled: true,
+            }}
+          />
+          <Stack.Screen
+            name="settings"
+            options={{ animation: "slide_from_right" }}
+          />
         </Stack>
       </ErrorBoundary>
       <StatusBar style={isDark ? "light" : "dark"} />

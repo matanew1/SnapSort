@@ -1,17 +1,17 @@
 import { ScreenBackground } from "@/components";
-import { LoadingState } from "@/components/features";
-import { scale, scaleFont, verticalScale } from "@/constants/responsive";
-import { BorderRadius, getColors, Spacing } from "@/constants/theme";
+import { scale, scaleFont } from "@/constants/responsive";
+import { BorderRadius, getColors, Shadows, Spacing } from "@/constants/theme";
 import { useAIAnalysis } from "@/hooks/useAIAnalysis";
 import { useMediaLibrary } from "@/hooks/useMediaLibrary";
-import { useAppStore } from "@/store";
 import type { PhotoAnalysis } from "@/services/aiPhotoAnalyzer";
+import { useAppStore } from "@/store";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
   ArrowLeft,
   CheckCircle2,
+  Lock,
   Sparkles,
   Trash2,
   Wand2,
@@ -53,6 +53,7 @@ interface CleanupPack {
   iconColor: string;
   photos: PackPhoto[];
   totalSizeKB: number;
+  isPro?: boolean;
 }
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -81,6 +82,7 @@ function buildPacks(
       p: { id: string; uri: string; filename: string },
       a: PhotoAnalysis,
     ) => boolean,
+    isPro = false,
   ): CleanupPack => {
     const matched: PackPhoto[] = [];
     photos.forEach((photo, i) => {
@@ -88,11 +90,7 @@ function buildPacks(
       if (!analysis) return;
       if (!usedIds.has(photo.id) && predicate(photo, analysis)) {
         usedIds.add(photo.id);
-        matched.push({
-          id: photo.id,
-          uri: photo.uri,
-          fileSizeKB: analysis.fileSizeKB,
-        });
+        matched.push({ id: photo.id, uri: photo.uri, fileSizeKB: analysis.fileSizeKB });
       }
     });
     return {
@@ -105,6 +103,7 @@ function buildPacks(
       iconColor,
       photos: matched,
       totalSizeKB: matched.reduce((s, p) => s + p.fileSizeKB, 0),
+      isPro,
     };
   };
 
@@ -127,8 +126,8 @@ function buildPacks(
       "Blurry Shots",
       "Out-of-focus or motion-blurred photos",
       "🌫️",
-      "#7C3AED",
-      "#4C1D95",
+      "#6C63FF",
+      "#4338CA",
       "#A78BFA",
       (_, a) => a.isBlurry,
     ),
@@ -162,6 +161,28 @@ function buildPacks(
       "#FCA5A5",
       (_, a) => a.qualityScore < 35 && !a.isBlurry && !a.isDark,
     ),
+    make(
+      "panoramas",
+      "Panoramas",
+      "Wide panoramic shots (often unused)",
+      "🌅",
+      "#0F4C81",
+      "#062D50",
+      "#38BDF8",
+      (_, a) => !!a.isPanorama,
+      true,
+    ),
+    make(
+      "overexposed",
+      "Overexposed",
+      "Blown-out highlights & washed photos",
+      "☀️",
+      "#78350F",
+      "#451A03",
+      "#FBBF24",
+      (_, a) => a.isOverexposed,
+      true,
+    ),
   ];
 
   return packs.filter((p) => p.photos.length > 0);
@@ -169,27 +190,25 @@ function buildPacks(
 
 // ─── PhotoFan ─────────────────────────────────────────────────────────────────
 
+const FAN_CONFIGS = [
+  { rotate: "-14deg", tx: -24, ty: 5, zIndex: 1 },
+  { rotate: "-5deg", tx: -10, ty: 1, zIndex: 2 },
+  { rotate: "4deg", tx: 0, ty: 0, zIndex: 3 },
+];
+
 interface PhotoFanProps {
   uris: string[];
   selected: boolean;
   selectionAnim: Animated.Value;
+  locked?: boolean;
 }
 
-const FAN_CONFIGS = [
-  { rotate: "-13deg", tx: -22, ty: 4, zIndex: 1 },
-  { rotate: "-5deg", tx: -9, ty: 1, zIndex: 2 },
-  { rotate: "3deg", tx: 0, ty: 0, zIndex: 3 },
-];
-
-function PhotoFan({ uris, selected, selectionAnim }: PhotoFanProps) {
+function PhotoFan({ uris, selected, selectionAnim, locked }: PhotoFanProps) {
   const shown = uris.slice(0, 3);
   const padded = [...shown];
   while (padded.length < 3) padded.unshift("");
 
-  const glow = selectionAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 1],
-  });
+  const glow = selectionAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
 
   return (
     <View style={fanStyles.root}>
@@ -220,17 +239,19 @@ function PhotoFan({ uris, selected, selectionAnim }: PhotoFanProps) {
             ) : (
               <View style={[fanStyles.img, fanStyles.placeholder]} />
             )}
+            {locked && i === 2 && (
+              <View style={fanStyles.lockOverlay}>
+                <Lock size={12} color="rgba(255,255,255,0.9)" />
+              </View>
+            )}
           </Animated.View>
         );
       })}
-      {/* selection glow ring */}
+      {/* Selection glow ring */}
       <Animated.View
         style={[
           fanStyles.glow,
-          {
-            opacity: glow,
-            shadowOpacity: glow,
-          },
+          { opacity: glow, shadowOpacity: glow },
         ]}
       />
     </View>
@@ -239,41 +260,47 @@ function PhotoFan({ uris, selected, selectionAnim }: PhotoFanProps) {
 
 const fanStyles = StyleSheet.create({
   root: {
-    width: 110,
-    height: 88,
+    width: 116,
+    height: 90,
     position: "relative",
     alignItems: "flex-end",
     justifyContent: "center",
   },
   photo: {
     position: "absolute",
-    width: 70,
-    height: 84,
-    borderRadius: 10,
+    width: 72,
+    height: 86,
+    borderRadius: 11,
     overflow: "hidden",
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.15)",
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.12)",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 7,
     right: 0,
   },
   img: { width: "100%", height: "100%" },
-  placeholder: { backgroundColor: "rgba(255,255,255,0.07)" },
+  placeholder: { backgroundColor: "rgba(255,255,255,0.06)" },
+  lockOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   glow: {
     position: "absolute",
-    right: -3,
-    top: -3,
-    width: 76,
-    height: 90,
-    borderRadius: 13,
-    borderWidth: 2.5,
-    borderColor: "#A78BFA",
-    shadowColor: "#8B5CF6",
+    right: -4,
+    top: -4,
+    width: 80,
+    height: 94,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: "#6C63FF",
+    shadowColor: "#6C63FF",
     shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 14,
+    shadowRadius: 16,
     elevation: 0,
   },
 });
@@ -283,12 +310,22 @@ const fanStyles = StyleSheet.create({
 interface PackCardProps {
   pack: CleanupPack;
   selected: boolean;
+  locked: boolean;
   onToggle: () => void;
+  onLockedPress: () => void;
   entryDelay: number;
   isDark: boolean;
 }
 
-function PackCard({ pack, selected, onToggle, entryDelay, isDark }: PackCardProps) {
+function PackCard({
+  pack,
+  selected,
+  locked,
+  onToggle,
+  onLockedPress,
+  entryDelay,
+  isDark,
+}: PackCardProps) {
   const Colors = getColors(isDark);
 
   const entryAnim = useRef(new Animated.Value(0)).current;
@@ -298,16 +335,14 @@ function PackCard({ pack, selected, onToggle, entryDelay, isDark }: PackCardProp
   useEffect(() => {
     Animated.sequence([
       Animated.delay(entryDelay),
-      Animated.parallel([
-        Animated.spring(entryAnim, {
-          toValue: 1,
-          tension: 68,
-          friction: 10,
-          useNativeDriver: true,
-        }),
-      ]),
+      Animated.spring(entryAnim, {
+        toValue: 1,
+        tension: 68,
+        friction: 10,
+        useNativeDriver: true,
+      }),
     ]).start();
-  }, [entryDelay]);
+  }, []);
 
   useEffect(() => {
     Animated.spring(selectionAnim, {
@@ -316,32 +351,25 @@ function PackCard({ pack, selected, onToggle, entryDelay, isDark }: PackCardProp
       friction: 7,
       useNativeDriver: false,
     }).start();
-    Animated.sequence([
-      Animated.timing(scaleAnim, {
-        toValue: 0.96,
-        duration: 90,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        tension: 100,
-        friction: 6,
-        useNativeDriver: true,
-      }),
-    ]).start();
+
+    if (!locked) {
+      Animated.sequence([
+        Animated.timing(scaleAnim, { toValue: 0.96, duration: 85, useNativeDriver: true }),
+        Animated.spring(scaleAnim, { toValue: 1, tension: 100, friction: 6, useNativeDriver: true }),
+      ]).start();
+    }
   }, [selected]);
 
   const borderColor = selectionAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [
-      isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
-      "#8B5CF6",
+      isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
+      "#6C63FF",
     ],
   });
-
   const bgOpacity = selectionAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 0.12],
+    outputRange: [0, 0.10],
   });
 
   return (
@@ -352,7 +380,7 @@ function PackCard({ pack, selected, onToggle, entryDelay, isDark }: PackCardProp
           {
             translateY: entryAnim.interpolate({
               inputRange: [0, 1],
-              outputRange: [32, 0],
+              outputRange: [36, 0],
             }),
           },
           { scale: scaleAnim },
@@ -361,57 +389,67 @@ function PackCard({ pack, selected, onToggle, entryDelay, isDark }: PackCardProp
       }}
     >
       <TouchableOpacity
-        onPress={onToggle}
-        activeOpacity={0.88}
-        style={[cardStyles.root]}
+        onPress={locked ? onLockedPress : onToggle}
+        activeOpacity={0.86}
+        style={cardStyles.root}
       >
         {/* Animated border */}
         <Animated.View
-          style={[
-            StyleSheet.absoluteFill,
-            cardStyles.border,
-            { borderColor },
-          ]}
+          style={[StyleSheet.absoluteFill, cardStyles.border, { borderColor }]}
         />
 
         {/* Selection tint */}
         <Animated.View
           style={[
             StyleSheet.absoluteFill,
-            { borderRadius: BorderRadius.xl, backgroundColor: "#8B5CF6", opacity: bgOpacity },
+            {
+              borderRadius: BorderRadius.xl,
+              backgroundColor: "#6C63FF",
+              opacity: bgOpacity,
+            },
           ]}
         />
 
-        {/* Gradient header strip */}
+        {/* Gradient accent strip */}
         <LinearGradient
           colors={[pack.gradientStart, pack.gradientEnd]}
           start={[0, 0]}
-          end={[1, 1]}
+          end={[0, 1]}
           style={cardStyles.gradientStrip}
         />
 
+        {/* Pro locked overlay hint */}
+        {locked && (
+          <LinearGradient
+            colors={["transparent", "rgba(255,184,0,0.06)"]}
+            style={StyleSheet.absoluteFill}
+            pointerEvents="none"
+          />
+        )}
+
         {/* Content row */}
         <View style={cardStyles.row}>
-          {/* Photo fan */}
           <PhotoFan
             uris={pack.photos.slice(0, 3).map((p) => p.uri)}
             selected={selected}
             selectionAnim={selectionAnim}
+            locked={locked}
           />
 
-          {/* Text info */}
           <View style={cardStyles.info}>
             <View style={cardStyles.labelRow}>
               <Text style={cardStyles.emoji}>{pack.emoji}</Text>
-              <Text
-                style={[
-                  cardStyles.label,
-                  { color: Colors.text },
-                ]}
-              >
+              <Text style={[cardStyles.label, { color: Colors.text }]}>
                 {pack.label}
               </Text>
+              {locked && (
+                <View style={cardStyles.proBadge}>
+                  <Sparkles size={8} color="#FFB800" />
+                  <Text style={cardStyles.proBadgeText}>PRO</Text>
+                </View>
+              )}
             </View>
+
             <Text
               style={[cardStyles.description, { color: Colors.textSecondary }]}
               numberOfLines={2}
@@ -419,12 +457,15 @@ function PackCard({ pack, selected, onToggle, entryDelay, isDark }: PackCardProp
               {pack.description}
             </Text>
 
-            {/* Count + size pills */}
             <View style={cardStyles.pillRow}>
               <View
                 style={[
                   cardStyles.pill,
-                  { backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" },
+                  {
+                    backgroundColor: isDark
+                      ? "rgba(255,255,255,0.07)"
+                      : "rgba(0,0,0,0.06)",
+                  },
                 ]}
               >
                 <Text style={[cardStyles.pillText, { color: Colors.textMuted }]}>
@@ -432,14 +473,9 @@ function PackCard({ pack, selected, onToggle, entryDelay, isDark }: PackCardProp
                 </Text>
               </View>
               {pack.totalSizeKB > 0 && (
-                <View
-                  style={[
-                    cardStyles.pill,
-                    { backgroundColor: "rgba(239,68,68,0.12)" },
-                  ]}
-                >
-                  <Trash2 size={9} color="#EF4444" />
-                  <Text style={[cardStyles.pillText, { color: "#EF4444" }]}>
+                <View style={[cardStyles.pill, { backgroundColor: "rgba(255,77,109,0.12)" }]}>
+                  <Trash2 size={9} color="#FF4D6D" />
+                  <Text style={[cardStyles.pillText, { color: "#FF4D6D" }]}>
                     {fmtStorage(pack.totalSizeKB)}
                   </Text>
                 </View>
@@ -447,14 +483,20 @@ function PackCard({ pack, selected, onToggle, entryDelay, isDark }: PackCardProp
             </View>
           </View>
 
-          {/* Checkbox */}
-          <View style={[cardStyles.check, selected && cardStyles.checkSelected]}>
-            {selected ? (
-              <CheckCircle2 size={22} color="#fff" />
-            ) : (
-              <View style={cardStyles.checkEmpty} />
-            )}
-          </View>
+          {/* Checkbox / Lock */}
+          {locked ? (
+            <View style={[cardStyles.check, cardStyles.checkLocked]}>
+              <Lock size={14} color="#FFB800" />
+            </View>
+          ) : (
+            <View style={[cardStyles.check, selected && cardStyles.checkSelected]}>
+              {selected ? (
+                <CheckCircle2 size={22} color="#fff" />
+              ) : (
+                <View style={cardStyles.checkEmpty} />
+              )}
+            </View>
+          )}
         </View>
       </TouchableOpacity>
     </Animated.View>
@@ -467,10 +509,7 @@ const cardStyles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "transparent",
   },
-  border: {
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1.5,
-  },
+  border: { borderRadius: BorderRadius.xl, borderWidth: 1.5 },
   gradientStrip: {
     position: "absolute",
     top: 0,
@@ -500,10 +539,24 @@ const cardStyles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: -0.2,
   },
-  description: {
-    fontSize: scaleFont(12),
-    lineHeight: scaleFont(17),
+  proBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.full,
+    backgroundColor: "rgba(255,184,0,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,184,0,0.28)",
   },
+  proBadgeText: {
+    fontSize: scaleFont(9),
+    fontWeight: "800",
+    color: "#FFB800",
+    letterSpacing: 0.5,
+  },
+  description: { fontSize: scaleFont(12), lineHeight: scaleFont(17) },
   pillRow: { flexDirection: "row", gap: 5, marginTop: 2 },
   pill: {
     flexDirection: "row",
@@ -523,9 +576,10 @@ const cardStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  checkSelected: {
-    backgroundColor: "#8B5CF6",
-    borderColor: "#8B5CF6",
+  checkSelected: { backgroundColor: "#6C63FF", borderColor: "#6C63FF" },
+  checkLocked: {
+    backgroundColor: "rgba(255,184,0,0.14)",
+    borderColor: "rgba(255,184,0,0.38)",
   },
   checkEmpty: {
     width: 18,
@@ -542,53 +596,80 @@ function ScanningView({ isDark }: { isDark: boolean }) {
   const Colors = getColors(isDark);
   const shimmer = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(1)).current;
+  const ring1 = useRef(new Animated.Value(1)).current;
+  const ring2 = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     Animated.loop(
       Animated.timing(shimmer, {
         toValue: 1,
-        duration: 1400,
+        duration: 1600,
         easing: Easing.linear,
         useNativeDriver: true,
       }),
     ).start();
+
     Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, {
-          toValue: 1.12,
-          duration: 700,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulse, {
-          toValue: 1,
-          duration: 700,
-          useNativeDriver: true,
-        }),
+        Animated.timing(pulse, { toValue: 1.14, duration: 800, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1, duration: 800, useNativeDriver: true }),
       ]),
     ).start();
+
+    // Ripple rings
+    const animRing = (val: Animated.Value, delay: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.parallel([
+            Animated.timing(val, { toValue: 1.8, duration: 1600, useNativeDriver: true }),
+          ]),
+          Animated.timing(val, { toValue: 1, duration: 0, useNativeDriver: true }),
+        ]),
+      ).start();
+
+    animRing(ring1, 0);
+    animRing(ring2, 800);
   }, []);
 
-  const shimmerTranslate = shimmer.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-8, 8],
-  });
+  const ringOpacity1 = ring1.interpolate({ inputRange: [1, 1.8], outputRange: [0.28, 0] });
+  const ringOpacity2 = ring2.interpolate({ inputRange: [1, 1.8], outputRange: [0.18, 0] });
 
   return (
     <View style={scanStyles.root}>
+      {/* Ripple rings */}
+      <Animated.View
+        style={[
+          scanStyles.ring,
+          {
+            transform: [{ scale: ring1 }],
+            opacity: ringOpacity1,
+            borderColor: "#6C63FF",
+          },
+        ]}
+      />
+      <Animated.View
+        style={[
+          scanStyles.ring,
+          {
+            transform: [{ scale: ring2 }],
+            opacity: ringOpacity2,
+            borderColor: "#6C63FF",
+          },
+        ]}
+      />
+
       <Animated.View style={[scanStyles.orb, { transform: [{ scale: pulse }] }]}>
         <LinearGradient
-          colors={["#8B5CF6", "#6C63FF", "#AE40FF"]}
+          colors={["#6C63FF", "#FF6B9D", "#6C63FF"]}
+          start={[0, 0]}
+          end={[1, 1]}
           style={scanStyles.orbGradient}
         >
           <Wand2 size={scale(36)} color="#fff" />
         </LinearGradient>
       </Animated.View>
-      <Animated.View
-        style={[
-          scanStyles.scanLine,
-          { transform: [{ translateY: shimmerTranslate }] },
-        ]}
-      />
+
       <Text style={[scanStyles.title, { color: Colors.text }]}>
         Analysing your library…
       </Text>
@@ -607,29 +688,25 @@ const scanStyles = StyleSheet.create({
     gap: Spacing.md,
     paddingHorizontal: Spacing.xl,
   },
+  ring: {
+    position: "absolute",
+    width: scale(120),
+    height: scale(120),
+    borderRadius: scale(60),
+    borderWidth: 2,
+  },
   orb: {
-    width: scale(96),
-    height: scale(96),
-    borderRadius: scale(48),
+    width: scale(100),
+    height: scale(100),
+    borderRadius: scale(50),
     overflow: "hidden",
     marginBottom: Spacing.sm,
-    shadowColor: "#8B5CF6",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    elevation: 16,
+    ...Shadows.accent("#6C63FF"),
   },
   orbGradient: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  scanLine: {
-    position: "absolute",
-    width: scale(120),
-    height: 2,
-    backgroundColor: "rgba(139,92,246,0.45)",
-    borderRadius: 1,
   },
   title: {
     fontSize: scaleFont(22),
@@ -645,19 +722,14 @@ const scanStyles = StyleSheet.create({
   },
 });
 
-// ─── Empty (clean library) state ──────────────────────────────────────────────
+// ─── Empty (clean library) ────────────────────────────────────────────────────
 
 function CleanLibraryView({ isDark }: { isDark: boolean }) {
   const Colors = getColors(isDark);
   const pop = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.spring(pop, {
-      toValue: 1,
-      tension: 70,
-      friction: 8,
-      useNativeDriver: true,
-    }).start();
+    Animated.spring(pop, { toValue: 1, tension: 70, friction: 8, useNativeDriver: true }).start();
   }, []);
 
   return (
@@ -672,13 +744,13 @@ function CleanLibraryView({ isDark }: { isDark: boolean }) {
         transform: [{ scale: pop }],
       }}
     >
-      <Text style={{ fontSize: scaleFont(64) }}>🦄</Text>
+      <Text style={{ fontSize: scaleFont(72) }}>🦄</Text>
       <Text style={[scanStyles.title, { color: Colors.text }]}>
-        Your library is pristine!
+        Library is pristine!
       </Text>
       <Text style={[scanStyles.subtitle, { color: Colors.textSecondary }]}>
-        The AI couldn't find anything worth removing. Your photos are in great
-        shape.
+        The AI couldn't find anything worth removing. Your photos are in
+        excellent shape.
       </Text>
     </Animated.View>
   );
@@ -698,10 +770,8 @@ export default function BatchScreen() {
 
   const isLoading = photosLoading || aiLoading;
 
-  // Build packs once data is ready
   const packs = useMemo<CleanupPack[]>(() => {
     if (photos.length === 0 || analyses.length === 0) return [];
-    // analyses array aligns with photos array
     const photosWithFilename = photos.map((p) => ({
       id: p.id,
       uri: p.uri,
@@ -710,10 +780,10 @@ export default function BatchScreen() {
     return buildPacks(photosWithFilename, analyses);
   }, [photos, analyses]);
 
-  // Selection state
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  const togglePack = useCallback((id: string) => {
+  const togglePack = useCallback((id: string, isPro?: boolean) => {
+    // All packs are now selectable - no Pro restriction
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -722,20 +792,18 @@ export default function BatchScreen() {
     });
   }, []);
 
-  // Aggregated counts
   const { totalPhotos, totalSizeKB } = useMemo(() => {
-    let photos = 0;
-    let sizeKB = 0;
+    let p = 0;
+    let s = 0;
     packs.forEach((pack) => {
       if (selected.has(pack.id)) {
-        photos += pack.photos.length;
-        sizeKB += pack.totalSizeKB;
+        p += pack.photos.length;
+        s += pack.totalSizeKB;
       }
     });
-    return { totalPhotos: photos, totalSizeKB: sizeKB };
+    return { totalPhotos: p, totalSizeKB: s };
   }, [selected, packs]);
 
-  // Bottom bar entrance anim
   const bottomAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(bottomAnim, {
@@ -746,17 +814,19 @@ export default function BatchScreen() {
     }).start();
   }, [totalPhotos > 0]);
 
-  // "Select all" convenience
-  const allSelected = packs.length > 0 && packs.every((p) => selected.has(p.id));
+  const allSelectablePacks = packs;
+  const allSelected =
+    allSelectablePacks.length > 0 &&
+    allSelectablePacks.every((p) => selected.has(p.id));
+
   const handleSelectAll = useCallback(() => {
     if (allSelected) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(packs.map((p) => p.id)));
+      setSelected(new Set(allSelectablePacks.map((p) => p.id)));
     }
-  }, [allSelected, packs]);
+  }, [allSelected, allSelectablePacks]);
 
-  // Apply selections → mark for delete → navigate to review
   const handleCleanup = useCallback(() => {
     const photosToMark: PackPhoto[] = [];
     packs.forEach((pack) => {
@@ -765,7 +835,6 @@ export default function BatchScreen() {
       }
     });
 
-    // De-duplicate by id
     const uniqueIds = new Set<string>();
     const unique = photosToMark.filter((p) => {
       if (uniqueIds.has(p.id)) return false;
@@ -775,28 +844,26 @@ export default function BatchScreen() {
 
     unique.forEach((p) => addPhotoToDelete(p.id));
 
-    // Find URIs
-    const photoMap = new Map(
-      photos.map((p) => [p.id, p.uri]),
-    );
+    const photoMap = new Map(photos.map((p) => [p.id, p.uri]));
     const assetIds = unique.map((p) => p.id).join(",");
     const assetUris = unique.map((p) => photoMap.get(p.id) ?? "").join(",");
 
-    router.replace({
-      pathname: "/review",
-      params: { assetIds, assetUris },
-    });
+    router.replace({ pathname: "/review", params: { assetIds, assetUris } });
   }, [packs, selected, addPhotoToDelete, photos, router]);
 
   const headerAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.timing(headerAnim, {
       toValue: 1,
-      duration: 550,
+      duration: 500,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start();
   }, []);
+
+  // Stats totals
+  const totalFoundPhotos = packs.reduce((s, p) => s + p.photos.length, 0);
+  const totalFoundSize = packs.reduce((s, p) => s + p.totalSizeKB, 0);
 
   return (
     <ScreenBackground>
@@ -810,7 +877,7 @@ export default function BatchScreen() {
               {
                 translateY: headerAnim.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [-18, 0],
+                  outputRange: [-20, 0],
                 }),
               },
             ],
@@ -829,30 +896,34 @@ export default function BatchScreen() {
 
         <View style={styles.headerCenter}>
           <View style={styles.headerTitleRow}>
-            <Wand2 size={18} color="#8B5CF6" />
+            <LinearGradient
+              colors={["#6C63FF", "#FF6B9D"]}
+              start={[0, 0]}
+              end={[1, 0]}
+              style={styles.headerIcon}
+            >
+              <Wand2 size={14} color="#fff" />
+            </LinearGradient>
             <Text style={[styles.headerTitle, { color: Colors.text }]}>
               Magic Cleanup
             </Text>
           </View>
           {!isLoading && packs.length > 0 && (
-            <Text
-              style={[styles.headerSub, { color: Colors.textSecondary }]}
-            >
-              {packs.reduce((s, p) => s + p.photos.length, 0)} photos · {fmtStorage(packs.reduce((s, p) => s + p.totalSizeKB, 0))}
+            <Text style={[styles.headerSub, { color: Colors.textSecondary }]}>
+              {totalFoundPhotos} photos · {fmtStorage(totalFoundSize)}
             </Text>
           )}
         </View>
 
-        {/* Select all */}
         {!isLoading && packs.length > 0 && (
           <TouchableOpacity
             style={[
               styles.selectAllBtn,
               {
                 backgroundColor: allSelected
-                  ? "rgba(139,92,246,0.15)"
+                  ? "rgba(108,99,255,0.15)"
                   : Colors.surfaceLight,
-                borderColor: allSelected ? "#8B5CF6" : Colors.border,
+                borderColor: allSelected ? "#6C63FF" : Colors.border,
               },
             ]}
             onPress={handleSelectAll}
@@ -860,7 +931,7 @@ export default function BatchScreen() {
             <Text
               style={[
                 styles.selectAllText,
-                { color: allSelected ? "#8B5CF6" : Colors.textSecondary },
+                { color: allSelected ? "#6C63FF" : Colors.textSecondary },
               ]}
             >
               {allSelected ? "None" : "All"}
@@ -881,45 +952,52 @@ export default function BatchScreen() {
             styles.scrollContent,
             {
               paddingBottom:
-                insets.bottom + (totalPhotos > 0 ? 120 : 24) + Spacing.xl,
+                insets.bottom + (totalPhotos > 0 ? 130 : 24) + Spacing.xl,
             },
           ]}
           showsVerticalScrollIndicator={false}
         >
-          {/* Section label */}
+          {/* Section header */}
           <View style={styles.sectionLabel}>
-            <Sparkles size={13} color="#8B5CF6" />
+            <Sparkles size={13} color="#6C63FF" />
             <Text style={[styles.sectionLabelText, { color: Colors.textMuted }]}>
               AI-DETECTED CLEANUP PACKS
             </Text>
           </View>
 
-          {packs.map((pack, i) => (
-            <PackCard
-              key={pack.id}
-              pack={pack}
-              selected={selected.has(pack.id)}
-              onToggle={() => togglePack(pack.id)}
-              entryDelay={120 + i * 110}
-              isDark={isDark}
-            />
-          ))}
+          {packs.map((pack, i) => {
+            // All packs are now unlocked - no Pro locking
+            const isLocked = false;
+            return (
+              <PackCard
+                key={pack.id}
+                pack={pack}
+                selected={selected.has(pack.id)}
+                locked={isLocked}
+                onToggle={() => togglePack(pack.id, pack.isPro)}
+                onLockedPress={() => router.push("/paywall" as any)}
+                entryDelay={100 + i * 90}
+                isDark={isDark}
+              />
+            );
+          })}
 
-          {/* Tip */}
+          {/* Privacy tip */}
           <View
             style={[
               styles.tip,
               {
                 backgroundColor: isDark
-                  ? "rgba(139,92,246,0.08)"
-                  : "rgba(139,92,246,0.06)",
-                borderColor: "rgba(139,92,246,0.18)",
+                  ? "rgba(108,99,255,0.07)"
+                  : "rgba(90,82,232,0.05)",
+                borderColor: "rgba(108,99,255,0.16)",
               },
             ]}
           >
-            <ZapOff size={13} color="#8B5CF6" />
+            <ZapOff size={13} color="#6C63FF" />
             <Text style={[styles.tipText, { color: Colors.textMuted }]}>
-              Photos are analysed on-device. Nothing leaves your phone.
+              Photos are analysed entirely on-device. Nothing ever leaves your
+              phone.
             </Text>
           </View>
         </ScrollView>
@@ -937,7 +1015,7 @@ export default function BatchScreen() {
               {
                 translateY: bottomAnim.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [140, 0],
+                  outputRange: [160, 0],
                 }),
               },
             ],
@@ -945,47 +1023,39 @@ export default function BatchScreen() {
         ]}
         pointerEvents={totalPhotos > 0 ? "auto" : "none"}
       >
-        {/* Summary row */}
         <View style={styles.summaryRow}>
           <View
-            style={[
-              styles.summaryPill,
-              { backgroundColor: "rgba(139,92,246,0.12)" },
-            ]}
+            style={[styles.summaryPill, { backgroundColor: "rgba(108,99,255,0.12)" }]}
           >
-            <CheckCircle2 size={12} color="#8B5CF6" />
-            <Text style={[styles.summaryText, { color: "#8B5CF6" }]}>
-              {selected.size} pack{selected.size !== 1 ? "s" : ""} selected
+            <CheckCircle2 size={12} color="#6C63FF" />
+            <Text style={[styles.summaryText, { color: "#6C63FF" }]}>
+              {selected.size} pack{selected.size !== 1 ? "s" : ""}
             </Text>
           </View>
           <View
-            style={[
-              styles.summaryPill,
-              { backgroundColor: "rgba(239,68,68,0.1)" },
-            ]}
+            style={[styles.summaryPill, { backgroundColor: "rgba(255,77,109,0.10)" }]}
           >
-            <Trash2 size={12} color="#EF4444" />
-            <Text style={[styles.summaryText, { color: "#EF4444" }]}>
-              {totalPhotos} photos · {fmtStorage(totalSizeKB)} freed
+            <Trash2 size={12} color="#FF4D6D" />
+            <Text style={[styles.summaryText, { color: "#FF4D6D" }]}>
+              {totalPhotos} photos · {fmtStorage(totalSizeKB)}
             </Text>
           </View>
         </View>
 
-        {/* CTA */}
         <TouchableOpacity
           onPress={handleCleanup}
           style={styles.ctaWrapper}
-          activeOpacity={0.85}
+          activeOpacity={0.84}
         >
           <LinearGradient
-            colors={["#8B5CF6", "#6C63FF"]}
+            colors={["#6C63FF", "#FF6B9D"]}
             start={[0, 0]}
             end={[1, 0]}
             style={styles.ctaGradient}
           >
             <Wand2 size={20} color="#fff" />
             <Text style={styles.ctaText}>
-              Clean It Up — {totalPhotos} Photo{totalPhotos !== 1 ? "s" : ""}
+              Clean Up — {totalPhotos} Photo{totalPhotos !== 1 ? "s" : ""}
             </Text>
           </LinearGradient>
         </TouchableOpacity>
@@ -993,8 +1063,6 @@ export default function BatchScreen() {
     </ScreenBackground>
   );
 }
-
-// ─── styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   header: {
@@ -1012,35 +1080,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
   },
-  headerCenter: {
-    flex: 1,
-    alignItems: "center",
-    gap: 2,
-  },
+  headerCenter: { flex: 1, alignItems: "center", gap: 3 },
   headerTitleRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 8,
+  },
+  headerIcon: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: scaleFont(18),
     fontWeight: "800",
     letterSpacing: -0.3,
   },
-  headerSub: {
-    fontSize: scaleFont(11),
-    fontWeight: "500",
-  },
+  headerSub: { fontSize: scaleFont(11), fontWeight: "500" },
   selectAllBtn: {
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
   },
-  selectAllText: {
-    fontSize: scaleFont(12),
-    fontWeight: "700",
-  },
+  selectAllText: { fontSize: scaleFont(12), fontWeight: "700" },
   scroll: { flex: 1 },
   scrollContent: {
     paddingHorizontal: Spacing.md,
@@ -1051,7 +1116,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     marginBottom: Spacing.md,
-    marginLeft: 4,
+    marginLeft: 2,
   },
   sectionLabelText: {
     fontSize: scaleFont(10),
@@ -1083,11 +1148,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     gap: Spacing.sm,
   },
-  summaryRow: {
-    flexDirection: "row",
-    gap: Spacing.sm,
-    flexWrap: "wrap",
-  },
+  summaryRow: { flexDirection: "row", gap: Spacing.sm, flexWrap: "wrap" },
   summaryPill: {
     flexDirection: "row",
     alignItems: "center",
@@ -1096,18 +1157,11 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: BorderRadius.full,
   },
-  summaryText: {
-    fontSize: scaleFont(11),
-    fontWeight: "700",
-  },
+  summaryText: { fontSize: scaleFont(11), fontWeight: "700" },
   ctaWrapper: {
     borderRadius: BorderRadius.full,
     overflow: "hidden",
-    shadowColor: "#8B5CF6",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.45,
-    shadowRadius: 20,
-    elevation: 10,
+    ...Shadows.accent("#6C63FF"),
   },
   ctaGradient: {
     flexDirection: "row",

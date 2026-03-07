@@ -1,143 +1,168 @@
 import { moderateScale, scaleFont } from "./responsive";
 
+// ─── Dark Palette ──────────────────────────────────────────────────────────────
 export const Colors = {
-  // Base — clean dark, professional
-  background: "#0F1419",
-  surface: "#1A1F2E",
-  surfaceLight: "#242C3D",
-  surfaceGlass: "rgba(26, 31, 46, 0.8)",
-  card: "#1A1F2E",
+  // Canvas
+  background: "#080B14",
+  backgroundElevated: "#0D1117",
+  surface: "#13192B",
+  surfaceRaised: "#1A2236",
+  surfaceLight: "#1F2A3C",
+  surfaceGlass: "rgba(19, 25, 43, 0.85)",
+  card: "#13192B",
 
-  // Text — crisp and accessible
-  text: "#E8EAED",
-  textSecondary: "#9CA3AF",
-  textMuted: "#6B7280",
-  textInverse: "#0F1419",
+  // Text
+  text: "#EDF2FF",
+  textSecondary: "#8B95A8",
+  textMuted: "#566070",
+  textDisabled: "#3A4454",
+  textInverse: "#080B14",
 
-  // Action colors — muted but clear
-  keep: "#10B981",
-  keepLight: "rgba(16, 185, 129, 0.12)",
-  keepGlow: "rgba(16, 185, 129, 0.25)",
-  keepDark: "#059669",
+  // Keep / Delete — vivid, accessible
+  keep: "#00E5A0",
+  keepLight: "rgba(0, 229, 160, 0.10)",
+  keepGlow: "rgba(0, 229, 160, 0.22)",
+  keepDark: "#00B87A",
 
-  delete: "#EF4444",
-  deleteLight: "rgba(239, 68, 68, 0.12)",
-  deleteGlow: "rgba(239, 68, 68, 0.25)",
-  deleteDark: "#DC2626",
+  delete: "#FF4D6D",
+  deleteLight: "rgba(255, 77, 109, 0.10)",
+  deleteGlow: "rgba(255, 77, 109, 0.22)",
+  deleteDark: "#D63756",
 
-  // Brand colors — subtle
-  primary: "#3B82F6",
-  primaryLight: "rgba(59, 130, 246, 0.12)",
-  primaryGlow: "rgba(59, 130, 246, 0.25)",
-  secondary: "#06B6D4",
-  secondaryLight: "rgba(6, 182, 212, 0.12)",
-
-  // Semantic
-  danger: "#EF4444",
-  success: "#10B981",
-  warning: "#F59E0B",
-  info: "#06B6D4",
-  disabled: "#374151",
+  // Brand
+  primary: "#6C63FF",
+  primaryLight: "rgba(108, 99, 255, 0.12)",
+  primaryGlow: "rgba(108, 99, 255, 0.28)",
+  secondary: "#00D4FF",
+  secondaryLight: "rgba(0, 212, 255, 0.12)",
 
   // Accent
-  accent: "#3B82F6",
-  accentLight: "rgba(59, 130, 246, 0.12)",
-  accentSecondary: "#EC4899",
+  accent: "#6C63FF",
+  accentLight: "rgba(108, 99, 255, 0.12)",
+  accentSecondary: "#FF6B9D",
+  accentTertiary: "#00E5A0",
 
-  // Gradients — subtle
-  gradientStart: "#0F1419",
-  gradientEnd: "#1A1F2E",
-  gradientAltStart: "#EF4444",
-  gradientAltEnd: "#F97316",
+  // Semantic
+  danger: "#FF4D6D",
+  success: "#00E5A0",
+  warning: "#FFB800",
+  info: "#00D4FF",
+  disabled: "#2A3347",
 
-  // Glass & borders
-  border: "rgba(255, 255, 255, 0.08)",
-  borderLight: "rgba(255, 255, 255, 0.12)",
-  borderGlow: "rgba(59, 130, 246, 0.2)",
-  overlay: "rgba(15, 20, 25, 0.9)",
-  glassLight: "rgba(255, 255, 255, 0.05)",
-  glassMedium: "rgba(255, 255, 255, 0.08)",
+  // Gradients
+  gradientStart: "#080B14",
+  gradientEnd: "#13192B",
+  gradientAltStart: "#FF4D6D",
+  gradientAltEnd: "#FF8E53",
+  gradientProStart: "#6C63FF",
+  gradientProEnd: "#FF6B9D",
+  gradientGoldStart: "#FFB800",
+  gradientGoldEnd: "#FF8E53",
+
+  // Borders & Glass
+  border: "rgba(255, 255, 255, 0.06)",
+  borderLight: "rgba(255, 255, 255, 0.10)",
+  borderGlow: "rgba(108, 99, 255, 0.25)",
+  borderKeep: "rgba(0, 229, 160, 0.30)",
+  borderDelete: "rgba(255, 77, 109, 0.30)",
+  overlay: "rgba(8, 11, 20, 0.92)",
+  glassLight: "rgba(255, 255, 255, 0.04)",
+  glassMedium: "rgba(255, 255, 255, 0.07)",
+
+  // Pro / Premium
+  pro: "#FFB800",
+  proLight: "rgba(255, 184, 0, 0.12)",
+  proGradientStart: "#FFB800",
+  proGradientEnd: "#FF8E53",
 
   // Base
   white: "#FFFFFF",
   black: "#000000",
 
-  // Palette
-  neonPurple: "#3B82F6",
-  neonCyan: "#06B6D4",
-  neonGreen: "#10B981",
-  neonPink: "#EC4899",
-  neonOrange: "#F97316",
+  // Neon palette
+  neonPurple: "#6C63FF",
+  neonCyan: "#00D4FF",
+  neonGreen: "#00E5A0",
+  neonPink: "#FF6B9D",
+  neonOrange: "#FF8E53",
+  neonGold: "#FFB800",
 };
 
+// ─── Light Palette ────────────────────────────────────────────────────────────
 export const LightColors = {
-  // Base — clean white with depth
-  background: "#F8FAFC",
+  background: "#F4F7FF",
+  backgroundElevated: "#FFFFFF",
   surface: "#FFFFFF",
-  surfaceLight: "#F1F5F9",
-  surfaceGlass: "rgba(255, 255, 255, 0.9)",
+  surfaceRaised: "#F8FAFF",
+  surfaceLight: "#EEF2FF",
+  surfaceGlass: "rgba(255, 255, 255, 0.92)",
   card: "#FFFFFF",
 
-  // Text
-  text: "#0F1419",
-  textSecondary: "#64748B",
-  textMuted: "#94A3B8",
-  textInverse: "#E8EAED",
+  text: "#0A0E1A",
+  textSecondary: "#5B6680",
+  textMuted: "#8A95AA",
+  textDisabled: "#BFC7D6",
+  textInverse: "#EDF2FF",
 
-  // Action colors
-  keep: "#059669",
-  keepLight: "rgba(5, 150, 105, 0.1)",
-  keepGlow: "rgba(5, 150, 105, 0.25)",
-  keepDark: "#047857",
+  keep: "#00A876",
+  keepLight: "rgba(0, 168, 118, 0.10)",
+  keepGlow: "rgba(0, 168, 118, 0.20)",
+  keepDark: "#007F59",
 
-  delete: "#DC2626",
-  deleteLight: "rgba(220, 38, 38, 0.1)",
-  deleteGlow: "rgba(220, 38, 38, 0.25)",
-  deleteDark: "#B91C1C",
+  delete: "#E03050",
+  deleteLight: "rgba(224, 48, 80, 0.10)",
+  deleteGlow: "rgba(224, 48, 80, 0.20)",
+  deleteDark: "#B82442",
 
-  // Brand
-  primary: "#2563EB",
-  primaryLight: "rgba(37, 99, 235, 0.1)",
-  primaryGlow: "rgba(37, 99, 235, 0.25)",
-  secondary: "#0891B2",
-  secondaryLight: "rgba(8, 145, 178, 0.1)",
+  primary: "#5A52E8",
+  primaryLight: "rgba(90, 82, 232, 0.10)",
+  primaryGlow: "rgba(90, 82, 232, 0.22)",
+  secondary: "#0099CC",
+  secondaryLight: "rgba(0, 153, 204, 0.10)",
 
-  // Semantic
-  danger: "#DC2626",
-  success: "#059669",
-  warning: "#D97706",
-  info: "#0891B2",
+  accent: "#5A52E8",
+  accentLight: "rgba(90, 82, 232, 0.10)",
+  accentSecondary: "#E83880",
+  accentTertiary: "#00A876",
+
+  danger: "#E03050",
+  success: "#00A876",
+  warning: "#E09000",
+  info: "#0099CC",
   disabled: "#E2E8F0",
 
-  // Accent
-  accent: "#2563EB",
-  accentLight: "rgba(37, 99, 235, 0.1)",
-  accentSecondary: "#DB2777",
+  gradientStart: "#F4F7FF",
+  gradientEnd: "#EEF2FF",
+  gradientAltStart: "#E03050",
+  gradientAltEnd: "#EA6030",
+  gradientProStart: "#5A52E8",
+  gradientProEnd: "#E83880",
+  gradientGoldStart: "#E09000",
+  gradientGoldEnd: "#EA6030",
 
-  // Gradients
-  gradientStart: "#F8FAFC",
-  gradientEnd: "#F1F5F9",
-  gradientAltStart: "#DC2626",
-  gradientAltEnd: "#EA580C",
-
-  // Glass & borders
-  border: "rgba(0, 0, 0, 0.08)",
-  borderLight: "rgba(0, 0, 0, 0.12)",
-  borderGlow: "rgba(37, 99, 235, 0.2)",
-  overlay: "rgba(0, 0, 0, 0.5)",
+  border: "rgba(0, 0, 0, 0.07)",
+  borderLight: "rgba(0, 0, 0, 0.11)",
+  borderGlow: "rgba(90, 82, 232, 0.20)",
+  borderKeep: "rgba(0, 168, 118, 0.28)",
+  borderDelete: "rgba(224, 48, 80, 0.28)",
+  overlay: "rgba(0, 0, 0, 0.52)",
   glassLight: "rgba(0, 0, 0, 0.02)",
   glassMedium: "rgba(0, 0, 0, 0.05)",
 
-  // Base
+  pro: "#E09000",
+  proLight: "rgba(224, 144, 0, 0.12)",
+  proGradientStart: "#E09000",
+  proGradientEnd: "#EA6030",
+
   white: "#FFFFFF",
   black: "#000000",
 
-  // Palette
-  neonPurple: "#2563EB",
-  neonCyan: "#0891B2",
-  neonGreen: "#059669",
-  neonPink: "#DB2777",
-  neonOrange: "#EA580C",
+  neonPurple: "#5A52E8",
+  neonCyan: "#0099CC",
+  neonGreen: "#00A876",
+  neonPink: "#E83880",
+  neonOrange: "#EA6030",
+  neonGold: "#E09000",
 };
 
 export function getColors(isDark: boolean) {
@@ -166,42 +191,45 @@ export const BorderRadius = {
 };
 
 export const Typography = {
-  hero: {
-    fontSize: scaleFont(40),
-    fontWeight: "900" as const,
-    letterSpacing: -1.5,
-  },
-  h1: {
-    fontSize: scaleFont(32),
-    fontWeight: "800" as const,
-    letterSpacing: -1,
-  },
-  h2: {
-    fontSize: scaleFont(24),
-    fontWeight: "700" as const,
-    letterSpacing: -0.5,
-  },
-  h3: {
-    fontSize: scaleFont(20),
-    fontWeight: "700" as const,
-    letterSpacing: -0.3,
-  },
+  hero: { fontSize: scaleFont(40), fontWeight: "900" as const, letterSpacing: -1.5 },
+  h1: { fontSize: scaleFont(32), fontWeight: "800" as const, letterSpacing: -1 },
+  h2: { fontSize: scaleFont(24), fontWeight: "700" as const, letterSpacing: -0.5 },
+  h3: { fontSize: scaleFont(20), fontWeight: "700" as const, letterSpacing: -0.3 },
   h4: { fontSize: scaleFont(17), fontWeight: "600" as const },
-  body: {
-    fontSize: scaleFont(15),
-    fontWeight: "400" as const,
-    lineHeight: scaleFont(22),
-  },
+  body: { fontSize: scaleFont(15), fontWeight: "400" as const, lineHeight: scaleFont(22) },
   bodyBold: { fontSize: scaleFont(15), fontWeight: "600" as const },
   caption: { fontSize: scaleFont(13), fontWeight: "500" as const },
-  label: {
-    fontSize: scaleFont(11),
-    fontWeight: "700" as const,
-    letterSpacing: 1.2,
+  label: { fontSize: scaleFont(11), fontWeight: "700" as const, letterSpacing: 1.2 },
+  micro: { fontSize: scaleFont(10), fontWeight: "600" as const, letterSpacing: 0.5 },
+};
+
+export const Shadows = {
+  sm: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  micro: {
-    fontSize: scaleFont(10),
-    fontWeight: "600" as const,
-    letterSpacing: 0.5,
+  md: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.28,
+    shadowRadius: 14,
+    elevation: 8,
   },
+  lg: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.38,
+    shadowRadius: 28,
+    elevation: 16,
+  },
+  accent: (color: string) => ({
+    shadowColor: color,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.45,
+    shadowRadius: 20,
+    elevation: 12,
+  }),
 };

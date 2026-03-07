@@ -93,7 +93,7 @@ export function useMediaLibrary() {
         return;
       }
 
-      // Fetch albums
+      // Fetch albums first
       await fetchAlbums();
 
       // Auto-load more photos if many were deleted (>100)
@@ -104,63 +104,60 @@ export function useMediaLibrary() {
         photoCountRef.current = PHOTO_COUNT;
       }
 
-      // Build query options
+      // Build base query options
       const queryOptions: MediaLibrary.AssetsOptions = {
         first: photoCountRef.current,
         mediaType: MediaLibrary.MediaType.photo,
         sortBy: [MediaLibrary.SortBy.creationTime],
       };
 
-      // Apply album filter if selected
+      // Get all photos first
+      let allPhotos: PhotoAsset[];
+      
       if (selectedAlbumId) {
-        // Get assets from specific album
-        const album = await MediaLibrary.getAlbumAsync(selectedAlbumId);
-        if (album) {
-          const result = await MediaLibrary.getAssetsAsync({
-            ...queryOptions,
-            album: album,
-          });
-          
-          const mapped: PhotoAsset[] = result.assets.map((asset) => ({
-            id: asset.id,
-            uri: asset.uri,
-            filename: asset.filename,
-            width: asset.width,
-            height: asset.height,
-            creationTime: asset.creationTime,
-          }));
-          
-          setPhotos(mapped);
-          setLoading(false);
-          return;
-        }
+        // When filtering by album, get assets from that specific album
+        // Using album ID directly in the query
+        const albumAssets = await MediaLibrary.getAssetsAsync({
+          ...queryOptions,
+          album: selectedAlbumId as any,
+        });
+        
+        allPhotos = albumAssets.assets.map((asset) => ({
+          id: asset.id,
+          uri: asset.uri,
+          filename: asset.filename,
+          width: asset.width,
+          height: asset.height,
+          creationTime: asset.creationTime,
+        }));
+      } else {
+        // Get all photos from library
+        const result = await MediaLibrary.getAssetsAsync(queryOptions);
+        allPhotos = result.assets.map((asset) => ({
+          id: asset.id,
+          uri: asset.uri,
+          filename: asset.filename,
+          width: asset.width,
+          height: asset.height,
+          creationTime: asset.creationTime,
+        }));
       }
 
-      const result = await MediaLibrary.getAssetsAsync(queryOptions);
-
-      let mapped: PhotoAsset[] = result.assets.map((asset) => ({
-        id: asset.id,
-        uri: asset.uri,
-        filename: asset.filename,
-        width: asset.width,
-        height: asset.height,
-        creationTime: asset.creationTime,
-      }));
-
-      // Apply date range filter
+      // Apply date range filter (works for both album and all photos)
+      let filteredPhotos = allPhotos;
       if (selectedDateRange !== "all") {
         const { start, end } = getDateRangeTimestamps(selectedDateRange);
         
         if (start !== null && end !== null) {
           // "older" - before a specific date
-          mapped = mapped.filter((photo) => photo.creationTime < end);
+          filteredPhotos = allPhotos.filter((photo) => photo.creationTime < end);
         } else if (start !== null) {
           // Recent date ranges
-          mapped = mapped.filter((photo) => photo.creationTime >= start);
+          filteredPhotos = allPhotos.filter((photo) => photo.creationTime >= start);
         }
       }
 
-      setPhotos(mapped);
+      setPhotos(filteredPhotos);
     } catch (error) {
       console.error("Failed to load photos:", error);
     } finally {
