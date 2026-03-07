@@ -461,12 +461,13 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     flexDirection: "row",
-    gap: Spacing.md,
+    gap: Spacing.lg,
+    marginTop: Spacing.lg,
   },
   icon: {
-    width: scale(52),
-    height: scale(52),
-    borderRadius: scale(26),
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(20),
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
