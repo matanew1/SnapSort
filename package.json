@@ -1,7 +1,7 @@
 {
   "name": "snapsort",
   "main": "expo-router/entry",
-  "version": "1.8.3",
+  "version": "1.8.4",
   "scripts": {
     "start": "expo start --clear",
     "dev": "expo start --clear",
