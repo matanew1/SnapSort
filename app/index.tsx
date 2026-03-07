@@ -33,8 +33,8 @@ import {
   RotateCcw,
   Settings,
   SlidersHorizontal,
-  Sparkles,
   Trash2,
+  Wand2,
 } from "lucide-react-native";
 import React, {
   useCallback,
@@ -364,12 +364,6 @@ export default function HomeScreen() {
     outputRange: ["0%", "100%"],
   });
 
-  // How many AI highlights exist (quality >= 60)
-  const highlightCount = useMemo(
-    () => aiAnalysis.analyses.filter((a) => a.qualityScore >= 60).length,
-    [aiAnalysis.analyses],
-  );
-
   // ─── card stack content ──────────────────────────────────────────
   const renderMainContent = () => {
     if (loading) return <LoadingState />;
@@ -465,41 +459,21 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.headerRight}>
-          {/* ✨ Highlights / Memory Reel — badge shows count */}
+          {/* ✨ Batch Cleanup */}
           <TouchableOpacity
             style={[
               styles.iconButton,
               {
-                backgroundColor:
-                  highlightCount > 0
-                    ? Colors.accentLight
-                    : Colors.surfaceLight,
-                borderColor:
-                  highlightCount > 0 ? Colors.accent : Colors.border,
+                backgroundColor: Colors.surfaceLight,
+                borderColor: Colors.border,
               },
             ]}
-            onPress={() => router.push("/highlights")}
+            onPress={() => router.push("/batch")}
           >
-            <Sparkles
+            <Wand2
               size={18}
-              color={
-                highlightCount > 0
-                  ? Colors.accent
-                  : Colors.textSecondary
-              }
+              color={Colors.textSecondary}
             />
-            {highlightCount > 0 && (
-              <View
-                style={[
-                  styles.iconBadge,
-                  { backgroundColor: Colors.accent },
-                ]}
-              >
-                <Text style={styles.iconBadgeText}>
-                  {highlightCount > 99 ? "99" : highlightCount}
-                </Text>
-              </View>
-            )}
           </TouchableOpacity>
 
           {/* Filter */}
@@ -833,25 +807,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     position: "relative",
     overflow: "visible",
-  },
-  iconBadge: {
-    position: "absolute",
-    top: -5,
-    right: -5,
-    minWidth: 17,
-    height: 17,
-    borderRadius: 9,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 3,
-    borderWidth: 1.5,
-    borderColor: "#000",
-  },
-  iconBadgeText: {
-    fontSize: 9,
-    fontWeight: "800",
-    color: "#fff",
-    letterSpacing: -0.3,
   },
   progressContainer: {
     flexDirection: "row",
