@@ -1,25 +1,24 @@
-import {
-    scale
-} from "@/constants/responsive";
+import { ConfettiCelebration } from "../shared";
+import { scale, scaleFont } from "@/constants/responsive";
 import { BorderRadius, getColors, Spacing } from "@/constants/theme";
 import { useAppStore } from "@/store";
 import { LinearGradient } from "expo-linear-gradient";
 import {
-    CheckCircle,
-    FolderOpen,
-    Image as ImageIcon,
-    RefreshCw,
-    Sparkles,
-    Trash2,
+  CheckCircle,
+  FolderOpen,
+  Image as ImageIcon,
+  RefreshCw,
+  Sparkles,
+  Trash2,
 } from "lucide-react-native";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-    Animated,
-    Easing,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Easing,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 type EmptyStateType =
@@ -106,17 +105,12 @@ export function EmptyState({
             {onRequestPermission && (
               <TouchableOpacity onPress={onRequestPermission}>
                 <LinearGradient
-                  colors={[
-                    Colors.accent,
-                    Colors.accentSecondary ?? Colors.accent,
-                  ]}
+                  colors={[Colors.accent, Colors.accentSecondary ?? Colors.accent]}
                   start={[0, 0]}
                   end={[1, 0]}
                   style={styles.primaryButton}
                 >
-                  <Text
-                    style={[styles.primaryButtonText, { color: Colors.white }]}
-                  >
+                  <Text style={[styles.primaryButtonText, { color: Colors.white }]}>
                     Grant Access
                   </Text>
                 </LinearGradient>
@@ -221,7 +215,7 @@ export function EmptyState({
                     },
                   ]}
                 >
-                  {hasActiveFilter ? `Change Filter` : "Change Filter"}
+                  Change Filter
                 </Text>
               </TouchableOpacity>
             )}
@@ -240,6 +234,7 @@ export function EmptyState({
   );
 }
 
+// ─── LoadingState ─────────────────────────────────────────────────────────────
 interface LoadingStateProps {
   message?: string;
 }
@@ -305,6 +300,7 @@ export function LoadingState({
   );
 }
 
+// ─── FinishedState ────────────────────────────────────────────────────────────
 interface FinishedStateProps {
   totalPhotos: number;
   deletedCount: number;
@@ -320,9 +316,13 @@ export function FinishedState({
 }: FinishedStateProps) {
   const isDark = useAppStore((s) => s.isDarkMode);
   const Colors = getColors(isDark);
+
   const scaleAnim = useRef(new Animated.Value(0.5)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
+  const statsAnim = useRef(new Animated.Value(0)).current;
+
+  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
     Animated.parallel([
@@ -343,98 +343,153 @@ export function FinishedState({
         friction: 10,
         useNativeDriver: true,
       }),
-    ]).start();
+    ]).start(() => {
+      // Stats pop in after main content
+      Animated.spring(statsAnim, {
+        toValue: 1,
+        tension: 70,
+        friction: 7,
+        useNativeDriver: true,
+      }).start();
+      // Confetti after a tiny delay
+      setTimeout(() => setShowConfetti(true), 180);
+    });
   }, []);
 
   const keptCount = totalPhotos - deletedCount;
+  const keepRate =
+    totalPhotos > 0 ? Math.round((keptCount / totalPhotos) * 100) : 0;
 
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
-      ]}
-    >
-      {/* Trophy icon */}
+    <View style={{ flex: 1 }}>
       <Animated.View
-        style={[styles.trophyWrapper, { transform: [{ scale: scaleAnim }] }]}
+        style={[
+          styles.container,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
       >
-        <LinearGradient
-          colors={[Colors.accent, Colors.accentSecondary ?? Colors.accent]}
-          style={styles.trophyCircle}
+        {/* Trophy */}
+        <Animated.View
+          style={[styles.trophyWrapper, { transform: [{ scale: scaleAnim }] }]}
         >
-          <CheckCircle size={52} color={Colors.white} />
-        </LinearGradient>
+          <LinearGradient
+            colors={[Colors.accent, Colors.accentSecondary ?? Colors.accent]}
+            style={styles.trophyCircle}
+          >
+            <CheckCircle size={52} color={Colors.white} />
+          </LinearGradient>
+        </Animated.View>
+
+        <Text style={[styles.title, { color: Colors.text }]}>All Sorted!</Text>
+        <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>
+          You reviewed {totalPhotos} photo{totalPhotos !== 1 ? "s" : ""}
+        </Text>
+
+        {/* Stats row */}
+        <Animated.View
+          style={[
+            styles.statsRow,
+            {
+              opacity: statsAnim,
+              transform: [
+                {
+                  translateY: statsAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [16, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.statCard,
+              {
+                backgroundColor: Colors.keepLight,
+                borderColor: Colors.keep + "40",
+              },
+            ]}
+          >
+            <Text style={[styles.statNumber, { color: Colors.keep }]}>
+              {keptCount}
+            </Text>
+            <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
+              Kept
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.statCard,
+              {
+                backgroundColor: Colors.deleteLight,
+                borderColor: Colors.delete + "40",
+              },
+            ]}
+          >
+            <Text style={[styles.statNumber, { color: Colors.delete }]}>
+              {deletedCount}
+            </Text>
+            <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
+              To Delete
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.statCard,
+              {
+                backgroundColor: Colors.accentLight,
+                borderColor: Colors.accent + "40",
+              },
+            ]}
+          >
+            <Text style={[styles.statNumber, { color: Colors.accent }]}>
+              {keepRate}%
+            </Text>
+            <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
+              Keep rate
+            </Text>
+          </View>
+        </Animated.View>
+
+        {deletedCount > 0 && onReview && (
+          <TouchableOpacity
+            onPress={onReview}
+            style={styles.reviewButtonWrapper}
+          >
+            <LinearGradient
+              colors={[Colors.delete, Colors.deleteDark ?? Colors.delete]}
+              start={[0, 0]}
+              end={[1, 0]}
+              style={styles.primaryButton}
+            >
+              <Trash2 size={18} color={Colors.white} />
+              <Text style={[styles.primaryButtonText, { color: Colors.white }]}>
+                Review {deletedCount} Photo{deletedCount !== 1 ? "s" : ""}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
+
+        {onUndo && (
+          <TouchableOpacity style={styles.undoButton} onPress={onUndo}>
+            <Text style={[styles.undoText, { color: Colors.textSecondary }]}>
+              Undo Last Action
+            </Text>
+          </TouchableOpacity>
+        )}
       </Animated.View>
 
-      <Text style={[styles.title, { color: Colors.text }]}>All Sorted!</Text>
-      <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>
-        You reviewed {totalPhotos} photos
-      </Text>
-
-      {/* Stats row */}
-      <View style={styles.statsRow}>
-        <View
-          style={[
-            styles.statCard,
-            {
-              backgroundColor: Colors.keepLight,
-              borderColor: Colors.keep + "40",
-            },
-          ]}
-        >
-          <Text style={[styles.statNumber, { color: Colors.keep }]}>
-            {keptCount}
-          </Text>
-          <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
-            Kept
-          </Text>
-        </View>
-        <View
-          style={[
-            styles.statCard,
-            {
-              backgroundColor: Colors.deleteLight,
-              borderColor: Colors.delete + "40",
-            },
-          ]}
-        >
-          <Text style={[styles.statNumber, { color: Colors.delete }]}>
-            {deletedCount}
-          </Text>
-          <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
-            To Delete
-          </Text>
-        </View>
-      </View>
-
-      {deletedCount > 0 && onReview && (
-        <TouchableOpacity onPress={onReview} style={styles.reviewButtonWrapper}>
-          <LinearGradient
-            colors={[Colors.delete, Colors.deleteDark ?? Colors.delete]}
-            start={[0, 0]}
-            end={[1, 0]}
-            style={styles.primaryButton}
-          >
-            <Trash2 size={18} color={Colors.white} />
-            <Text style={[styles.primaryButtonText, { color: Colors.white }]}>
-              Review {deletedCount} Photos
-            </Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      )}
-
-      {onUndo && (
-        <TouchableOpacity style={styles.undoButton} onPress={onUndo}>
-          <Text style={[styles.undoText, { color: Colors.textSecondary }]}>
-            Undo Last Action
-          </Text>
-        </TouchableOpacity>
-      )}
-    </Animated.View>
+      {/* Confetti — rendered on top */}
+      <ConfettiCelebration visible={showConfetti} />
+    </View>
   );
 }
 
+// ─── shared styles ────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -482,8 +537,9 @@ const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: "row",
-    gap: Spacing.md,
+    gap: Spacing.sm,
     marginBottom: Spacing.xl,
+    width: "100%",
   },
   statCard: {
     flex: 1,
@@ -493,12 +549,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   statNumber: {
-    fontSize: scale(36),
+    fontSize: scale(30),
     fontWeight: "800",
     letterSpacing: -1,
   },
   statLabel: {
-    fontSize: scale(13),
+    fontSize: scaleFont(12),
     fontWeight: "600",
     marginTop: 4,
   },
